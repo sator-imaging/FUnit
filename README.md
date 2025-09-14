@@ -1,3 +1,13 @@
+[![FUnit](https://img.shields.io/nuget/vpre/FUnit?label=FUnit)](https://www.nuget.org/packages/FUnit)
+[![FUnit.Run](https://img.shields.io/nuget/vpre/FUnit.Run?label=FUnit.Run)](https://www.nuget.org/packages/FUnit.Run)
+[![build](https://github.com/sator-imaging/FUnit/actions/workflows/build.yml/badge.svg)](https://github.com/sator-imaging/FUnit/actions/workflows/build.yml)
+&nbsp;
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sator-imaging/FUnit)
+
+
+
+
+
 # 🔬 Unit Testing Framework for File-based Apps
 
 `FUnit` provides structured test descriptor for file-based apps introduced in .NET 10.0. (i.e., no `.csproj` is required anymore)
@@ -83,7 +93,8 @@ return FUnit.Run(args, describe =>
 `FUnit` is shipped with builtin assertion methods.
 
 ```cs
-// Value assertion (BeEqual throws when collection type is passed)
+// Value assertion
+// Note: BeEqual rejects collection type to prevent ambiguous comparisons
 Must.BeEqual(expected, actual);
 Must.BeSameReference(expected, actual);
 
