@@ -94,7 +94,7 @@ return FUnit.Run(args, describe =>
 
 ```cs
 // Value assertion
-// Note: BeEqual rejects collection type to prevent ambiguous comparisons
+// ❌ BeEqual rejects collection type to prevent ambiguous comparisons
 Must.BeEqual(expected, actual);
 Must.BeSameReference(expected, actual);
 
