@@ -30,4 +30,6 @@ jobs:
     - name: Test
       run: |
         dotnet run --project ./cli --TEST
-        dotnet run --project ./cli --markdown >> $GITHUB_STEP_SUMMARY
+        
+        ##dotnet run --project ./cli --markdown >> $GITHUB_STEP_SUMMARY
+        dnx -y FUnit.Run -- -md >> $GITHUB_STEP_SUMMARY
