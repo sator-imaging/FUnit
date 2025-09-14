@@ -89,6 +89,7 @@ namespace FUnitImpl
                             continue;
                         }
 
+                    case SR.Flag_Delimiter:
                     case SR.Flag_TEST:
                         {
                             continue;

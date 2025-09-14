@@ -13,6 +13,7 @@ namespace FUnitImpl
         public const string Flag_ConfigurationShort = "-c";
         public const string Flag_Debug = "Debug";
         public const string Flag_Release = "Release";
+        public const string Flag_Delimiter = "--";
 
         public const string EmojiPassed = "✓";
         public const string EmojiFailed = "×";
