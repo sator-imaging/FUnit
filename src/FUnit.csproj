@@ -7,10 +7,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../impl/FUnitImpl.csproj" />
-  </ItemGroup>
-
   <!--                            -->
   <!-- nuget.org publish settings -->
   <!--                            -->
@@ -50,7 +46,9 @@
     <PackageProjectUrl>$(NuGetPublishWebsite)</PackageProjectUrl>
     <RepositoryUrl>$(NuGetPublishRepository)</RepositoryUrl>
     <PackageReleaseNotes>$(NuGetPublishReleaseNote)</PackageReleaseNotes>
+    <!--
     <PackageIconUrl>$(NuGetPublishIconUrl)</PackageIconUrl>
+    -->
   </PropertyGroup>
 
 </Project>

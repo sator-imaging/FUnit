@@ -5,12 +5,6 @@
     <PackAsTool>true</PackAsTool>
     <OutputType>Exe</OutputType>
     <LangVersion>latest</LangVersion>
-
-    <!-- add '.Run' suffix -->
-    <NugetPublishNameSuffix>.Run</NugetPublishNameSuffix>
-    <NuGetPublishID>$(NuGetPublishID)$(NugetPublishNameSuffix)</NuGetPublishID>
-    <NuGetPublishTitle>$(NuGetPublishTitle)$(NugetPublishNameSuffix)</NuGetPublishTitle>
-    <NuGetPublishProduct>$(NuGetPublishProduct)$(NugetPublishNameSuffix)</NuGetPublishProduct>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -20,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../impl/FUnitImpl.csproj" />
+    <ProjectReference Include="../src/FUnit.csproj" />
   </ItemGroup>
 
   <!--                            -->
@@ -62,7 +56,9 @@
     <PackageProjectUrl>$(NuGetPublishWebsite)</PackageProjectUrl>
     <RepositoryUrl>$(NuGetPublishRepository)</RepositoryUrl>
     <PackageReleaseNotes>$(NuGetPublishReleaseNote)</PackageReleaseNotes>
+    <!--
     <PackageIconUrl>$(NuGetPublishIconUrl)</PackageIconUrl>
+    -->
   </PropertyGroup>
 
 </Project>

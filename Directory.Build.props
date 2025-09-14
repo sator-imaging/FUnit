@@ -6,14 +6,14 @@
 
   <PropertyGroup Label="NuGetPublishSettings">
     <NuGetPublishVersion>0.1.0</NuGetPublishVersion>
-    <NuGetPublishVersionSuffix>-rc.2</NuGetPublishVersionSuffix>
+    <NuGetPublishVersionSuffix>-rc.3</NuGetPublishVersionSuffix>
     <!-- relative path from .csproj files, without trailing slash -->
     <NuGetPublishProjectRootRelPath>..</NuGetPublishProjectRootRelPath>
     <NuGetPublishIconFile>icon-128px.png</NuGetPublishIconFile>
     <NuGetPublishReadmeFile>README.md</NuGetPublishReadmeFile>
 
-    <NuGetPublishID>FUnit</NuGetPublishID>
-    <NuGetPublishTitle>FUnit</NuGetPublishTitle>
+    <NuGetPublishID>$(MSBuildProjectName)</NuGetPublishID>
+    <NuGetPublishTitle>$(NuGetPublishID)</NuGetPublishTitle>
     <NuGetPublishProduct>$(NuGetPublishTitle)</NuGetPublishProduct>
     <NuGetPublishOwner>Sator Imaging</NuGetPublishOwner>
     <NuGetPublishCompany>$(NuGetPublishOwner)</NuGetPublishCompany>
