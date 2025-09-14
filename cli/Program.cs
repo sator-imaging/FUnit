@@ -424,6 +424,7 @@ static void RunAllTests()
     ConsoleLogger.LogInfo($"  result: {actual}");
     ConsoleLogger.LogPassed("All tests successfully completed");
 }
+#endif
 
 
 file sealed class ProcessCallbackCallCounts
@@ -431,4 +432,3 @@ file sealed class ProcessCallbackCallCounts
     public int Error;
     public int Stdout;
 }
-#endif
