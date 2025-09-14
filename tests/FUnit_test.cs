@@ -75,7 +75,7 @@ Must.BeEqual(1, callCounts.FuncTask);
 Must.BeEqual(1, callCounts.FuncValueTask);
 
 ConsoleLogger.LogInfoRaw();
-ConsoleLogger.LogInfoRaw("<details><summary><b>TEST</b>: <code>FUnit.Result.ToString()</code></summary>");
+ConsoleLogger.LogInfoRaw($"<details><summary><b>TEST</b>: <code>{nameof(FUnit)}.{nameof(FUnit.Result)}.{nameof(FUnit.Result.ToString)}()</code></summary>");
 ConsoleLogger.LogInfoRaw();
 ConsoleLogger.LogInfoRaw("```md");
 ConsoleLogger.LogInfoRaw(FUnit.Result?.ToString().TrimEnd() ?? throw new Exception("must not be reached"));
