@@ -2,8 +2,8 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
+  <Project Path="impl/FUnitImpl.csproj" />
   <Project Path="src/FUnit.csproj" />
   <Project Path="cli/FUnit.Run.csproj" />
-  <Project Path="impl/FUnitImpl.csproj" />
   <Project Path="sandbox/FUnit.Sandbox.csproj" />
 </Solution>
