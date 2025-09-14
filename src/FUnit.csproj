@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\impl\FUnitImpl.csproj" />
+    <ProjectReference Include="../impl/FUnitImpl.csproj" />
   </ItemGroup>
 
   <!--                            -->

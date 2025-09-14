@@ -6,7 +6,11 @@
     <OutputType>Exe</OutputType>
     <LangVersion>latest</LangVersion>
 
-    <!-- add '.Run' suffix --><NuGetPublishID>$(NuGetPublishID).Run</NuGetPublishID>
+    <!-- add '.Run' suffix -->
+    <NugetPublishNameSuffix>.Run</NugetPublishNameSuffix>
+    <NuGetPublishID>$(NuGetPublishID)$(NugetPublishNameSuffix)</NuGetPublishID>
+    <NuGetPublishTitle>$(NuGetPublishTitle)$(NugetPublishNameSuffix)</NuGetPublishTitle>
+    <NuGetPublishProduct>$(NuGetPublishProduct)$(NugetPublishNameSuffix)</NuGetPublishProduct>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -16,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\impl\FUnitImpl.csproj" />
+    <ProjectReference Include="../impl/FUnitImpl.csproj" />
   </ItemGroup>
 
   <!--                            -->

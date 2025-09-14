@@ -1,5 +1,9 @@
 <Project>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
   <PropertyGroup Label="NuGetPublishSettings">
     <NuGetPublishVersion>0.1.0</NuGetPublishVersion>
     <NuGetPublishVersionSuffix>-rc.2</NuGetPublishVersionSuffix>
