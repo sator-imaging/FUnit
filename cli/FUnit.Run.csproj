@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ToolCommandName>funit</ToolCommandName>
+    <PackAsTool>true</PackAsTool>
+    <OutputType>Exe</OutputType>
+    <LangVersion>latest</LangVersion>
+
+    <!-- add '.Run' suffix --><NuGetPublishID>$(NuGetPublishID).Run</NuGetPublishID>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\impl\FUnitImpl.csproj" />
+  </ItemGroup>
+
+  <!--                            -->
+  <!-- nuget.org publish settings -->
+  <!--                            -->
+  <ItemGroup>
+    <!--
+    <None Include="$(NuGetPublishProjectRootRelPath)/$(NuGetPublishIconFile)">
+      <Pack>True</Pack><PackagePath>/</PackagePath>
+    </None>
+    -->
+    <None Include="$(NuGetPublishProjectRootRelPath)/$(NuGetPublishReadmeFile)">
+      <Pack>True</Pack><PackagePath>/</PackagePath>
+    </None>
+  </ItemGroup>
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+
+    <PackageIcon>$(NuGetPublishIconFile)</PackageIcon>
+    <PackageReadmeFile>$(NuGetPublishReadmeFile)</PackageReadmeFile>
+    <AssemblyVersion>$(NuGetPublishVersion)</AssemblyVersion>
+    <FileVersion>$(NuGetPublishVersion)</FileVersion>
+    <PackageVersion>$(NuGetPublishVersion)$(NuGetPublishVersionSuffix)</PackageVersion>
+    <Version>$(NuGetPublishVersion)$(NuGetPublishVersionSuffix)</Version>
+
+    <AssemblyName>$(NuGetPublishID)</AssemblyName>
+    <PackageId>$(NuGetPublishID)</PackageId>
+    <Title>$(NuGetPublishTitle)</Title>
+    <Product>$(NuGetPublishProduct)</Product>
+    <Authors>$(NuGetPublishOwner)</Authors>
+    <Company>$(NuGetPublishCompany)</Company>
+    <Copyright>$(NuGetPublishCopyright)</Copyright>
+    <PackageLicenseExpression>$(NuGetPublishLicenseSPDX)</PackageLicenseExpression>
+    <Description>$(NuGetPublishDescription)</Description>
+    <PackageTags>$(NuGetPublishTags)</PackageTags>
+    <PackageProjectUrl>$(NuGetPublishWebsite)</PackageProjectUrl>
+    <RepositoryUrl>$(NuGetPublishRepository)</RepositoryUrl>
+    <PackageReleaseNotes>$(NuGetPublishReleaseNote)</PackageReleaseNotes>
+    <PackageIconUrl>$(NuGetPublishIconUrl)</PackageIconUrl>
+  </PropertyGroup>
+
+</Project>
