@@ -17,6 +17,9 @@ namespace FUnitImpl
         public const string EmojiPassed = "✓";
         public const string EmojiFailed = "×";
 
+        public const string EmojiPassedGitHub = "✅";
+        public const string EmojiFailedGitHub = "⛔";
+
         public const string MarkdownPassed = "- [x] " + EmojiPassed;
         public const string MarkdownFailed = "- [ ] " + EmojiFailed;
 

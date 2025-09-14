@@ -25,9 +25,12 @@ namespace FUnitImpl
 
             if (EnableMarkdownOutput)
             {
+                // As GitHub doesn't allow changing text color, use more eye-catching emojis.
                 message = message
                     .Replace("<", "&lt;", StringComparison.Ordinal)
                     .Replace(">", "&gt;", StringComparison.Ordinal)
+                    .Replace(SR.EmojiPassed, SR.EmojiPassedGitHub, StringComparison.Ordinal)
+                    .Replace(SR.EmojiFailed, SR.EmojiFailedGitHub, StringComparison.Ordinal)
                     ;
             }
 
