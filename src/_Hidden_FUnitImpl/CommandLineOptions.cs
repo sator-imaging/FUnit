@@ -10,6 +10,8 @@ namespace FUnitImpl
     /// Represents the command line options for the FUnit test runner.
     /// </summary>
     /// <param name="ConcurrencyLevel">Maximum number of tests run simultaneously in each test subject.</param>
+    /// <param name="Verbosity">The verbosity level of the test output.</param>
+    /// <param name="BuildConfiguration">The build configuration (e.g., "Debug" or "Release").</param>
     internal sealed record CommandLineOptions(
         int ConcurrencyLevel = 1,
         Verbosity Verbosity = Verbosity.Normal,
