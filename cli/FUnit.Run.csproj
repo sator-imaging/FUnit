@@ -36,7 +36,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 
+    <!--
     <PackageIcon>$(NuGetPublishIconFile)</PackageIcon>
+    -->
     <PackageReadmeFile>$(NuGetPublishReadmeFile)</PackageReadmeFile>
     <AssemblyVersion>$(NuGetPublishVersion)</AssemblyVersion>
     <FileVersion>$(NuGetPublishVersion)</FileVersion>
