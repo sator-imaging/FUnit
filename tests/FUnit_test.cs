@@ -1,4 +1,5 @@
 #:project ../src
+//#:package FUnit@*
 
 using FUnitImpl;
 using System.Diagnostics;

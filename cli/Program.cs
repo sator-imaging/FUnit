@@ -406,7 +406,7 @@ async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool re
 }
 
 
-[Conditional("DEBUG")]
+#if DEBUG
 static void RunAllTests()
 {
     Debug.Assert(BuildEscapedArguments([@" "]) == @""" """, "space");
@@ -431,3 +431,4 @@ file sealed class ProcessCallbackCallCounts
     public int Error;
     public int Stdout;
 }
+#endif
