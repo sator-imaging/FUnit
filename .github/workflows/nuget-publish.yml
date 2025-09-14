@@ -1,0 +1,49 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.x.x
+
+    - name: Pack (release)
+      run: |
+        cd ./src
+        dotnet pack -c Release -p:ContinuousIntegrationBuild=true
+        cd ..
+
+        cd ./cli
+        dotnet pack -c Release -p:ContinuousIntegrationBuild=true
+        cd ..
+
+    - name: Test (release)
+      run: |
+        # '-c Release' for dotnet run
+        # '-- Release' for ./cli
+        dotnet run --project ./cli -c Release -- Release --TEST
+        dotnet run --project ./cli -c Release -- Release -md >> $GITHUB_STEP_SUMMARY
+
+    ################################
+    #  NUGET
+    - name: NuGet Publish
+      run: |
+        cd ./src
+        dotnet nuget push "bin/Release/*.nupkg"  \
+          -k ${{ secrets.NUGET_API_KEY }}  \
+          -s https://api.nuget.org/v3/index.json \
+          --timeout 60
+        cd ..
+
+        cd ./cli
+        dotnet nuget push "bin/Release/*.nupkg"  \
+          -k ${{ secrets.NUGET_API_KEY }}  \
+          -s https://api.nuget.org/v3/index.json \
+          --timeout 60
+        cd ..
