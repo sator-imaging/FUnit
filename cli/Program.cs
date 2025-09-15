@@ -31,7 +31,12 @@ if (EnsureEnvironment() != 0)
 // Step 1: Collect all files with *.cs file extension (case insensitive)
 // Assuming the tool should search in the current directory and its subdirectories
 string currentDirectory = Directory.GetCurrentDirectory();
-List<string> csFiles = [.. Directory.GetFiles(currentDirectory, "*.cs", SearchOption.AllDirectories)];
+List<string> csFiles = [.. Directory.GetFiles(currentDirectory, "*.cs", new EnumerationOptions{
+    IgnoreInaccessible = true,
+    MatchCasing = MatchCasing.CaseInsensitive,
+    RecurseSubdirectories = true,
+    ReturnSpecialDirectories = false,
+})];
 
 List<string> validFUnitFiles = [];
 
