@@ -21,9 +21,6 @@
 // IGNORED: prefix must be single line comment and placed at line beginning
 //   //:funit:
 ///:funit:
-/*
-//:funit:
-*/
 // leading space is not allowed
    //:funit:
 
@@ -34,4 +31,10 @@
 //:funit: 
 //:funit:include  file not found
 
+*/
+
+
+// IGNORED: in multiline comment
+/*
+//:funit:
 */
