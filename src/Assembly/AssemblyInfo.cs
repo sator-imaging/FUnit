@@ -10,5 +10,6 @@ using System.Runtime.CompilerServices;
 
 // these attributes are not required in Release build but should leave untouched
 // to allow running test with '-c Release' option.
-[assembly: InternalsVisibleTo("FUnit_test")]
 [assembly: InternalsVisibleTo("Must_test")]
+[assembly: InternalsVisibleTo("FUnit_test")]
+[assembly: InternalsVisibleTo("FUnit_testAsync")]

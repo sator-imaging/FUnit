@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FUnitImpl
@@ -16,7 +17,14 @@ namespace FUnitImpl
         /// Gets the description of the test case.
         /// </summary>
         public string Description { get; }
+
         private readonly Delegate testFunction;
+
+        /// <summary>
+        /// Gets the number of times the test case has been executed.
+        /// </summary>
+        public int ExecutionCount => this.b_executionCount;
+        private volatile int b_executionCount;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestCase"/> class.
@@ -41,6 +49,8 @@ namespace FUnitImpl
 
             try
             {
+                _ = Interlocked.Increment(ref this.b_executionCount);
+
                 object? result = null;
 
                 switch (this.testFunction)
