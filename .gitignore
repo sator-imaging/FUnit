@@ -1,6 +1,10 @@
 .*
+*.md
 bin
 obj
+
+!README.md
+!LICENSE.md
 
 !.gitignore
 !.editorconfig

@@ -322,7 +322,7 @@ public static class FUnit
                     var error = test.Error;
 
                     var prefix = test.ExecutionCount == 0
-                        ? "- *NOT EXECUTED*:"
+                        ? "- [ ] *NOT EXECUTED*:"
                         : error == null
                             ? $"- [x]{passedColorTag}"
                             : $"- [ ]{failedColorTag}"
