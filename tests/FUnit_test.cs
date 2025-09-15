@@ -50,11 +50,15 @@ int failedTestCount = FUnit.Run(args, describe =>
         async ValueTask<int> task() { await Task.CompletedTask; return 310; }
     });
 
+    // Must tests
+    describe("Error messages", it => it("should throw", () => { Must.HaveSameSequence([1, 2], [1, 2, 3]); }));
+
+    // test descriptor tests
     describe("Empty", it => { });
 
     describe("Error outside of 'it' scope", it =>
     {
-        it("is empty test case", () => { });
+        it("should pass empty test function", () => { });
 
         throw new Exception($"Failed outside of '{nameof(it)}'");
     });
@@ -65,10 +69,11 @@ int failedTestCount = FUnit.Run(args, describe =>
 
 // async tests must be awaited correctly
 var elapsedTime = Stopwatch.GetElapsedTime(startTimestamp);
-Must.BeTrue(AsyncTestDelayMilliseconds * 2 <= elapsedTime.TotalMilliseconds);
+var expectedTime = AsyncTestDelayMilliseconds * 2;
+Must.BeTrue(elapsedTime.TotalMilliseconds > expectedTime);
 
 // errors outside of test descriptor scope should be captured
-const int ExpectedErrorCount = 6;
+const int ExpectedErrorCount = 7;
 Must.BeEqual(ExpectedErrorCount, failedTestCount);
 
 Must.BeEqual(1, callCounts.Action);
@@ -79,7 +84,7 @@ ConsoleLogger.LogInfoRaw();
 ConsoleLogger.LogInfoRaw($"<details><summary><b>TEST</b>: <code>{nameof(FUnit)}.{nameof(FUnit.Result)}.{nameof(FUnit.Result.ToString)}()</code></summary>");
 ConsoleLogger.LogInfoRaw();
 ConsoleLogger.LogInfoRaw("```md");
-ConsoleLogger.LogInfoRaw(FUnit.Result?.ToString().TrimEnd() ?? throw new Exception("must not be reached"));
+ConsoleLogger.LogInfoRaw(FUnit.Result?.ToString() ?? throw new Exception("must not be reached"));
 ConsoleLogger.LogInfoRaw("```");
 ConsoleLogger.LogInfoRaw();
 ConsoleLogger.LogInfoRaw("</details>");

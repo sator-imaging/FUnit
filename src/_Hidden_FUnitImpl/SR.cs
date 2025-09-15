@@ -32,6 +32,8 @@ namespace FUnitImpl
         public const string MarkdownColorPassed = "<span style='color:green'>";
         public const string MarkdownColorReset = "</span>";
 
+        public const int IndentationAdjustment = 6;
+
 
         #region  GetElapsedTime(long) & GetElapsedTime(long, long)
 

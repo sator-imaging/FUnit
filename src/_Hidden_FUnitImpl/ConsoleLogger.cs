@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace FUnitImpl
@@ -34,6 +33,9 @@ namespace FUnitImpl
                     ;
             }
 
+            // always!!
+            message = message.Replace("\n", $"\n{new string(' ', SR.IndentationAdjustment)}", StringComparison.Ordinal);
+
             Console.Write(message);
         }
 
@@ -58,7 +60,7 @@ namespace FUnitImpl
         {
             var message = obj?.ToString();
 
-            Debug.Assert(message?.Contains('\n') != true);
+            // No!! --> Debug.Assert(message?.Contains('\n') != true);
 
             // fix for markdown
             int numTrailingSpaces = 0;
@@ -73,7 +75,7 @@ namespace FUnitImpl
                 var match = re_markdownUnorderedList.Match(message);
                 if (match.Success)
                 {
-                    Console.Write(match.Value);
+                    Write(match.Value);
                     message = message[match.Value.Length..];
                 }
             }
@@ -119,7 +121,7 @@ namespace FUnitImpl
             // trailing spaces
             if (numTrailingSpaces > 0)
             {
-                Console.Write(new string(' ', numTrailingSpaces));
+                Write(new string(' ', numTrailingSpaces));
             }
         }
 

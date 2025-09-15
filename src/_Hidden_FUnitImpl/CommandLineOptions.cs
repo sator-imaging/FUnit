@@ -18,7 +18,10 @@ namespace FUnitImpl
         string BuildConfiguration = "Debug"
     )
     {
-        public string BuildConfiguration { get; private set; } = BuildConfiguration;
+        // NOTE: BuildConfiguration should be hidden from log because it may be different from
+        //       actual build configuration if command line flag '-c Release' is used incorrectly.
+        //       (ex. missing '--' delimiter)
+        internal string BuildConfiguration { get; private set; } = BuildConfiguration;
 
         private int b_concurrencyLevel = ConcurrencyLevel;
         public int ConcurrencyLevel
