@@ -17,15 +17,15 @@ jobs:
       run: |
         dotnet build -c Release -p:ContinuousIntegrationBuild=true
 
+        cd ./directives
+        dotnet pack  -c Release -p:ContinuousIntegrationBuild=true
+        cd ..
+
         cd ./src
         dotnet pack  -c Release -p:ContinuousIntegrationBuild=true
         cd ..
 
         cd ./cli
-        dotnet pack  -c Release -p:ContinuousIntegrationBuild=true
-        cd ..
-
-        cd ./directives
         dotnet pack  -c Release -p:ContinuousIntegrationBuild=true
         cd ..
 
@@ -40,6 +40,13 @@ jobs:
     #  NUGET
     - name: NuGet Publish
       run: |
+        cd ./directives
+        dotnet nuget push "bin/Release/*.nupkg"  \
+          -k ${{ secrets.NUGET_API_KEY }}  \
+          -s https://api.nuget.org/v3/index.json \
+          --timeout 60
+        cd ..
+
         cd ./src
         dotnet nuget push "bin/Release/*.nupkg"  \
           -k ${{ secrets.NUGET_API_KEY }}  \
@@ -48,13 +55,6 @@ jobs:
         cd ..
 
         cd ./cli
-        dotnet nuget push "bin/Release/*.nupkg"  \
-          -k ${{ secrets.NUGET_API_KEY }}  \
-          -s https://api.nuget.org/v3/index.json \
-          --timeout 60
-        cd ..
-
-        cd ./directives
         dotnet nuget push "bin/Release/*.nupkg"  \
           -k ${{ secrets.NUGET_API_KEY }}  \
           -s https://api.nuget.org/v3/index.json \
