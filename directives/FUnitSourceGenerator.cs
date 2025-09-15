@@ -50,7 +50,7 @@ namespace FUnit.Directives
                 var comments = root
                     .DescendantTrivia()
                     .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia))
-                    .ToImmutableList();
+                    .ToList();  // ToList is better than ToImmutableList in this case
 
                 foreach (var trivia in comments)
                 {
