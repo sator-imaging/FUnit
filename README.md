@@ -141,7 +141,7 @@ FUnit has an ability to output log as markdown format so you can generate summar
 
 ```bash
 # '-md' or '--markdown'
-dnx FUnit.Run -y -md >> $GITHUB_STEP_SUMMARY
+dnx -y FUnit.Run -- -md >> $GITHUB_STEP_SUMMARY
 ```
 
 
