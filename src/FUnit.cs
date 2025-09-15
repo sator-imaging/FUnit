@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Descriptor = System.Action<string, System.Action<System.Action<string, System.Delegate>>>;
 
@@ -25,6 +26,17 @@ public static class FUnit
     /// </summary>
     public static TestResult? Result { get; private set; }
 
+    /// <summary>
+    /// Executes the FUnit test runner.
+    /// </summary>
+    /// <param name="args">Command line arguments for the test run.</param>
+    /// <param name="builder">An action that describes the test subjects and test cases.</param>
+    /// <returns>The number of failed test cases.</returns>
+    public static int Run(string[] args, Action<Descriptor> builder)
+    {
+        return Task.Run(async () => await RunAsync(args, builder)).Result;  // ok
+    }
+
     // TODO: refactor Run method by creating new methods and types.
     //       --> Build(Descriptor) -> TestSuite
     //       --> TestSuite (class)
@@ -37,13 +49,15 @@ public static class FUnit
     //           - setup testSuite events
     //           - call testSuite.ExecuteTests
     //           - set static Result property and return failed test case count from ExecuteTests
+
     /// <summary>
-    /// Executes the FUnit test runner.
+    /// Executes the FUnit test runner asynchronously.
     /// </summary>
     /// <param name="args">Command line arguments for the test run.</param>
     /// <param name="builder">An action that describes the test subjects and test cases.</param>
-    /// <returns>The number of failed test cases.</returns>
-    public static int Run(string[] args, Action<Descriptor> builder)
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <returns>The number of failed test cases if not canceled, otherwise a negative number that is the bitwise complement of the failed test case count.</returns>
+    public static async ValueTask<int> RunAsync(string[] args, Action<Descriptor> builder, CancellationToken cancellationToken = default)
     {
         var timestamp_runStart = Stopwatch.GetTimestamp();
 
@@ -93,6 +107,7 @@ public static class FUnit
         }
 
         // run tests
+        var skippedTestCases = new List<TestCase>();
         {
             // TODO: ready to run tests simultaneously but functionality is not tested
             int concurrencyLevel = options.ConcurrencyLevel;
@@ -108,6 +123,12 @@ public static class FUnit
                 int currentCaseIndex = 0;
 
             CONSUME_QUEUE:
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    skippedTestCases.AddRange(testCases.Skip(currentCaseIndex));
+                    break;
+                }
+
                 while (currentCaseIndex < testCases.Count && activeTasks.Count < concurrencyLevel)
                 {
                     var task = Task.Run(testCases[currentCaseIndex].ExecuteAsync);
@@ -121,7 +142,7 @@ public static class FUnit
                     continue;
                 }
 
-                Task.WhenAll(activeTasks).Wait();  // ok
+                _ = await Task.WhenAll(activeTasks);
 
                 failedTestCases.AddRange(
                     activeTasks
@@ -133,6 +154,15 @@ public static class FUnit
                 activeTasks.Clear();
 
                 goto CONSUME_QUEUE;
+            }
+
+            if (skippedTestCases.Count > 0)
+            {
+                foreach (var skipped in skippedTestCases)
+                {
+                    ConsoleLogger.LogFailed($"- [FUnit] Tests Canceled");
+                    ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} [{skipped.Subject}] {skipped.Description}");
+                }
             }
         }
 
@@ -158,7 +188,7 @@ public static class FUnit
                     error = new(e.Message, e.StackTrace, IsFUnitError: failedCase.IsSystemError);
                 }
 
-                tests.Add(new(tc.Description, IsExecuted: true, error));
+                tests.Add(new(tc.Description, tc.ExecutionCount, error));
             }
         }
 
@@ -170,24 +200,33 @@ public static class FUnit
         ConsoleLogger.LogInfo("## Test Summary");
         ConsoleLogger.LogInfo($"Options:  {options}  ");
         ConsoleLogger.LogInfo($"Duration: {elapsedTime.ToString(TimeSpanFormat)}  ");
-        if (failedTestCases.Count == 0)
+        if (skippedTestCases.Count > 0)
         {
-            ConsoleLogger.LogPassed($"{SR.MarkdownPassed} All Tests Passed: {totalTestCaseCount}");
+            ConsoleLogger.LogFailed($"{SR.MarkdownFailed} Total {skippedTestCases.Count} tests canceled");
+
+            return ~(failedTestCases.Count);  // ok: bash treats -1 as 255 (byte)
         }
         else
         {
-            int failedCountExceptForSystemError = failedTestCases.Count(x => !x.IsSystemError);
-
-            ConsoleLogger.LogPassed($"Passed: {totalTestCaseCount - failedCountExceptForSystemError} ({totalTestCaseCount})  ");
-            ConsoleLogger.LogFailed($"Failed: {failedTestCases.Count}  ");
-
-            foreach (var detail in failedTestCases)
+            if (failedTestCases.Count == 0)
             {
-                ConsoleLogger.LogFailedTestCase($"{SR.MarkdownFailed} [{detail.TestSubject}] ", detail, SR.AnsiColorFailed);
+                ConsoleLogger.LogPassed($"{SR.MarkdownPassed} All Tests Passed: {totalTestCaseCount}");
             }
-        }
+            else
+            {
+                int failedCountExceptForSystemError = failedTestCases.Count(x => !x.IsSystemError);
 
-        return failedTestCases.Count;
+                ConsoleLogger.LogPassed($"Passed: {totalTestCaseCount - failedCountExceptForSystemError} ({totalTestCaseCount})  ");
+                ConsoleLogger.LogFailed($"Failed: {failedTestCases.Count}  ");
+
+                foreach (var detail in failedTestCases)
+                {
+                    ConsoleLogger.LogFailedTestCase($"{SR.MarkdownFailed} [{detail.TestSubject}] ", detail, SR.AnsiColorFailed);
+                }
+            }
+
+            return failedTestCases.Count;
+        }
     }
 
 
@@ -217,9 +256,9 @@ public static class FUnit
         /// Represents a single test case.
         /// </summary>
         /// <param name="Description">The description of the test case.</param>
-        /// <param name="IsExecuted">Indicates whether the test case was executed.</param>
+        /// <param name="ExecutionCount">The number of times the test case was executed.</param>
         /// <param name="Error">The error that occurred during the test case execution, if any.</param>
-        public sealed record Test(string Description, bool IsExecuted, Error? Error) { }
+        public sealed record Test(string Description, int ExecutionCount, Error? Error) { }
 
 
         /// <summary>
@@ -282,7 +321,7 @@ public static class FUnit
                 {
                     var error = test.Error;
 
-                    var prefix = !test.IsExecuted
+                    var prefix = test.ExecutionCount == 0
                         ? "- *NOT EXECUTED*:"
                         : error == null
                             ? $"- [x]{passedColorTag}"
@@ -293,7 +332,10 @@ public static class FUnit
 
                     if (error != null)
                     {
-                        _ = sb.AppendLine($"    {failedColorTag}--> {error.Message}{colorResetTag}");
+                        // always!!
+                        var message = error.Message.Replace("\n", $"\n{new string(' ', SR.IndentationAdjustment)}", StringComparison.Ordinal);
+
+                        _ = sb.AppendLine($"    {failedColorTag}--> {message}{colorResetTag}");
                     }
                 }
             }
@@ -307,7 +349,7 @@ public static class FUnit
                 .AppendLine($"{this.TotalExecutionTime.ToString(TimeSpanFormat)}")
                 ;
 
-            return sb.ToString();
+            return sb.ToString().TrimEnd();
         }
     }
 }
