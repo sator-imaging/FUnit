@@ -17,21 +17,21 @@ return FUnit.Run(args, describe =>
         it("should throw FUnitException for inequality of value types", () =>
         {
             string actualString = "world";
-            Must.Throw<FUnitException>(() => Must.BeEqual("hello", actualString), "Expected \"hello\", but was \"world\". (actualString)");
-            Must.Throw<FUnitException>(() => Must.BeEqual(1, 1 + 1), "Expected '1', but was '2'. (1 + 1)");
-            Must.Throw<FUnitException>(() => Must.BeEqual(true, 0 == 1), "Expected 'True', but was 'False'. (0 == 1)");
+            Must.Throw<FUnitException>("Expected \"hello\", but was \"world\". (actualString)", () => Must.BeEqual("hello", actualString));
+            Must.Throw<FUnitException>("Expected '1', but was '2'. (1 + 1)", () => Must.BeEqual(1, 1 + 1));
+            Must.Throw<FUnitException>("Expected 'True', but was 'False'. (0 == 1)", () => Must.BeEqual(true, 0 == 1));
         });
 
         it("should throw FUnitException with generic message for string inequality when newlines are present", () =>
         {
-            Must.Throw<FUnitException>(() => Must.BeEqual("hello\nworld", "foo bar"), "Expected and actual strings are not equal.");
-            Must.Throw<FUnitException>(() => Must.BeEqual("hello world", "foo\nbar"), "Expected and actual strings are not equal.");
-            Must.Throw<FUnitException>(() => Must.BeEqual("hello\nworld", "foo\nbar"), "Expected and actual strings are not equal.");
+            Must.Throw<FUnitException>("Expected and actual strings are not equal.", () => Must.BeEqual("hello\nworld", "foo bar"));
+            Must.Throw<FUnitException>("Expected and actual strings are not equal.", () => Must.BeEqual("hello world", "foo\nbar"));
+            Must.Throw<FUnitException>("Expected and actual strings are not equal.", () => Must.BeEqual("hello\nworld", "foo\nbar"));
         });
 
         it("should throw Exception for ambiguous comparisons of IEnumerable", () =>
         {
-            Must.Throw<FUnitException>(() => Must.BeEqual(new List<int> { 1 }, new List<int> { 1 }), "Ambiguous comparisons are not permitted in tests. Use 'HaveSameSequence' or 'BeSameReference' instead.");
+            Must.Throw<FUnitException>("Ambiguous comparisons are not permitted in tests. Use 'HaveSameSequence' or 'BeSameReference' instead.", () => Must.BeEqual(new List<int> { 1 }, new List<int> { 1 }));
         });
     });
 
@@ -48,7 +48,7 @@ return FUnit.Run(args, describe =>
         {
             object obj1 = new object();
             object obj2 = new object();
-            Must.Throw<FUnitException>(() => Must.BeSameReference(obj1, obj2), "Expected both references to point to the same object, but found different instances.");
+            Must.Throw<FUnitException>("Expected both references to point to the same object, but found different instances.", () => Must.BeSameReference(obj1, obj2));
         });
     });
 
@@ -62,8 +62,8 @@ return FUnit.Run(args, describe =>
 
         it("should throw FUnitException for sequence inequality", () =>
         {
-            Must.Throw<FUnitException>(() => Must.HaveSameSequence(new List<int> { 1, 2, 3 }, new List<int> { 1, 3, 2 }), "Expected collections to be equal in order.");
-            Must.Throw<FUnitException>(() => Must.HaveSameSequence(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 }), "Expected collections to be equal in order.");
+            Must.Throw<FUnitException>("Expected collections to be equal in order.", () => Must.HaveSameSequence(new List<int> { 1, 2, 3 }, new List<int> { 1, 3, 2 }));
+            Must.Throw<FUnitException>("Expected collections to be equal in order.", () => Must.HaveSameSequence(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 }));
         });
     });
 
@@ -77,9 +77,9 @@ return FUnit.Run(args, describe =>
 
         it("should throw FUnitException for unordered sequence inequality", () =>
         {
-            Must.Throw<FUnitException>(() => Must.HaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 1, 2, 4 }), "Expected collections to be equal ignoring order.");
-            Must.Throw<FUnitException>(() => Must.HaveSameUnorderedElements(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 }), "Expected collections to be equal ignoring order.");
-            Must.Throw<FUnitException>(() => Must.HaveSameUnorderedElements(new List<int> { 1 }, new List<int> { 1, 1 }), "Expected collections to be equal ignoring order.");
+            Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 1, 2, 4 }));
+            Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 }));
+            Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1 }, new List<int> { 1, 1 }));
         });
     });
 
@@ -92,14 +92,14 @@ return FUnit.Run(args, describe =>
 
         it("should throw FUnitException if text does not contain substring", () =>
         {
-            Must.Throw<FUnitException>(() => Must.ContainText("hello world", "foo"), "Expected \"hello world\" to contain \"foo\", but it did not.");
+            Must.Throw<FUnitException>("Expected \"hello world\" to contain \"foo\", but it did not.", () => Must.ContainText("hello world", "foo"));
         });
 
         it("should throw FUnitException with generic message if text or substring contain newlines and substring is not found", () =>
         {
-            Must.Throw<FUnitException>(() => Must.ContainText("hello world", "foo\nbar"), "Expected substring to be contained in source text, but it was not.");
-            Must.Throw<FUnitException>(() => Must.ContainText("hello\nworld", "foo bar"), "Expected substring to be contained in source text, but it was not.");
-            Must.Throw<FUnitException>(() => Must.ContainText("hello\nworld", "foo\nbar"), "Expected substring to be contained in source text, but it was not.");
+            Must.Throw<FUnitException>("Expected substring to be contained in source text, but it was not.", () => Must.ContainText("hello world", "foo\nbar"));
+            Must.Throw<FUnitException>("Expected substring to be contained in source text, but it was not.", () => Must.ContainText("hello\nworld", "foo bar"));
+            Must.Throw<FUnitException>("Expected substring to be contained in source text, but it was not.", () => Must.ContainText("hello\nworld", "foo\nbar"));
         });
     });
 
@@ -112,13 +112,13 @@ return FUnit.Run(args, describe =>
 
         it("should throw FUnitException if text contains substring", () =>
         {
-            Must.Throw<FUnitException>(() => Must.NotContainText("hello world", "world"), "Expected \"hello world\" not to contain \"world\", but it did.");
+            Must.Throw<FUnitException>("Expected \"hello world\" not to contain \"world\", but it did.", () => Must.NotContainText("hello world", "world"));
         });
 
         it("should throw FUnitException with generic message if text or substring contain newlines and substring is found", () =>
         {
-            Must.Throw<FUnitException>(() => Must.NotContainText("hello\nworld", "\nworld"), "Expected substring not to be contained in source text, but it was.");
-            Must.Throw<FUnitException>(() => Must.NotContainText("hello\nworld", "world"), "Expected substring not to be contained in source text, but it was.");
+            Must.Throw<FUnitException>("Expected substring not to be contained in source text, but it was.", () => Must.NotContainText("hello\nworld", "\nworld"));
+            Must.Throw<FUnitException>("Expected substring not to be contained in source text, but it was.", () => Must.NotContainText("hello\nworld", "world"));
         });
     });
 
@@ -126,27 +126,27 @@ return FUnit.Run(args, describe =>
     {
         it("should assert that a specific exception is thrown", () =>
         {
-            Must.Throw<InvalidOperationException>(() => throw new InvalidOperationException("Test exception"), "Test exception");
+            Must.Throw<InvalidOperationException>("Test exception", () => throw new InvalidOperationException("Test exception"));
         });
 
         it("should throw FUnitException if no exception is thrown", () =>
         {
-            Must.Throw<FUnitException>(() => Must.Throw<ArgumentNullException>(() => { /* no exception */ }, null), "Expected exception of type 'ArgumentNullException', but got none.");
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got none.", () => Must.Throw<ArgumentNullException>(null, () => { /* no exception */ }));
         });
 
         it("should throw FUnitException if a different exception type is thrown", () =>
         {
-            Must.Throw<FUnitException>(() => Must.Throw<ArgumentNullException>(() => throw new InvalidOperationException(), null), "Expected exception of type 'ArgumentNullException', but got 'InvalidOperationException'.");
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got 'InvalidOperationException'.", () => Must.Throw<ArgumentNullException>(null, () => throw new InvalidOperationException()));
         });
 
         it("should throw FUnitException if the error message does not match", () =>
         {
-            Must.Throw<FUnitException>(() => Must.Throw<InvalidOperationException>(() => throw new InvalidOperationException("Wrong message"), "Expected message"), "Expected error message to be \"Expected message\", but was \"Wrong message\".");
+            Must.Throw<FUnitException>("Expected error message to be \"Expected message\", but was \"Wrong message\".", () => Must.Throw<InvalidOperationException>("Expected message", () => throw new InvalidOperationException("Wrong message")));
         });
 
         it("should throw FUnitException when a general Exception type is specified for Throw<T>", () =>
         {
-            Must.Throw<FUnitException>(() => Must.Throw<Exception>(() => throw new Exception("General exception"), "General exception"), "An explicit exception type must be specified.");
+            Must.Throw<FUnitException>("An explicit exception type must be specified.", () => Must.Throw<Exception>("General exception", () => throw new Exception("General exception")));
         });
     });
 
@@ -159,8 +159,8 @@ return FUnit.Run(args, describe =>
 
         it("should throw FUnitException if the condition is false", () =>
         {
-            Must.Throw<FUnitException>(() => Must.BeTrue(false), "Expected condition 'false' to be met, but it was not.");
-            Must.Throw<FUnitException>(() => Must.BeTrue(0 == 1), "Expected condition '0 == 1' to be met, but it was not.");
+            Must.Throw<FUnitException>("Expected condition 'false' to be met, but it was not.", () => Must.BeTrue(false));
+            Must.Throw<FUnitException>("Expected condition '0 == 1' to be met, but it was not.", () => Must.BeTrue(0 == 1));
         });
     });
 
@@ -173,8 +173,8 @@ return FUnit.Run(args, describe =>
 
         it("should throw FUnitException if the condition is true", () =>
         {
-            Must.Throw<FUnitException>(() => Must.BeFalse(true), "Expected condition 'true' not to be met, but it was.");
-            Must.Throw<FUnitException>(() => Must.BeFalse(0 == 0), "Expected condition '0 == 0' not to be met, but it was.");
+            Must.Throw<FUnitException>("Expected condition 'true' not to be met, but it was.", () => Must.BeFalse(true));
+            Must.Throw<FUnitException>("Expected condition '0 == 0' not to be met, but it was.", () => Must.BeFalse(0 == 0));
         });
     });
 });
