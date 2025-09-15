@@ -25,6 +25,10 @@ jobs:
         dotnet pack  -c Release -p:ContinuousIntegrationBuild=true
         cd ..
 
+        cd ./directives
+        dotnet pack  -c Release -p:ContinuousIntegrationBuild=true
+        cd ..
+
     - name: Test (release)
       run: |
         # '-c Release' for dotnet run
@@ -44,6 +48,13 @@ jobs:
         cd ..
 
         cd ./cli
+        dotnet nuget push "bin/Release/*.nupkg"  \
+          -k ${{ secrets.NUGET_API_KEY }}  \
+          -s https://api.nuget.org/v3/index.json \
+          --timeout 60
+        cd ..
+
+        cd ./directives
         dotnet nuget push "bin/Release/*.nupkg"  \
           -k ${{ secrets.NUGET_API_KEY }}  \
           -s https://api.nuget.org/v3/index.json \
