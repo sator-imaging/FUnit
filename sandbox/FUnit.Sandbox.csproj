@@ -15,4 +15,11 @@
     -->
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../directives/FUnit.Directives.csproj">
+        <OutputItemType>Analyzer</OutputItemType>
+        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+
 </Project>
