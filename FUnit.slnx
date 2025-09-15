@@ -5,4 +5,5 @@
   <Project Path="src/FUnit.csproj" />
   <Project Path="cli/FUnit.Run.csproj" />
   <Project Path="sandbox/FUnit.Sandbox.csproj" />
+  <Project Path="directives/FUnit.Directives.csproj" />
 </Solution>

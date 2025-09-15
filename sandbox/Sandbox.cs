@@ -8,3 +8,24 @@
         });
     });
 });
+
+// multiple include of same file should be allowed
+//:funit:include Sandbox.cs 
+//:funit:include Sandbox.cs 
+//:funit:include ./Sandbox.cs 
+//:funit:include ./Sandbox.cs 
+
+// IGNORED: prefix must be single line comment and placed at line beginning
+   //:funit:
+//   //:funit:
+///:funit:
+/*
+//:funit:
+*/
+
+// ERRORS
+//:funit:include 
+//:funit:include  NotFound.cs
+//:funit:unknown
+//:funit: 
+//:funit:include  file not found
