@@ -1,5 +1,7 @@
-#:package FUnit@*
-#:package FUnit.Directives@0.2.0-rc.1
+#:project ../src
+#:package FUnit.Directives@*
+
+// cannot...? --> #:project ../directives
 
 // [TEST] allow multiple include directives scattered in project
 //:funit:include Directives_TestClass.cs
@@ -15,7 +17,7 @@ return FUnit.Run(args, describe =>
     {
         it("should work (:funit:include)", () =>
         {
-            Must.BeEqual(310, Foo.TestClass.TestMethod());
+            Must.BeEqual(310, Tests.TestClass.TestMethod());
         });
     });
 });
