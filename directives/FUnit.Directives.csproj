@@ -69,4 +69,14 @@
     -->
   </PropertyGroup>
 
+  <!--                                                  -->
+  <!-- vvv TEMPLATE for roslyn analyzer development vvv -->
+  <!--                                                  -->
+
+  <!-- https://github.com/dotnet/roslyn/blob/main/docs/features/incremental-generators.cookbook.md#package-a-generator-as-a-nuget-package -->
+  <ItemGroup Condition=" Exists('$(OutputPath)/$(AssemblyName).dll') ">
+    <!-- Package the generator in the analyzer directory of the nuget package -->
+    <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
 </Project>
