@@ -9,22 +9,37 @@ namespace FUnit.Directives
 {
     // NOTE: DO NOT use IIncrementalGenerator because the list of whole FUnit directives in
     //       project must be processed in sequential at once.
+
+    /// <summary>
+    /// An FUnit source generator that processes FUnit directives in source files.
+    /// </summary>
     [Generator]
     public class FUnitSourceGenerator : ISourceGenerator
     {
         private readonly Dictionary<string, IDirectiveOperator> _directiveOperators = new();
         private readonly IncludeOperator _includeOperator = new();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FUnitSourceGenerator"/> class.
+        /// </summary>
         public FUnitSourceGenerator()
         {
             this._directiveOperators.Add(SR.IncludeDirective, this._includeOperator);
         }
 
+        /// <summary>
+        /// Initializes the source generator.
+        /// </summary>
+        /// <param name="context">The generator initialization context.</param>
         public void Initialize(GeneratorInitializationContext context)
         {
             // No initialization required for this source generator.
         }
 
+        /// <summary>
+        /// Executes the source generator to process FUnit directives.
+        /// </summary>
+        /// <param name="context">The generator execution context.</param>
         public void Execute(GeneratorExecutionContext context)
         {
             this._includeOperator.Initialize();
