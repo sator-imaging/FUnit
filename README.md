@@ -1,6 +1,6 @@
 [![FUnit](https://img.shields.io/nuget/vpre/FUnit?label=FUnit)](https://www.nuget.org/packages/FUnit)
-[![FUnit.Run](https://img.shields.io/nuget/vpre/FUnit.Run?label=FUnit.Run)](https://www.nuget.org/packages/FUnit.Run)
-[![FUnit.Directives](https://img.shields.io/nuget/vpre/FUnit.Directives?label=FUnit.Directives)](https://www.nuget.org/packages/FUnit.Directives)
+[![FUnit.Run](https://img.shields.io/nuget/vpre/FUnit.Run?label=Run)](https://www.nuget.org/packages/FUnit.Run)
+[![FUnit.Directives](https://img.shields.io/nuget/vpre/FUnit.Directives?label=Directives)](https://www.nuget.org/packages/FUnit.Directives)
 [![build](https://github.com/sator-imaging/FUnit/actions/workflows/build.yml/badge.svg)](https://github.com/sator-imaging/FUnit/actions/workflows/build.yml)
 &nbsp;
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sator-imaging/FUnit)
