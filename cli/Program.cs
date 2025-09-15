@@ -119,8 +119,10 @@ if (validFUnitFiles.Count > 0)
 else
 {
     ConsoleLogger.LogInfo();
-    ConsoleLogger.LogInfo($"> [!WARNING]");
-    ConsoleLogger.LogInfo($"> No valid {FUnit} test files found matching the criteria.");
+    ConsoleLogger.LogFailed($"> [!CAUTION]");
+    ConsoleLogger.LogFailed($"> No valid {FUnit} test files found matching the criteria.");
+
+    Environment.Exit(1);
 }
 
 
