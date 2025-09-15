@@ -200,7 +200,7 @@ $@"Expected collections to be equal ignoring order.
     /// <typeparam name="TException">The type of the expected exception.</typeparam>
     /// <param name="test">The action to execute that is expected to throw an exception.</param>
     /// <param name="expectedMessage">The expected exception message. If null or empty, the message is not checked.</param>
-    public static void Throw<TException>(Action test, string? expectedMessage)
+    public static void Throw<TException>(string? expectedMessage, Action test)
         where TException : Exception
     {
         if (typeof(TException) == typeof(Exception))

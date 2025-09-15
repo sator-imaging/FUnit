@@ -107,7 +107,7 @@ Must.ContainText(text, substring);
 Must.NotContainText(text, substring);
 
 // Exception assertion
-Must.Throw<T>(() => Test(), "Expected error message");
+Must.Throw<T>("Expected error message", () => Test());
 
 // Conditional assertion
 Must.BeTrue(list == list);
