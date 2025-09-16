@@ -17,8 +17,7 @@ public static class FUnit
 #pragma warning restore CA1050
 {
     private const int InitialSubjectMapCapacity = 8;
-    private const int InitialTestCaseListCapacity = 8;
-    private const int InitialFailedTestCaseListCapacity = 8;
+    private const int InitialTestCaseListCapacity = 4;
     private const string TimeSpanFormat = @"hh\:mm\:ss\.fff";
 
     /// <summary>
@@ -67,7 +66,7 @@ public static class FUnit
         var options = CommandLineOptions.Parse(args);
 
         var testCasesBySubject = new Dictionary<string, List<TestCase>>(InitialSubjectMapCapacity);
-        var failedTestCases = new List<FailedTestCase>(InitialFailedTestCaseListCapacity);
+        var failedTestCases = new List<FailedTestCase>();
 
         // aggregate test cases
         {
@@ -126,7 +125,7 @@ public static class FUnit
                 if (cancellationToken.IsCancellationRequested)
                 {
                     skippedTestCases.AddRange(testCases.Skip(currentCaseIndex));
-                    break;
+                    continue;  // collect all skipped test cases
                 }
 
                 while (currentCaseIndex < testCases.Count && activeTasks.Count < concurrencyLevel)
