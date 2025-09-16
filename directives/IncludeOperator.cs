@@ -11,17 +11,19 @@ namespace FUnit.Directives
 {
     internal class IncludeOperator : IDirectiveOperator
     {
+        public string DirectiveKeyword => "include";
+
         // ConcurrentBag doesn't have Clear method in .NET Standard 2.0...!?
         private readonly ConcurrentDictionary<string, byte> _processedFilePaths = new();
-
-        private static string? NormalizePathFileName(string? path)
-        {
-            return path?.Replace('\\', '/').TrimEnd('/');
-        }
 
         public void Initialize()
         {
             this._processedFilePaths.Clear();
+        }
+
+        private static string? NormalizePathFileName(string? path)
+        {
+            return path?.Replace('\\', '/').TrimEnd('/');
         }
 
         public (string HintName, string? GeneratedCode, ImmutableList<Diagnostic> Diagnostics) Apply(string args, string sourceFilePath, Location location)
@@ -29,9 +31,9 @@ namespace FUnit.Directives
             var diagnostics = ImmutableList<Diagnostic>.Empty;
             string hintName = string.Empty;
 
-            string? targetFileName = NormalizePathFileName(args);
+            string targetFileName = NormalizePathFileName(args) ?? string.Empty;
 
-            if (targetFileName == null || string.IsNullOrWhiteSpace(targetFileName))
+            if (string.IsNullOrWhiteSpace(targetFileName))
             {
                 diagnostics = diagnostics.Add(Diagnostic.Create(SR.MissingFileNameDiagnostic, location, args));
                 return (hintName, null, diagnostics);

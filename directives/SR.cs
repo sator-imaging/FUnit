@@ -7,7 +7,6 @@ namespace FUnit.Directives
     internal class SR
     {
         public const string DirectivePrefix = "//:funit:";
-        public const string IncludeDirective = "include";
 
         public static readonly char[] DirectiveSeparators = new[] { ' ' };
         public static readonly char[] InvalidChars = new[] { '/', '\\', ':' };  // File.Exists will reject invalid path so remove only directory separators

@@ -2,7 +2,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace FUnit.Directives
@@ -24,7 +23,7 @@ namespace FUnit.Directives
         /// </summary>
         public FUnitSourceGenerator()
         {
-            this._directiveOperators.Add(SR.IncludeDirective, this._includeOperator);
+            this._directiveOperators.Add(this._includeOperator.DirectiveKeyword, this._includeOperator);
         }
 
         /// <summary>
@@ -81,20 +80,20 @@ namespace FUnit.Directives
                         Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), fullText));
 #endif
 
-                    var directiveAndArgs = fullText.Substring(SR.DirectivePrefix.Length);
+                    var keywordAndArgs = fullText.Substring(SR.DirectivePrefix.Length);
 
-                    var parts = directiveAndArgs.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
-                    var directiveName = parts.FirstOrDefault();
-                    var args = parts.Length > 1 ? parts[1] : string.Empty;
+                    var parts = keywordAndArgs.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
+                    var keyword = parts.FirstOrDefault()?.Trim() ?? string.Empty;
+                    var args = parts.Length > 1 ? parts[1].Trim() : string.Empty;
 
-                    if (string.IsNullOrEmpty(directiveName))
+                    if (keyword.Length == 0)
                     {
                         context.ReportDiagnostic(
                             Diagnostic.Create(SR.EmptyFUnitDirectiveDiagnostic, trivia.GetLocation()));
                         continue;
                     }
 
-                    if (this._directiveOperators.TryGetValue(directiveName, out IDirectiveOperator? op))
+                    if (this._directiveOperators.TryGetValue(keyword, out IDirectiveOperator? op))
                     {
                         var (hintName, generatedContent, diagnostics) = op.Apply(args, trivia.SyntaxTree.FilePath, trivia.GetLocation());
                         foreach (var diagnostic in diagnostics)
@@ -109,7 +108,7 @@ namespace FUnit.Directives
                     else
                     {
                         context.ReportDiagnostic(
-                            Diagnostic.Create(SR.UnknownFUnitDirectiveDiagnostic, trivia.GetLocation(), directiveName));
+                            Diagnostic.Create(SR.UnknownFUnitDirectiveDiagnostic, trivia.GetLocation(), keyword));
                     }
                 }
             }
