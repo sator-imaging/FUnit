@@ -105,6 +105,12 @@ public static class FUnit
             }
         }
 
+        // TODO: refactor: currently, run tests and then build result.
+        //       1. the result should be built while running test and also update TestResult's
+        //          Subject/Test class to have ToString overridden to allow generating consisntent
+        //          log output for both console and markdown output.
+        //       2. add FailedCount property to result thus FailedTestCase can be removed.
+
         // run tests
         var skippedTestCases = new List<TestCase>();
         {
