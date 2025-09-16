@@ -14,6 +14,16 @@ namespace FUnitImpl
         /// </summary>
         public static bool EnableMarkdownOutput { get; set; } = false;
 
+#pragma warning disable SYSLIB1045 // Use GeneratedRegexAttribute to generate the regular expression implementation at compile time.
+        private static readonly Regex re_markdownUnorderedList = new(
+            @"(^(>[ ]+)?[ ]*([\*\-+]?([ ]+\[[ x]\])?)?[ ]+)|(>[ ]+)",
+            RegexOptions.Compiled);
+
+        private static readonly Regex re_markdownQuoteAwareTagCloser = new(
+            @"(?<!^)>",
+            RegexOptions.Compiled | RegexOptions.Multiline);
+#pragma warning restore SYSLIB1045
+
         private static void Write(object? obj)
         {
             var message = obj?.ToString();
@@ -25,9 +35,8 @@ namespace FUnitImpl
             if (EnableMarkdownOutput)
             {
                 // As GitHub doesn't allow changing text color, use more eye-catching emojis.
-                message = message
+                message = re_markdownQuoteAwareTagCloser.Replace(message, "&gt;")
                     .Replace("<", "&lt;", StringComparison.Ordinal)
-                    .Replace(">", "&gt;", StringComparison.Ordinal)
                     .Replace(SR.EmojiPassed, SR.EmojiPassedGitHub, StringComparison.Ordinal)
                     .Replace(SR.EmojiFailed, SR.EmojiFailedGitHub, StringComparison.Ordinal)
                     ;
@@ -49,12 +58,6 @@ namespace FUnitImpl
         {
             Console.WriteLine();
         }
-
-#pragma warning disable SYSLIB1045 // Use GeneratedRegexAttribute to generate the regular expression implementation at compile time.
-        private static readonly Regex re_markdownUnorderedList = new(
-            @"^[ ]*([\*\-+]?([ ]+\[[ x]\])?)?[ ]+",
-            RegexOptions.Compiled);
-#pragma warning restore SYSLIB1045
 
         private static void Color(string? ansiColor, object obj)
         {

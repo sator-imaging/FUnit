@@ -89,7 +89,7 @@ if (validFUnitFiles.Count > 0)
 
         var relFilePath = Path.GetRelativePath(Directory.GetCurrentDirectory(), filePath).Replace('\\', '/');
 
-        ConsoleLogger.LogInfo($"# {FUnit}: `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
+        ConsoleLogger.LogInfo($"# 🔬 `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
 
         var exitCode = await ExecuteTestAsync(filePath, args);
         if (exitCode < 0)
@@ -103,6 +103,7 @@ if (validFUnitFiles.Count > 0)
     }
 
     ConsoleLogger.LogInfo();
+    ConsoleLogger.LogInfo();
     ConsoleLogger.LogInfo($"# {FUnit} Result");
 
     if (failedSuiteCount == 0 && failedTestCaseCount == 0)
@@ -111,13 +112,16 @@ if (validFUnitFiles.Count > 0)
     }
     else
     {
+        ConsoleLogger.LogInfo();
+        ConsoleLogger.LogFailed($"> [!CAUTION]");
+
         if (failedSuiteCount > 0)
         {
-            ConsoleLogger.LogFailed($"{SR.MarkdownFailed} {failedSuiteCount} of {validFUnitFiles.Count} test suites were failed to run");
+            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} {failedSuiteCount} of {validFUnitFiles.Count} test suites were failed to run");
         }
         if (failedTestCaseCount > 0)
         {
-            ConsoleLogger.LogFailed($"{SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed");
+            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed");
         }
     }
 }
