@@ -39,7 +39,7 @@ return FUnit.Run(args, describe =>
 # Run unit test
 dotnet run ./tests/my-test.cs
 
-# OR use 'dnx' to run all "*test*.cs" in project folder
+# OR use 'dnx' to run all "*test*.cs" (case-insensitive) in project folder
 dnx FUnit.Run
 ```
 

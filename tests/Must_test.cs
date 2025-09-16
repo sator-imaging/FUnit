@@ -80,6 +80,7 @@ return FUnit.Run(args, describe =>
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 1, 2, 4 }));
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 }));
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1 }, new List<int> { 1, 1 }));
+            Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 1 }, new List<int> { 1 }));
         });
     });
 

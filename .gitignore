@@ -2,6 +2,7 @@
 *.md
 bin
 obj
+assets
 
 !README.md
 !LICENSE.md

@@ -3,7 +3,7 @@
 
 namespace Tests
 {
-    public class TestClass
+    internal class TestClass
     {
         public static int TestMethod() => 310;
     }
