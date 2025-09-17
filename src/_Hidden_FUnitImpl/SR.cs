@@ -5,6 +5,7 @@ namespace FUnitImpl
 {
     internal static class SR
     {
+        public const string Flag_Times = "--times";
         public const string Flag_Concurrency = "--concurrency";
         public const string Flag_MarkdownOutput = "--markdown";
         public const string Flag_MarkdownOutputShort = "-md";

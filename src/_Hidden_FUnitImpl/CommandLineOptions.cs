@@ -15,7 +15,8 @@ namespace FUnitImpl
     internal sealed record CommandLineOptions(
         int ConcurrencyLevel = 1,
         Verbosity Verbosity = Verbosity.Normal,
-        string BuildConfiguration = "Debug"
+        string BuildConfiguration = "Debug",
+        int Times = 3
     )
     {
         // NOTE: BuildConfiguration should be hidden from log because it may be different from
@@ -38,6 +39,21 @@ namespace FUnitImpl
             }
         }
 
+        private int b_times = Times;
+        public int Times
+        {
+            get => this.b_times;
+            private set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException($"'{nameof(this.Times)}' must be greater than 0: {value}");
+                }
+
+                this.b_times = value;
+            }
+        }
+
 
         /// <summary>
         /// Parses the command line arguments and returns a <see cref="CommandLineOptions"/> object.
@@ -52,6 +68,20 @@ namespace FUnitImpl
             {
                 switch (args[i])
                 {
+                    case SR.Flag_Times:
+                        {
+                            i++;
+                            if (i < args.Length)
+                            {
+                                if (int.TryParse(args[i], out var times))
+                                {
+                                    ret.Times = times;
+                                    continue;
+                                }
+                            }
+                        }
+                        throw new ArgumentException($"'{args[i - 1]}' takes 1 positive integer parameter");
+
                     case SR.Flag_Concurrency:
                         {
                             i++;
@@ -64,7 +94,7 @@ namespace FUnitImpl
                                 }
                             }
                         }
-                        throw new ArgumentException($"'{args[i]}' takes 1 positive integer parameter");
+                        throw new ArgumentException($"'{args[i - 1]}' takes 1 positive integer parameter");
 
                     case SR.Flag_Configuration:
                     case SR.Flag_ConfigurationShort:
@@ -76,7 +106,7 @@ namespace FUnitImpl
                                 continue;
                             }
                         }
-                        throw new ArgumentException($"'{args[i]}' takes 1 string parameter");
+                        throw new ArgumentException($"'{args[i - 1]}' takes 1 string parameter");
 
                     case SR.Flag_MarkdownOutput:
                     case SR.Flag_MarkdownOutputShort:
