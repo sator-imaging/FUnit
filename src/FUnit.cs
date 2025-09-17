@@ -48,6 +48,9 @@ public static class FUnit
     //           - setup testSuite events
     //           - call testSuite.ExecuteTests
     //           - set static Result property and return failed test case count from ExecuteTests
+    // TODO: add command line option '--times' to specify the number of times to run tests.
+    //       --> verify test subject's (hidden) global state is correctly handled or not.
+    //       --> 3 by default
 
     /// <summary>
     /// Executes the FUnit test runner asynchronously.
@@ -106,10 +109,10 @@ public static class FUnit
         }
 
         // TODO: refactor: currently, run tests and then build result.
-        //       1. the result should be built while running test and also update TestResult's
-        //          Subject/Test class to have ToString overridden to allow generating consisntent
-        //          log output for both console and markdown output.
-        //       2. add FailedCount property to result thus FailedTestCase can be removed.
+        //       1. the result should be built while running test.
+        //       2. update TestResult's Subject/Test class to have ToString overridden to
+        //          allow generating consisntent log for both console and markdown output.
+        //       3. add FailedCount property to result thus FailedTestCase can be removed.
 
         // run tests
         var skippedTestCases = new List<TestCase>();
