@@ -13,7 +13,7 @@ using Descriptor = System.Action<string, System.Action<System.Action<string, Sys
 /// <summary>
 /// Provides the main entry point for running FUnit tests.
 /// </summary>
-public static class FUnit
+public static partial class FUnit
 #pragma warning restore CA1050
 {
     private const int InitialSubjectMapCapacity = 8;
@@ -61,162 +61,30 @@ public static class FUnit
     /// <returns>The number of failed test cases if not canceled, otherwise a negative number that is the bitwise complement of the failed test case count.</returns>
     public static async ValueTask<int> RunAsync(string[] args, Action<Descriptor> builder, CancellationToken cancellationToken = default)
     {
-        var timestamp_runStart = Stopwatch.GetTimestamp();
-
         // always clear!!
         Result = null;
 
         var options = CommandLineOptions.Parse(args);
-
-        var testCasesBySubject = new Dictionary<string, List<TestCase>>(InitialSubjectMapCapacity);
-        var failedTestCases = new List<FailedTestCase>();
-
-        // aggregate test cases
-        {
-            // 'describe' may contain error
-            try
-            {
-                // collect subjects
-                builder.Invoke((subjectDesc, it) =>
-                {
-                    // 'it' may contain error
-                    try
-                    {
-                        if (!testCasesBySubject.TryGetValue(subjectDesc, out var testCases))
-                        {
-                            testCases = new(InitialTestCaseListCapacity);
-                            testCasesBySubject[subjectDesc] = testCases;
-                        }
-
-                        // run 'it' (case aggregator) to collect test cases
-                        it.Invoke((testCaseDesc, testCaseFunc) =>
-                        {
-                            testCases.Add(new(subjectDesc, testCaseDesc, testCaseFunc));
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        failedTestCases.Add(
-                            new(nameof(FUnit), $"{nameof(FUnit)} got error from outside of 'it' scope", ex, IsSystemError: true));
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                failedTestCases.Add(
-                    new(nameof(FUnit), $"{nameof(FUnit)} got error from outside of 'describe' scope", ex, IsSystemError: true));
-            }
-        }
-
-        // TODO: refactor: currently, run tests and then build result.
-        //       1. the result should be built while running test.
-        //       2. update TestResult's Subject/Test class to have ToString overridden to
-        //          allow generating consisntent log for both console and markdown output.
-        //       3. add FailedCount property to result thus FailedTestCase can be removed.
-
-        // run tests
-        var skippedTestCases = new List<TestCase>();
-        {
-            // TODO: ready to run tests simultaneously but functionality is not tested
-            int concurrencyLevel = options.ConcurrencyLevel;
-            var activeTasks = new List<Task<FailedTestCase?>>(capacity: concurrencyLevel);
-
-            ConsoleLogger.LogInfo();
-            ConsoleLogger.LogInfo("## Test Result");
-
-            foreach (var (testSubject, testCases) in testCasesBySubject.Where(x => x.Value.Count != 0))
-            {
-                ConsoleLogger.LogInfo($"- {testSubject}");
-
-                int currentCaseIndex = 0;
-
-            CONSUME_QUEUE:
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    skippedTestCases.AddRange(testCases.Skip(currentCaseIndex));
-                    continue;  // collect all skipped test cases
-                }
-
-                while (currentCaseIndex < testCases.Count && activeTasks.Count < concurrencyLevel)
-                {
-                    var task = Task.Run(testCases[currentCaseIndex].ExecuteAsync);
-                    currentCaseIndex++;
-
-                    activeTasks.Add(task);
-                }
-
-                if (activeTasks.Count == 0)
-                {
-                    continue;
-                }
-
-                _ = await Task.WhenAll(activeTasks);
-
-                failedTestCases.AddRange(
-                    activeTasks
-                        .Where(x => x.Result != null)
-                        .Select(x => x.Result)
-                        .OfType<FailedTestCase>()
-                        );
-
-                activeTasks.Clear();
-
-                goto CONSUME_QUEUE;
-            }
-
-            if (skippedTestCases.Count > 0)
-            {
-                foreach (var skipped in skippedTestCases)
-                {
-                    ConsoleLogger.LogFailed($"- [FUnit] Tests Canceled");
-                    ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} [{skipped.Subject}] {skipped.Description}");
-                }
-            }
-        }
-
-        // result
-        var elapsedTime = SR.GetElapsedTime(timestamp_runStart);
-
-        var result = new Dictionary<TestResult.Subject, IReadOnlyList<TestResult.Test>>(testCasesBySubject.Count);
-        foreach (var (subjectTitle, testCases) in testCasesBySubject)
-        {
-            var subject = new TestResult.Subject(subjectTitle);
-            var tests = new List<TestResult.Test>(testCases.Count);
-
-            result[subject] = tests;
-
-            foreach (var tc in testCases)
-            {
-                TestResult.Error? error = null;
-
-                var failedCase = failedTestCases.FirstOrDefault(x => x.TestSubject == tc.Subject && x.Description == tc.Description);
-                if (failedCase != null)
-                {
-                    var e = failedCase.Error;
-                    error = new(e.Message, e.StackTrace, IsFUnitError: failedCase.IsSystemError);
-                }
-
-                tests.Add(new(tc.Description, tc.ExecutionCount, error));
-            }
-        }
-
-        Result = new(options, elapsedTime, result);
+        var testSuite = TestSuite.Build(builder, out var setupErrors);
+        var (testResult, failedTestCases, skippedCount) = await testSuite.ExecuteAsync(options, setupErrors, cancellationToken);
+        Result = testResult;
 
         // finish up
-        var totalTestCaseCount = testCasesBySubject.Sum(x => x.Value.Count);
+        var totalTestCaseCount = testResult.TotalCount;
+        var failedCount = failedTestCases.Count;
         ConsoleLogger.LogInfo();
         ConsoleLogger.LogInfo("## Test Summary");
         ConsoleLogger.LogInfo($"Options:  {options}  ");
-        ConsoleLogger.LogInfo($"Duration: {elapsedTime.ToString(TimeSpanFormat)}  ");
-        if (skippedTestCases.Count > 0)
+        ConsoleLogger.LogInfo($"Duration: {testResult.TotalExecutionTime.ToString(TimeSpanFormat)}  ");
+        if (skippedCount > 0)
         {
-            ConsoleLogger.LogFailed($"{SR.MarkdownFailed} Total {skippedTestCases.Count} tests canceled");
+            ConsoleLogger.LogFailed($"{SR.MarkdownFailed} Total {skippedCount} tests canceled");
 
-            return ~(failedTestCases.Count);  // ok: bash treats -1 as 255 (byte)
+            return ~failedCount;  // ok: bash treats -1 as 255 (byte)
         }
         else
         {
-            if (failedTestCases.Count == 0)
+            if (failedCount == 0)
             {
                 ConsoleLogger.LogPassed($"{SR.MarkdownPassed} All Tests Passed: {totalTestCaseCount}");
             }
@@ -225,7 +93,7 @@ public static class FUnit
                 int failedCountExceptForSystemError = failedTestCases.Count(x => !x.IsSystemError);
 
                 ConsoleLogger.LogPassed($"Passed: {totalTestCaseCount - failedCountExceptForSystemError} ({totalTestCaseCount})  ");
-                ConsoleLogger.LogFailed($"Failed: {failedTestCases.Count}  ");
+                ConsoleLogger.LogFailed($"Failed: {failedCount}  ");
 
                 foreach (var detail in failedTestCases)
                 {
@@ -233,7 +101,7 @@ public static class FUnit
                 }
             }
 
-            return failedTestCases.Count;
+            return failedCount;
         }
     }
 
@@ -281,22 +149,42 @@ public static class FUnit
         /// Gets a read-only dictionary of test subjects and their associated test cases.
         /// </summary>
         public IReadOnlyDictionary<Subject, IReadOnlyList<Test>> TestsBySubject { get; }
+        public int TotalCount { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TestResult"/> class.
-        /// </summary>
-        /// <param name="Options">The command line options used for the test run.</param>
-        /// <param name="TotalExecutionTime">The total execution time of the test run.</param>
-        /// <param name="TestsBySubject">A dictionary of test subjects and their associated test cases.</param>
         internal TestResult(
-            CommandLineOptions Options,
-            TimeSpan TotalExecutionTime,
-            IReadOnlyDictionary<Subject, IReadOnlyList<Test>> TestsBySubject
+            CommandLineOptions options,
+            TimeSpan totalExecutionTime,
+            IReadOnlyDictionary<string, IReadOnlyList<TestCase>> testCasesBySubject,
+            IReadOnlyList<FailedTestCase> failedTestCases
         )
         {
-            this.Options = Options;
-            this.TotalExecutionTime = TotalExecutionTime;
-            this.TestsBySubject = TestsBySubject;
+            this.Options = options;
+            this.TotalExecutionTime = totalExecutionTime;
+            this.TotalCount = testCasesBySubject.Sum(x => x.Value.Count);
+
+            var result = new Dictionary<Subject, IReadOnlyList<Test>>(testCasesBySubject.Count);
+            foreach (var (subjectTitle, testCases) in testCasesBySubject)
+            {
+                var subject = new Subject(subjectTitle);
+                var tests = new List<Test>(testCases.Count);
+
+                result[subject] = tests;
+
+                foreach (var tc in testCases)
+                {
+                    Error? error = null;
+
+                    var failedCase = failedTestCases.FirstOrDefault(x => x.TestSubject == tc.Subject && x.Description == tc.Description);
+                    if (failedCase != null)
+                    {
+                        var e = failedCase.Error;
+                        error = new(e.Message, e.StackTrace, IsFUnitError: failedCase.IsSystemError);
+                    }
+
+                    tests.Add(new(tc.Description, tc.ExecutionCount, error));
+                }
+            }
+            this.TestsBySubject = result;
         }
 
         /// <summary>
