@@ -16,14 +16,19 @@ namespace FUnit.Directives
     public class FUnitSourceGenerator : ISourceGenerator
     {
         private readonly Dictionary<string, IDirectiveOperator> _directiveOperators = new();
-        private readonly IncludeOperator _includeOperator = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FUnitSourceGenerator"/> class.
         /// </summary>
         public FUnitSourceGenerator()
         {
-            this._directiveOperators.Add(this._includeOperator.DirectiveKeyword, this._includeOperator);
+            foreach (var op in new IDirectiveOperator[]
+            {
+                new IncludeOperator(),
+            })
+            {
+                this._directiveOperators.Add(op.DirectiveKeyword, op);
+            }
         }
 
         /// <summary>
@@ -41,7 +46,10 @@ namespace FUnit.Directives
         /// <param name="context">The generator execution context.</param>
         public void Execute(GeneratorExecutionContext context)
         {
-            this._includeOperator.Initialize();
+            foreach (var op in this._directiveOperators.Values)
+            {
+                op.Setup();
+            }
 
             foreach (var syntaxTree in context.Compilation.SyntaxTrees)
             {
@@ -111,6 +119,11 @@ namespace FUnit.Directives
                             Diagnostic.Create(SR.UnknownFUnitDirectiveDiagnostic, trivia.GetLocation(), keyword));
                     }
                 }
+            }
+
+            foreach (var op in this._directiveOperators.Values)
+            {
+                op.Cleanup();
             }
         }
     }

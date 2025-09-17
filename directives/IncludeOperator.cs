@@ -4,9 +4,6 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.IO;
 
-// System.IO...!!!
-#pragma warning disable RS1035 // The symbol is banned for use by analyzers
-
 namespace FUnit.Directives
 {
     internal class IncludeOperator : IDirectiveOperator
@@ -16,7 +13,11 @@ namespace FUnit.Directives
         // ConcurrentBag doesn't have Clear method in .NET Standard 2.0...!?
         private readonly ConcurrentDictionary<string, byte> _processedFilePaths = new();
 
-        public void Initialize()
+        public void Setup()
+        {
+        }
+
+        public void Cleanup()
         {
             this._processedFilePaths.Clear();
         }
@@ -80,7 +81,6 @@ namespace FUnit.Directives
                 hintName = hintName.Replace(invalid, '+');
             }
 
-            //var fileContent = "// Hello, world...: " + absoluteFilePath;
             var fileContent = File.ReadAllText(absoluteFilePath);
 
             return (hintName, fileContent, diagnostics);
