@@ -7,6 +7,7 @@ namespace FUnit.Directives
     internal class SR
     {
         public const string DirectivePrefix = "//:funit:";
+        public const string DiagnosticCategory = nameof(FUnit);
 
         public static readonly char[] DirectiveSeparators = new[] { ' ' };
         public static readonly char[] InvalidChars = new[] { '/', '\\', ':' };  // File.Exists will reject invalid path so remove only directory separators
@@ -15,7 +16,7 @@ namespace FUnit.Directives
             id: "FUNIT001",
             title: "Missing file name for include directive",
             messageFormat: "Include directive '{0}' is missing a file name argument",
-            category: "FUnit.SourceGenerator",
+            category: DiagnosticCategory,
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
@@ -23,7 +24,7 @@ namespace FUnit.Directives
             id: "FUNIT002",
             title: "Included file not found",
             messageFormat: "Included file '{0}' not found",
-            category: "FUnit.SourceGenerator",
+            category: DiagnosticCategory,
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
@@ -31,7 +32,7 @@ namespace FUnit.Directives
             id: "FUNIT003",
             title: "Unknown FUnit directive",
             messageFormat: "Unknown FUnit directive '{0}'",
-            category: "FUnit.SourceGenerator",
+            category: DiagnosticCategory,
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
@@ -39,7 +40,7 @@ namespace FUnit.Directives
             id: "FUNIT004",
             title: "Empty FUnit directive",
             messageFormat: "FUnit directive prefix found, but no directive specified",
-            category: "FUnit.SourceGenerator",
+            category: DiagnosticCategory,
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
@@ -47,7 +48,7 @@ namespace FUnit.Directives
             id: "FUNIT005",
             title: "File extension not supported",
             messageFormat: "Included file '{0}' has an unsupported extension. Only .cs files are allowed.",
-            category: "FUnit.SourceGenerator",
+            category: DiagnosticCategory,
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
@@ -55,7 +56,7 @@ namespace FUnit.Directives
             id: "FUNIT999",
             title: "FUnit Debug Diagnostic",
             messageFormat: "FUnit directive encountered: {0}",
-            category: "FUnit.SourceGenerator",
+            category: DiagnosticCategory,
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true);
     }

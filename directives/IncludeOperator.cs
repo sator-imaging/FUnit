@@ -48,13 +48,8 @@ namespace FUnit.Directives
                 return (hintName, null, diagnostics);
             }
 
-            const string CURR_DIR = "./";
-            while (targetFileName.StartsWith(CURR_DIR, StringComparison.Ordinal))
-            {
-                targetFileName = targetFileName.Substring(CURR_DIR.Length);
-            }
-
-            var absoluteFilePath = Path.Combine(sourceDirectory, targetFileName);
+            // GetFullPath eliminates unnecessary '.' and '..' in path
+            var absoluteFilePath = Path.GetFullPath(Path.Combine(sourceDirectory, targetFileName));
 
             if (!Path.GetExtension(absoluteFilePath).Equals(".cs", StringComparison.OrdinalIgnoreCase))
             {
