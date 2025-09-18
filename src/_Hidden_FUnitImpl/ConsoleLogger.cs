@@ -16,7 +16,7 @@ namespace FUnitImpl
 
 #pragma warning disable SYSLIB1045 // Use GeneratedRegexAttribute to generate the regular expression implementation at compile time.
         private static readonly Regex re_markdownUnorderedList = new(
-            @"(^(>[ ]+)?[ ]*([\*\-+]?([ ]+\[[ x]\])?)?[ ]+)|(>[ ]+)",
+            @"(^(>[ ]+)?[ ]*([\*\-+]?([ ]+\[[ x]\])?)?[ ]+)|(^(>[ ]+))",
             RegexOptions.Compiled);
 
         private static readonly Regex re_markdownQuoteAwareTagCloser = new(
