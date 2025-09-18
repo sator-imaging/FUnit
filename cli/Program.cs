@@ -227,7 +227,7 @@ static string BuildEscapedArguments(string[] args)
     {
         var arg = args[i];
 
-        if (arg.Contains(' ') || arg.Contains('\\') || arg.Contains('"'))
+        if (arg.Contains(' ') || arg.Contains('\\') || arg.Contains('"') || arg.Contains('\''))
         {
             arg = $"\"{arg.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
         }
@@ -423,9 +423,10 @@ static void RunAllTests()
     Debug.Assert(BuildEscapedArguments([@" "]) == @""" """, "space");
     Debug.Assert(BuildEscapedArguments([@"\"]) == @"""\\""", "back slash");
     Debug.Assert(BuildEscapedArguments([@""""]) == @"""\""""", "double quote");
+    Debug.Assert(BuildEscapedArguments([@"'"]) == @"""'""", "single quote");
 
-    var complex = @"Hello, \"" \ "" world.";
-    var expected = @"""Hello, \\\"" \\ \"" world.""";
+    var complex = @"Hello, \"" ' \ "" world.";
+    var expected = @"""Hello, \\\"" ' \\ \"" world.""";
     var actual = BuildEscapedArguments([complex]);
 
     Debug.Assert(actual == expected, $"'{actual}' != '{expected}'");
