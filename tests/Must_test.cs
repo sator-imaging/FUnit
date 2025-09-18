@@ -63,7 +63,9 @@ return FUnit.Run(args, describe =>
         it("should throw FUnitException for sequence inequality", () =>
         {
             Must.Throw<FUnitException>("Expected collections to be equal in order.", () => Must.HaveSameSequence(new List<int> { 1, 2, 3 }, new List<int> { 1, 3, 2 }));
+            Must.Throw<FUnitException>("Expected collections to be equal in order.", () => Must.HaveSameSequence(new List<int> { 1, 3, 2 }, new List<int> { 1, 2, 3 }));
             Must.Throw<FUnitException>("Expected collections to be equal in order.", () => Must.HaveSameSequence(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 }));
+            Must.Throw<FUnitException>("Expected collections to be equal in order.", () => Must.HaveSameSequence(new List<int> { 1, 2, 3 }, new List<int> { 1, 2 }));
         });
     });
 
@@ -78,7 +80,9 @@ return FUnit.Run(args, describe =>
         it("should throw FUnitException for unordered sequence inequality", () =>
         {
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 1, 2, 4 }));
+            Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2, 4 }, new List<int> { 1, 2, 3 }));
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 }));
+            Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 1, 2 }));
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1 }, new List<int> { 1, 1 }));
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 1 }, new List<int> { 1 }));
         });

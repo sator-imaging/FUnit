@@ -168,7 +168,7 @@ public static class FUnit
             {
                 foreach (var skipped in skippedTestCases)
                 {
-                    ConsoleLogger.LogFailed($"- [FUnit] Tests Canceled");
+                    ConsoleLogger.LogFailed($"- [{nameof(FUnit)}] Tests Canceled");
                     ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} [{skipped.Subject}] {skipped.Description}");
                 }
             }

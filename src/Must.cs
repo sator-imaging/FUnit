@@ -96,7 +96,7 @@ public static class Must
         if (condition)
         {
             throw new FUnitException(string.IsNullOrWhiteSpace(conditionExpr)
-                ? "Expected condition to be true, but was false."
+                ? "Expected condition to be false, but was true."
                 : $"Expected condition '{conditionExpr}' not to be met, but it was."
             );
         }
