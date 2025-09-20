@@ -47,6 +47,10 @@ jobs:
       # after checkout, you can checkout another repo, copy logo image or
       # other assets into '.docfx' folder to setup your own docfx environment.
       # note that images must be copied into '.docfx/images', 'images' or '.images'.
+      - name: Icon setup
+      - run: |
+        mkdir .docfx/images || true
+        cp icon-128px.png ./docfx/images
 
 
       ######  main  ######
@@ -68,7 +72,7 @@ jobs:
 
           # paths must be relative from .docfx folder. default value is used when not set.
           # note that url works but only in top page. see sample website for detail.
-          ###site_logo:    '<logo>.svg'
+          site_logo:    'icon-128px.png'
           ###site_favicon: '<favicon>.svg'
 
           # advanced options
