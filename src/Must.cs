@@ -86,22 +86,6 @@ public static class Must
         }
     }
 
-    /// <summary>
-    /// Asserts that a condition is false.
-    /// </summary>
-    /// <param name="condition">The condition to check.</param>
-    /// <param name="conditionExpr">The expression of the condition, used for error reporting.</param>
-    public static void BeFalse(bool condition, [CallerArgumentExpression(nameof(condition))] string? conditionExpr = null)
-    {
-        if (condition)
-        {
-            throw new FUnitException(string.IsNullOrWhiteSpace(conditionExpr)
-                ? "Expected condition to be false, but was true."
-                : $"Expected condition '{conditionExpr}' not to be met, but it was."
-            );
-        }
-    }
-
 
     /// <summary>
     /// Asserts that two sequences are equal and in the same order.

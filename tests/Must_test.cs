@@ -168,18 +168,4 @@ return FUnit.Run(args, describe =>
             Must.Throw<FUnitException>("Expected condition '0 == 1' to be met, but it was not.", () => Must.BeTrue(0 == 1));
         });
     });
-
-    describe("Must.BeFalse", it =>
-    {
-        it("should assert that a condition is false", () =>
-        {
-            Must.BeFalse(false);
-        });
-
-        it("should throw FUnitException if the condition is true", () =>
-        {
-            Must.Throw<FUnitException>("Expected condition 'true' not to be met, but it was.", () => Must.BeFalse(true));
-            Must.Throw<FUnitException>("Expected condition '0 == 0' not to be met, but it was.", () => Must.BeFalse(0 == 0));
-        });
-    });
 });

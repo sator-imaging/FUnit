@@ -111,12 +111,11 @@ Must.NotContainText(text, substring);
 Must.Throw<T>("Expected error message", () => Test());
 
 // Conditional assertion
-Must.BeTrue(list == list);
-Must.BeFalse(list.Count < 0);
+Must.BeTrue(x is >= 0 and < 10);
 
 // ❌ Avoid asserting high-level conditions on collections
 // ex Instead of checking if a value is absent, assert the full expected content
-Must.BeFalse(list.Contains(x));  // ✅ Prefer: Must.HaveSameSequence(expectedList, actualList)
+Must.BeTrue(!list.Contains(x));  // ✅ Prefer: Must.HaveSameSequence(expectedList, actualList)
 ```
 
 
