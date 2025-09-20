@@ -48,7 +48,7 @@ jobs:
       # other assets into '.docfx' folder to setup your own docfx environment.
       # note that images must be copied into '.docfx/images', 'images' or '.images'.
       - name: Icon setup
-      - run: |
+        run: |
         mkdir .docfx/images || true
         cp icon-128px.png ./docfx/images
 
