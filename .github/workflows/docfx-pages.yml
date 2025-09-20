@@ -49,8 +49,8 @@ jobs:
       # note that images must be copied into '.docfx/images', 'images' or '.images'.
       - name: Icon setup
         run: |
-        mkdir .docfx/images || true
-        cp icon-128px.png ./docfx/images
+          mkdir .docfx/images || true
+          cp icon-128px.png ./docfx/images
 
 
       ######  main  ######
