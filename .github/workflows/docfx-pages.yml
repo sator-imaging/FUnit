@@ -50,7 +50,7 @@ jobs:
       - name: Icon setup
         run: |
           mkdir -p .docfx/images
-          cp icon-128px.png ./docfx/images
+          cp icon-128px.png .docfx/images
 
 
       ######  main  ######
@@ -72,7 +72,7 @@ jobs:
 
           # paths must be relative from .docfx folder. default value is used when not set.
           # note that url works but only in top page. see sample website for detail.
-          site_logo:    'icon-128px.png'
+          site_logo:    'images/icon-128px.png'
           ###site_favicon: '<favicon>.svg'
 
           # advanced options
