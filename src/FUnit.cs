@@ -80,7 +80,7 @@ public static partial class FUnit
         testSuite.TestCaseSkipped += skipped =>
         {
             ConsoleLogger.LogFailed($"- [{nameof(FUnit)}] Tests Canceled");
-            ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} [{skipped.Subject}] {skipped.Description}");
+            ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} [{skipped.subject}] {skipped.description}");
         };
 
         var (failedTestCases, skippedTestCases) = await testSuite.ExecuteAsync(options, cancellationToken);
@@ -154,7 +154,7 @@ public static partial class FUnit
     {
         public event Action? TestRunStarting;
         public event Action<string>? SubjectStarting;
-        public event Action<TestCase>? TestCaseSkipped;
+        public event Action<(string subject, string description)>? TestCaseSkipped;
 
         internal IReadOnlyDictionary<string, List<TestCase>> TestCasesBySubject { get; }
         private readonly List<FailedTestCase> _failedTestCases;
@@ -263,7 +263,7 @@ public static partial class FUnit
                 {
                     foreach (var skipped in skippedTestCases)
                     {
-                        TestCaseSkipped?.Invoke(skipped);
+                        TestCaseSkipped?.Invoke((skipped.Subject, skipped.Description));
                     }
                 }
             }
