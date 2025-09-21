@@ -13,7 +13,7 @@ using Descriptor = System.Action<string, System.Action<System.Action<string, Sys
 /// <summary>
 /// Provides the main entry point for running FUnit tests.
 /// </summary>
-public static class FUnit
+public static partial class FUnit
 #pragma warning restore CA1050
 {
     private const int InitialSubjectMapCapacity = 8;
@@ -35,6 +35,8 @@ public static class FUnit
     {
         return Task.Run(async () => await RunAsync(args, builder)).Result;  // ok
     }
+
+    public static TestSuite Build(Action<Descriptor> builder) => new TestSuite(builder);
 
     // TODO: refactor Run method by creating new methods and types.
     //       --> Build(Descriptor) -> TestSuite
@@ -67,112 +69,22 @@ public static class FUnit
         Result = null;
 
         var options = CommandLineOptions.Parse(args);
+        var testSuite = Build(builder);
 
-        var testCasesBySubject = new Dictionary<string, List<TestCase>>(InitialSubjectMapCapacity);
-        var failedTestCases = new List<FailedTestCase>();
-
-        // aggregate test cases
+        testSuite.TestRunStarting += () =>
         {
-            // 'describe' may contain error
-            try
-            {
-                // collect subjects
-                builder.Invoke((subjectDesc, it) =>
-                {
-                    // 'it' may contain error
-                    try
-                    {
-                        if (!testCasesBySubject.TryGetValue(subjectDesc, out var testCases))
-                        {
-                            testCases = new(InitialTestCaseListCapacity);
-                            testCasesBySubject[subjectDesc] = testCases;
-                        }
-
-                        // run 'it' (case aggregator) to collect test cases
-                        it.Invoke((testCaseDesc, testCaseFunc) =>
-                        {
-                            testCases.Add(new(subjectDesc, testCaseDesc, testCaseFunc));
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        failedTestCases.Add(
-                            new(nameof(FUnit), $"{nameof(FUnit)} got error from outside of 'it' scope", ex, IsSystemError: true));
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                failedTestCases.Add(
-                    new(nameof(FUnit), $"{nameof(FUnit)} got error from outside of 'describe' scope", ex, IsSystemError: true));
-            }
-        }
-
-        // TODO: refactor: currently, run tests and then build result.
-        //       1. the result should be built while running test.
-        //       2. update TestResult's Subject/Test class to have ToString overridden to
-        //          allow generating consisntent log for both console and markdown output.
-        //       3. add FailedCount property to result thus FailedTestCase can be removed.
-
-        // run tests
-        var skippedTestCases = new List<TestCase>();
-        {
-            // TODO: ready to run tests simultaneously but functionality is not tested
-            int concurrencyLevel = options.ConcurrencyLevel;
-            var activeTasks = new List<Task<FailedTestCase?>>(capacity: concurrencyLevel);
-
             ConsoleLogger.LogInfo();
             ConsoleLogger.LogInfo("## Test Result");
+        };
+        testSuite.SubjectStarting += subject => ConsoleLogger.LogInfo($"- {subject}");
+        testSuite.TestCaseSkipped += skipped =>
+        {
+            ConsoleLogger.LogFailed($"- [{nameof(FUnit)}] Tests Canceled");
+            ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} [{skipped.Subject}] {skipped.Description}");
+        };
 
-            foreach (var (testSubject, testCases) in testCasesBySubject.Where(x => x.Value.Count != 0))
-            {
-                ConsoleLogger.LogInfo($"- {testSubject}");
-
-                int currentCaseIndex = 0;
-
-            CONSUME_QUEUE:
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    skippedTestCases.AddRange(testCases.Skip(currentCaseIndex));
-                    continue;  // collect all skipped test cases
-                }
-
-                while (currentCaseIndex < testCases.Count && activeTasks.Count < concurrencyLevel)
-                {
-                    var task = Task.Run(testCases[currentCaseIndex].ExecuteAsync);
-                    currentCaseIndex++;
-
-                    activeTasks.Add(task);
-                }
-
-                if (activeTasks.Count == 0)
-                {
-                    continue;
-                }
-
-                _ = await Task.WhenAll(activeTasks);
-
-                failedTestCases.AddRange(
-                    activeTasks
-                        .Where(x => x.Result != null)
-                        .Select(x => x.Result)
-                        .OfType<FailedTestCase>()
-                        );
-
-                activeTasks.Clear();
-
-                goto CONSUME_QUEUE;
-            }
-
-            if (skippedTestCases.Count > 0)
-            {
-                foreach (var skipped in skippedTestCases)
-                {
-                    ConsoleLogger.LogFailed($"- [{nameof(FUnit)}] Tests Canceled");
-                    ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} [{skipped.Subject}] {skipped.Description}");
-                }
-            }
-        }
+        var (failedTestCases, skippedTestCases) = await testSuite.ExecuteAsync(options, cancellationToken);
+        var testCasesBySubject = testSuite.TestCasesBySubject;
 
         // result
         var elapsedTime = SR.GetElapsedTime(timestamp_runStart);
@@ -234,6 +146,129 @@ public static class FUnit
             }
 
             return failedTestCases.Count;
+        }
+    }
+
+
+    public class TestSuite
+    {
+        public event Action? TestRunStarting;
+        public event Action<string>? SubjectStarting;
+        public event Action<TestCase>? TestCaseSkipped;
+
+        internal IReadOnlyDictionary<string, List<TestCase>> TestCasesBySubject { get; }
+        private readonly List<FailedTestCase> _failedTestCases;
+
+        internal TestSuite(Action<Descriptor> builder)
+        {
+            var testCasesBySubject = new Dictionary<string, List<TestCase>>(InitialSubjectMapCapacity);
+            var failedTestCases = new List<FailedTestCase>();
+
+            TestCasesBySubject = testCasesBySubject;
+            _failedTestCases = failedTestCases;
+
+            // aggregate test cases
+            {
+                // 'describe' may contain error
+                try
+                {
+                    // collect subjects
+                    builder.Invoke((subjectDesc, it) =>
+                    {
+                        // 'it' may contain error
+                        try
+                        {
+                            if (!testCasesBySubject.TryGetValue(subjectDesc, out var testCases))
+                            {
+                                testCases = new(InitialTestCaseListCapacity);
+                                testCasesBySubject[subjectDesc] = testCases;
+                            }
+
+                            // run 'it' (case aggregator) to collect test cases
+                            it.Invoke((testCaseDesc, testCaseFunc) =>
+                            {
+                                testCases.Add(new(subjectDesc, testCaseDesc, testCaseFunc));
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            failedTestCases.Add(
+                                new(nameof(FUnit), $"{nameof(FUnit)} got error from outside of 'it' scope", ex, IsSystemError: true));
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    failedTestCases.Add(
+                        new(nameof(FUnit), $"{nameof(FUnit)} got error from outside of 'describe' scope", ex, IsSystemError: true));
+                }
+            }
+        }
+
+        public async Task<(List<FailedTestCase> failed, List<TestCase> skipped)> ExecuteAsync(
+            CommandLineOptions options,
+            CancellationToken cancellationToken)
+        {
+            var failedTestCases = new List<FailedTestCase>(_failedTestCases);
+            var skippedTestCases = new List<TestCase>();
+            TestRunStarting?.Invoke();
+
+            // run tests
+            {
+                // TODO: ready to run tests simultaneously but functionality is not tested
+                int concurrencyLevel = options.ConcurrencyLevel;
+                var activeTasks = new List<Task<FailedTestCase?>>(capacity: concurrencyLevel);
+
+                foreach (var (testSubject, testCases) in TestCasesBySubject.Where(x => x.Value.Count != 0))
+                {
+                    SubjectStarting?.Invoke(testSubject);
+
+                    int currentCaseIndex = 0;
+
+                CONSUME_QUEUE:
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        skippedTestCases.AddRange(testCases.Skip(currentCaseIndex));
+                        continue;  // collect all skipped test cases
+                    }
+
+                    while (currentCaseIndex < testCases.Count && activeTasks.Count < concurrencyLevel)
+                    {
+                        var task = Task.Run(testCases[currentCaseIndex].ExecuteAsync);
+                        currentCaseIndex++;
+
+                        activeTasks.Add(task);
+                    }
+
+                    if (activeTasks.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    _ = await Task.WhenAll(activeTasks);
+
+                    failedTestCases.AddRange(
+                        activeTasks
+                            .Where(x => x.Result != null)
+                            .Select(x => x.Result)
+                            .OfType<FailedTestCase>()
+                            );
+
+                    activeTasks.Clear();
+
+                    goto CONSUME_QUEUE;
+                }
+
+                if (skippedTestCases.Count > 0)
+                {
+                    foreach (var skipped in skippedTestCases)
+                    {
+                        TestCaseSkipped?.Invoke(skipped);
+                    }
+                }
+            }
+
+            return (failedTestCases, skippedTestCases);
         }
     }
 
