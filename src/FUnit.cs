@@ -63,8 +63,6 @@ public static partial class FUnit
     /// <returns>The number of failed test cases if not canceled, otherwise a negative number that is the bitwise complement of the failed test case count.</returns>
     public static async ValueTask<int> RunAsync(string[] args, Action<Descriptor> builder, CancellationToken cancellationToken = default)
     {
-        var timestamp_runStart = Stopwatch.GetTimestamp();
-
         // always clear!!
         Result = null;
 
@@ -83,43 +81,23 @@ public static partial class FUnit
             ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} [{skipped.subject}] {skipped.description}");
         };
 
-        var (failedTestCases, skippedTestCases) = await testSuite.ExecuteAsync(options, cancellationToken);
-        var testCasesBySubject = testSuite.TestCasesBySubject;
-
-        // result
-        var elapsedTime = SR.GetElapsedTime(timestamp_runStart);
-
-        var result = new Dictionary<TestResult.Subject, IReadOnlyList<TestResult.Test>>(testCasesBySubject.Count);
-        foreach (var (subjectTitle, testCases) in testCasesBySubject)
-        {
-            var subject = new TestResult.Subject(subjectTitle);
-            var tests = new List<TestResult.Test>(testCases.Count);
-
-            result[subject] = tests;
-
-            foreach (var tc in testCases)
-            {
-                TestResult.Error? error = null;
-
-                var failedCase = failedTestCases.FirstOrDefault(x => x.TestSubject == tc.Subject && x.Description == tc.Description);
-                if (failedCase != null)
-                {
-                    var e = failedCase.Error;
-                    error = new(e.Message, e.StackTrace, IsFUnitError: failedCase.IsSystemError);
-                }
-
-                tests.Add(new(tc.Description, tc.ExecutionCount, error));
-            }
-        }
-
-        Result = new(options, elapsedTime, result);
+        Result = await testSuite.ExecuteAsync(options, cancellationToken);
 
         // finish up
-        var totalTestCaseCount = testCasesBySubject.Sum(x => x.Value.Count);
+        var totalTestCaseCount = Result.TestsBySubject.Sum(x => x.Value.Count);
+        var failedTestCases = Result.TestsBySubject
+            .SelectMany(x => x.Value)
+            .Where(x => x.Errors is { Count: > 0 })
+            .ToList();
+        var skippedTestCases = Result.TestsBySubject
+            .SelectMany(x => x.Value)
+            .Where(x => x.ExecutionCount == 0)
+            .ToList();
+
         ConsoleLogger.LogInfo();
         ConsoleLogger.LogInfo("## Test Summary");
-        ConsoleLogger.LogInfo($"Options:  {options}  ");
-        ConsoleLogger.LogInfo($"Duration: {elapsedTime.ToString(TimeSpanFormat)}  ");
+        ConsoleLogger.LogInfo($"Options:  {Result.Options}  ");
+        ConsoleLogger.LogInfo($"Duration: {Result.TotalExecutionTime.ToString(TimeSpanFormat)}  ");
         if (skippedTestCases.Count > 0)
         {
             ConsoleLogger.LogFailed($"{SR.MarkdownFailed} Total {skippedTestCases.Count} tests canceled");
@@ -134,14 +112,20 @@ public static partial class FUnit
             }
             else
             {
-                int failedCountExceptForSystemError = failedTestCases.Count(x => !x.IsSystemError);
+                var failedCountExceptForSystemError = failedTestCases
+                    .Count(x => x.Errors?.Any(e => !e.IsFUnitError) ?? false);
 
                 ConsoleLogger.LogPassed($"Passed: {totalTestCaseCount - failedCountExceptForSystemError} ({totalTestCaseCount})  ");
                 ConsoleLogger.LogFailed($"Failed: {failedTestCases.Count}  ");
 
-                foreach (var detail in failedTestCases)
+                foreach (var failed in failedTestCases)
                 {
-                    ConsoleLogger.LogFailedTestCase($"{SR.MarkdownFailed} [{detail.TestSubject}] ", detail, SR.AnsiColorFailed);
+                    var error = failed.Errors?.FirstOrDefault();
+                    if (error is not null)
+                    {
+                        var message = error.Message;
+                        ConsoleLogger.LogFailed($"    {SR.MarkdownFailed} {message}");
+                    }
                 }
             }
 
@@ -205,10 +189,11 @@ public static partial class FUnit
             }
         }
 
-        public async Task<(List<FailedTestCase> failed, List<TestCase> skipped)> ExecuteAsync(
+        public async Task<TestResult> ExecuteAsync(
             CommandLineOptions options,
             CancellationToken cancellationToken)
         {
+            var timestamp_runStart = Stopwatch.GetTimestamp();
             var failedTestCases = new List<FailedTestCase>(_failedTestCases);
             var skippedTestCases = new List<TestCase>();
             TestRunStarting?.Invoke();
@@ -268,7 +253,33 @@ public static partial class FUnit
                 }
             }
 
-            return (failedTestCases, skippedTestCases);
+            var elapsedTime = SR.GetElapsedTime(timestamp_runStart);
+            var result = new Dictionary<TestResult.Subject, IReadOnlyList<TestResult.Test>>(TestCasesBySubject.Count);
+            foreach (var (subjectTitle, testCases) in TestCasesBySubject)
+            {
+                var subject = new TestResult.Subject(subjectTitle);
+                var tests = new List<TestResult.Test>(testCases.Count);
+
+                result[subject] = tests;
+
+                foreach (var tc in testCases)
+                {
+                    List<TestResult.Error>? errors = null;
+
+                    var failedCases = failedTestCases.Where(x => x.TestSubject == tc.Subject && x.Description == tc.Description).ToList();
+                    if (failedCases.Count > 0)
+                    {
+                        errors = failedCases.Select(failedCase =>
+                        {
+                            var e = failedCase.Error;
+                            return new TestResult.Error(e.Message, e.StackTrace, IsFUnitError: failedCase.IsSystemError);
+                        }).ToList();
+                    }
+
+                    tests.Add(new(tc.Description, tc.ExecutionCount, errors));
+                }
+            }
+            return new TestResult(options, elapsedTime, result);
         }
     }
 
@@ -300,8 +311,8 @@ public static partial class FUnit
         /// </summary>
         /// <param name="Description">The description of the test case.</param>
         /// <param name="ExecutionCount">The number of times the test case was executed.</param>
-        /// <param name="Error">The error that occurred during the test case execution, if any.</param>
-        public sealed record Test(string Description, int ExecutionCount, Error? Error) { }
+        /// <param name="Errors">The errors that occurred during the test case execution, if any.</param>
+        public sealed record Test(string Description, int ExecutionCount, IReadOnlyList<Error>? Errors) { }
 
 
         /// <summary>
@@ -362,23 +373,26 @@ public static partial class FUnit
 
                 foreach (var test in tests)
                 {
-                    var error = test.Error;
+                    var errors = test.Errors;
 
                     var prefix = test.ExecutionCount == 0
                         ? "- [ ] *NOT EXECUTED*:"
-                        : error == null
+                        : (errors is null || errors.Count == 0)
                             ? $"- [x]{passedColorTag}"
                             : $"- [ ]{failedColorTag}"
                             ;
 
                     _ = sb.AppendLine($"  {prefix} {test.Description}{colorResetTag}");
 
-                    if (error != null)
+                    if (errors is not null)
                     {
-                        // always!!
-                        var message = error.Message.Replace("\n", $"\n{new string(' ', SR.IndentationAdjustment)}", StringComparison.Ordinal);
+                        foreach (var error in errors)
+                        {
+                            // always!!
+                            var message = error.Message.Replace("\n", $"\n{new string(' ', SR.IndentationAdjustment)}", StringComparison.Ordinal);
 
-                        _ = sb.AppendLine($"    {failedColorTag}--> {message}{colorResetTag}");
+                            _ = sb.AppendLine($"    {failedColorTag}--> {message}{colorResetTag}");
+                        }
                     }
                 }
             }
