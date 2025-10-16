@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace FUnitImpl
@@ -12,12 +12,12 @@ namespace FUnitImpl
     /// <param name="ConcurrencyLevel">Maximum number of tests run simultaneously in each test subject.</param>
     /// <param name="Verbosity">The verbosity level of the test output.</param>
     /// <param name="BuildConfiguration">The build configuration (e.g., "Debug" or "Release").</param>
-    /// <param name="Times">The number of times to run the tests.</param>
+    /// <param name="Iterations">The number of times to run each test case.</param>
     internal sealed record CommandLineOptions(
         int ConcurrencyLevel = 1,
         Verbosity Verbosity = Verbosity.Normal,
         string BuildConfiguration = "Debug",
-        int Times = 3
+        int Iterations = 3
     )
     {
         // NOTE: BuildConfiguration should be hidden from log because it may be different from
@@ -33,25 +33,25 @@ namespace FUnitImpl
             {
                 if (value <= 0)
                 {
-                    throw new ArgumentOutOfRangeException($"'{nameof(this.ConcurrencyLevel)}' must be greater than 0: {value}");
+                    throw new ArgumentOutOfRangeException(nameof(this.ConcurrencyLevel), $"Argument must be greater than 0: {value}");
                 }
 
                 this.b_concurrencyLevel = value;
             }
         }
 
-        private int b_times = Times;
-        public int Times
+        private int b_iterations = Iterations;
+        public int Iterations
         {
-            get => this.b_times;
+            get => this.b_iterations;
             private set
             {
                 if (value <= 0)
                 {
-                    throw new ArgumentOutOfRangeException($"'{nameof(this.Times)}' must be greater than 0: {value}");
+                    throw new ArgumentOutOfRangeException(nameof(this.Iterations), $"Argument must be greater than 0: {value}");
                 }
 
-                this.b_times = value;
+                this.b_iterations = value;
             }
         }
 
@@ -69,14 +69,14 @@ namespace FUnitImpl
             {
                 switch (args[i])
                 {
-                    case SR.Flag_Times:
+                    case SR.Flag_Iterations:
                         {
                             i++;
                             if (i < args.Length)
                             {
-                                if (int.TryParse(args[i], out var times))
+                                if (int.TryParse(args[i], out var iterations))
                                 {
-                                    ret.Times = times;
+                                    ret.Iterations = iterations;
                                     continue;
                                 }
                             }

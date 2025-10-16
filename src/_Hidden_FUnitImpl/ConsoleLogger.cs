@@ -12,11 +12,11 @@ namespace FUnitImpl
         /// <summary>
         /// Gets or sets a value indicating whether markdown output is enabled.
         /// </summary>
-        public static bool EnableMarkdownOutput { get; set; } = false;
+        public static bool EnableMarkdownOutput { get; set; }
 
 #pragma warning disable SYSLIB1045 // Use GeneratedRegexAttribute to generate the regular expression implementation at compile time.
         private static readonly Regex re_markdownUnorderedList = new(
-            @"(^(>[ ]+)?[ ]*([\*\-+]?([ ]+\[[ x]\])?)?[ ]+)|(^(>[ ]+))",
+            @"(^(>[ ]+)?[ ]*([\*\-+]?([ ]+\[[ x]\])?)?[ ]+)|(^(>[ ]+(\[\![^\]]+\]([^\n]*\n)?)?))",
             RegexOptions.Compiled);
 
         private static readonly Regex re_markdownQuoteAwareTagCloser = new(
@@ -67,7 +67,7 @@ namespace FUnitImpl
 
             // fix for markdown
             int numTrailingSpaces = 0;
-            if (message != null)
+            if (message != null && EnableMarkdownOutput)
             {
                 numTrailingSpaces = message.Length - message.TrimEnd(' ').Length;
                 if (numTrailingSpaces > 0)
@@ -83,8 +83,10 @@ namespace FUnitImpl
                 }
             }
 
+            bool writeColor = ansiColor != null && message?.Length is > 0;
+
             // write color
-            if (ansiColor != null)
+            if (writeColor)
             {
                 if (!EnableMarkdownOutput)
                 {
@@ -108,7 +110,7 @@ namespace FUnitImpl
             }
 
             // reset color
-            if (ansiColor != null)
+            if (writeColor)
             {
                 if (!EnableMarkdownOutput)
                 {
@@ -181,21 +183,6 @@ namespace FUnitImpl
             lock (sync)
             {
                 Color(SR.AnsiColorFailed, message);
-                NewLine();
-            }
-        }
-
-        /// <summary>
-        /// Logs details of a failed test case to the console.
-        /// </summary>
-        /// <param name="prefix">A prefix to prepend to the log message.</param>
-        /// <param name="detail">The <see cref="FailedTestCase"/> object containing details of the failure.</param>
-        /// <param name="ansiColor">Optional ANSI color code to apply to the message.</param>
-        public static void LogFailedTestCase(string prefix, FailedTestCase detail, string? ansiColor = null)
-        {
-            lock (sync)
-            {
-                Color(ansiColor, $"{prefix}{detail.Description} - {detail.Error.Message}");
                 NewLine();
             }
         }
