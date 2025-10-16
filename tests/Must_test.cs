@@ -35,6 +35,34 @@ return FUnit.Run(args, describe =>
         });
     });
 
+    describe("Must.NotBeEqual", it =>
+    {
+        it("should assert inequality for value types", () =>
+        {
+            Must.NotBeEqual(1, 2);
+            Must.NotBeEqual("hello", "world");
+            Must.NotBeEqual(true, false);
+        });
+
+        it("should throw FUnitException for equality of value types", () =>
+        {
+            string actualString = "hello";
+            Must.Throw<FUnitException>("Expected not to be \"hello\", but was \"hello\". (actualString)", () => Must.NotBeEqual("hello", actualString));
+            Must.Throw<FUnitException>("Expected not to be '1', but was '1'. (1)", () => Must.NotBeEqual(1, 1));
+            Must.Throw<FUnitException>("Expected not to be 'True', but was 'True'. (true)", () => Must.NotBeEqual(true, true));
+        });
+
+        it("should throw FUnitException with generic message for string equality when newlines are present", () =>
+        {
+            Must.Throw<FUnitException>("Expected and actual strings are equal.", () => Must.NotBeEqual("hello\nworld", "hello\nworld"));
+        });
+
+        it("should throw Exception for ambiguous comparisons of IEnumerable", () =>
+        {
+            Must.Throw<FUnitException>("Ambiguous comparisons are not permitted in tests. Use 'HaveSameSequence' or 'BeSameReference' instead.", () => Must.NotBeEqual(new List<int> { 1 }, new List<int> { 2 }));
+        });
+    });
+
     describe("Must.BeSameReference", it =>
     {
         it("should assert reference equality", () =>
@@ -49,6 +77,22 @@ return FUnit.Run(args, describe =>
             object obj1 = new object();
             object obj2 = new object();
             Must.Throw<FUnitException>("Expected both references to point to the same object, but found different instances.", () => Must.BeSameReference(obj1, obj2));
+        });
+    });
+
+    describe("Must.NotBeSameReference", it =>
+    {
+        it("should assert reference inequality", () =>
+        {
+            object obj1 = new object();
+            object obj2 = new object();
+            Must.NotBeSameReference(obj1, obj2);
+        });
+
+        it("should throw FUnitException for reference equality", () =>
+        {
+            object obj1 = new object();
+            Must.Throw<FUnitException>("Expected references to point to different objects, but both pointed to the same instance.", () => Must.NotBeSameReference(obj1, obj1));
         });
     });
 
@@ -69,6 +113,22 @@ return FUnit.Run(args, describe =>
         });
     });
 
+    describe("Must.NotHaveSameSequence", it =>
+    {
+        it("should assert sequence inequality", () =>
+        {
+            Must.NotHaveSameSequence(new List<int> { 1, 2, 3 }, new List<int> { 1, 3, 2 });
+            Must.NotHaveSameSequence(new string[] { "a", "b" }, new string[] { "b", "a" });
+            Must.NotHaveSameSequence(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 });
+        });
+
+        it("should throw FUnitException for sequence equality", () =>
+        {
+            Must.Throw<FUnitException>("Expected collections to not be equal in order.", () => Must.NotHaveSameSequence(new List<int> { 1, 2, 3 }, new List<int> { 1, 2, 3 }));
+            Must.Throw<FUnitException>("Expected collections to not be equal in order.", () => Must.NotHaveSameSequence(new string[] { "a", "b" }, new string[] { "a", "b" }));
+        });
+    });
+
     describe("Must.HaveSameUnorderedElements", it =>
     {
         it("should assert unordered sequence equality", () =>
@@ -85,6 +145,22 @@ return FUnit.Run(args, describe =>
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 1, 2 }));
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1 }, new List<int> { 1, 1 }));
             Must.Throw<FUnitException>("Expected collections to be equal ignoring order.", () => Must.HaveSameUnorderedElements(new List<int> { 1, 1 }, new List<int> { 1 }));
+        });
+    });
+
+    describe("Must.NotHaveSameUnorderedElements", it =>
+    {
+        it("should assert unordered sequence inequality", () =>
+        {
+            Must.NotHaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 1, 2, 4 });
+            Must.NotHaveSameUnorderedElements(new string[] { "a", "b" }, new string[] { "a", "c" });
+            Must.NotHaveSameUnorderedElements(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 });
+        });
+
+        it("should throw FUnitException for unordered sequence equality", () =>
+        {
+            Must.Throw<FUnitException>("Expected collections to not be equal ignoring order.", () => Must.NotHaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 3, 1, 2 }));
+            Must.Throw<FUnitException>("Expected collections to not be equal ignoring order.", () => Must.NotHaveSameUnorderedElements(new string[] { "a", "b" }, new string[] { "b", "a" }));
         });
     });
 
@@ -127,7 +203,7 @@ return FUnit.Run(args, describe =>
         });
     });
 
-    describe("Must.Throw", it =>
+    describe("Must.Throw<T>", it =>
     {
         it("should assert that a specific exception is thrown", () =>
         {
@@ -152,6 +228,39 @@ return FUnit.Run(args, describe =>
         it("should throw FUnitException when a general Exception type is specified for Throw<T>", () =>
         {
             Must.Throw<FUnitException>("An explicit exception type must be specified.", () => Must.Throw<Exception>("General exception", () => throw new Exception("General exception")));
+        });
+    });
+
+    describe("Must.Throw", it =>
+    {
+        it("should assert that a specific exception is thrown using non-generic Throw", () =>
+        {
+            Must.Throw("System.InvalidOperationException", "Test exception", () => throw new InvalidOperationException("Test exception"));
+        });
+
+        it("should throw FUnitException if type name is invalid for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Could not find exception type 'Invalid.Type.Name'.", () => Must.Throw("Invalid.Type.Name", null, () => { }));
+        });
+
+        it("should throw FUnitException if type name is not an exception for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Type 'System.String' is not an exception type.", () => Must.Throw("System.String", null, () => { }));
+        });
+
+        it("should throw FUnitException if no exception is thrown for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got none.", () => Must.Throw("System.ArgumentNullException", null, () => { /* no exception */ }));
+        });
+
+        it("should throw FUnitException if a different exception type is thrown for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got 'InvalidOperationException'.", () => Must.Throw("System.ArgumentNullException", null, () => throw new InvalidOperationException()));
+        });
+
+        it("should throw FUnitException if the error message does not match for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected error message to be \"Expected message\", but was \"Wrong message\".", () => Must.Throw("System.InvalidOperationException", "Expected message", () => throw new InvalidOperationException("Wrong message")));
         });
     });
 

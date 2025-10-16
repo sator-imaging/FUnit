@@ -3,13 +3,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 #pragma warning disable CA1050 // Declare types in namespaces
 /// <summary>
 /// Provides a set of assertion methods for FUnit tests.
 /// </summary>
-public static class Must
+public static partial class Must
 #pragma warning restore CA1050
 {
     private const string INDENT = "  ";
@@ -57,6 +58,46 @@ public static class Must
     }
 
     /// <summary>
+    /// Asserts that two objects are not equal. For collections, use <see cref="NotHaveSameSequence{T}"/> or <see cref="NotBeSameReference"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the objects to compare.</typeparam>
+    /// <param name="expected">The expected value.</param>
+    /// <param name="actual">The actual value.</param>
+    /// <param name="actualExpr">The expression of the actual value, used for error reporting.</param>
+    public static void NotBeEqual<T>(T expected, T actual, [CallerArgumentExpression(nameof(actual))] string? actualExpr = null)
+    {
+        if (typeof(T) != typeof(string) && typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+        {
+            throw new FUnitException(
+                $"Ambiguous comparisons are not permitted in tests. Use '{nameof(HaveSameSequence)}' or '{nameof(BeSameReference)}' instead."
+                );
+        }
+
+        actualExpr = string.IsNullOrWhiteSpace(actualExpr)
+            ? null
+            : $" ({actualExpr})";
+
+        if (typeof(T) == typeof(string))
+        {
+            if (EqualityComparer<T>.Default.Equals(actual, expected))
+            {
+                throw new FUnitException(
+                    ((actual as string)?.Contains('\n') == true || (expected as string)?.Contains('\n') == true)
+                        ? $"Expected and actual strings are equal."
+                        : $"Expected not to be {(expected == null ? NULL : $"\"{expected}\"")}, but was {(actual == null ? NULL : $"\"{actual}\"")}.{actualExpr}"
+                    );
+            }
+        }
+        else
+        {
+            if (EqualityComparer<T>.Default.Equals(actual, expected))
+            {
+                throw new FUnitException($"Expected not to be '{expected?.ToString() ?? NULL}', but was '{actual?.ToString() ?? NULL}'.{actualExpr}");
+            }
+        }
+    }
+
+    /// <summary>
     /// Asserts that two object references point to the same instance.
     /// </summary>
     /// <param name="expected">The expected object instance.</param>
@@ -66,6 +107,19 @@ public static class Must
         if (!ReferenceEquals(actual, expected))
         {
             throw new FUnitException($"Expected both references to point to the same object, but found different instances.");
+        }
+    }
+
+    /// <summary>
+    /// Asserts that two object references do not point to the same instance.
+    /// </summary>
+    /// <param name="expected">The expected object instance.</param>
+    /// <param name="actual">The actual object instance.</param>
+    public static void NotBeSameReference(object expected, object actual)
+    {
+        if (ReferenceEquals(actual, expected))
+        {
+            throw new FUnitException($"Expected references to point to different objects, but both pointed to the same instance.");
         }
     }
 
@@ -99,6 +153,24 @@ public static class Must
         {
             throw new FUnitException(
 $@"Expected collections to be equal in order.
+{INDENT}Expected: [{string.Join(", ", expected.Select(x => x?.ToString() ?? NULL))}]
+{INDENT}Actual:   [{string.Join(", ", actual.Select(x => x?.ToString() ?? NULL))}]"
+                );
+        }
+    }
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(IEnumerable<T> expected, IEnumerable<T> actual)
+    {
+        if (expected.SequenceEqual(actual))
+        {
+            throw new FUnitException(
+$@"Expected collections to not be equal in order.
 {INDENT}Expected: [{string.Join(", ", expected.Select(x => x?.ToString() ?? NULL))}]
 {INDENT}Actual:   [{string.Join(", ", actual.Select(x => x?.ToString() ?? NULL))}]"
                 );
@@ -140,6 +212,45 @@ $@"Expected collections to be equal ignoring order.
 {INDENT}Expected: [{string.Join(", ", expected.Select(x => x?.ToString() ?? NULL))}]
 {INDENT}Actual:   [{string.Join(", ", actual.Select(x => x?.ToString() ?? NULL))}]"
             );
+    }
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(IEnumerable<T> expected, IEnumerable<T> actual)
+    {
+        if (expected.Count() != actual.Count())
+        {
+            goto EXIT;
+        }
+        else
+        {
+            var checkList = new List<T>(expected);
+            foreach (var x in actual)
+            {
+                if (!checkList.Remove(x))
+                {
+                    goto EXIT;
+                }
+            }
+
+            if (checkList.Count != 0)
+            {
+                goto EXIT;
+            }
+        }
+
+        throw new FUnitException(
+$@"Expected collections to not be equal ignoring order.
+{INDENT}Expected: [{string.Join(", ", expected.Select(x => x?.ToString() ?? NULL))}]
+{INDENT}Actual:   [{string.Join(", ", actual.Select(x => x?.ToString() ?? NULL))}]"
+            );
+
+    EXIT:
+        ;
     }
 
 
@@ -198,6 +309,13 @@ $@"Expected collections to be equal ignoring order.
         }
         catch (Exception error)
         {
+            // unwrap inner exception
+            if (error is AggregateException aggregate &&
+                aggregate.InnerExceptions.Count == 1)
+            {
+                error = aggregate.InnerExceptions[0];
+            }
+
             string actualMessage = error.Message;
 
             if (error.GetType() != typeof(TException))
@@ -227,5 +345,45 @@ $@"Expected collections to be equal ignoring order.
         }
 
         throw new FUnitException($@"Expected exception of type '{typeof(TException).Name}', but got none.");
+    }
+
+
+    static MethodInfo? method_ThrowT;
+
+    /// <summary>
+    /// Asserts that a specific type of exception is thrown by an action.
+    /// </summary>
+    /// <param name="fullTypeName">The full name of the expected exception type (e.g., "System.InvalidOperationException").</param>
+    /// <param name="expectedMessage">The expected exception message. If null or empty, the message is not checked.</param>
+    /// <param name="test">The action to execute that is expected to throw an exception.</param>
+    public static void Throw(string fullTypeName, string? expectedMessage, Action test)
+    {
+        var exceptionType = Type.GetType(fullTypeName)
+            ?? throw new FUnitException($"Could not find exception type '{fullTypeName}'.");
+
+        if (!typeof(Exception).IsAssignableFrom(exceptionType))
+        {
+            throw new FUnitException($"Type '{fullTypeName}' is not an exception type.");
+        }
+
+        // Use reflection to call the generic Throw<TException> method
+        method_ThrowT ??= typeof(Must).GetMethod(nameof(Throw), genericParameterCount: 1, new[] { typeof(string), typeof(Action) });
+        var genericMethod = method_ThrowT?.MakeGenericMethod(exceptionType)
+            ?? throw new FUnitException("[SYSTEM ERROR] must not be reached");
+
+        try
+        {
+            genericMethod.Invoke(null, new object?[] { expectedMessage, test });
+        }
+        catch (TargetInvocationException ex)
+        {
+            // Unwrap the inner exception thrown by the invoked method
+            if (ex.InnerException != null)
+            {
+                throw ex.InnerException;
+            }
+
+            throw;
+        }
     }
 }
