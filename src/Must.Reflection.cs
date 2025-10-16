@@ -154,12 +154,12 @@ partial class Must
                 // check keys separately for better error message
                 foreach (var key in expectedMap.Keys)
                 {
-                    BeTrue(actualMap.ContainsKey(key), $"{memberFullPath} has key: {key}");
+                    BeTrue(actualMap.ContainsKey(key), $"{memberFullPath} has required key: {key}");
                 }
                 // actual should not have key that is not in expected
                 foreach (var key in actualMap.Keys)
                 {
-                    BeTrue(expectedMap.ContainsKey(key), $"{memberFullPath} doesn't have key: {key}");
+                    BeTrue(expectedMap.ContainsKey(key), $"{memberFullPath} doesn't have unnecessary key: {key}");
                 }
 
                 // both dictionary keys are checked so don't need to check count.
@@ -191,7 +191,7 @@ partial class Must
                     actualList.Add(x);
                 }
 
-                BeTrue(expectedList.Count == actualList.Count, $"{expectedList.Count} items in {memberFullPath}");
+                BeTrue(expectedList.Count == actualList.Count, $"{memberFullPath} has {expectedList.Count} items");
 
                 for (int i = 0, count = Math.Min(expectedList.Count, actualList.Count); i < count; i++)
                 {

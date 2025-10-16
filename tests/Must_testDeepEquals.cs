@@ -26,7 +26,7 @@ return FUnit.Run(args, describe =>
         it("should pass when properties are equal and one is skipped", () =>
         {
             var expected = new Wrapper<TestClass>(new TestClass { Id = 1, Name = "Test" });
-            var actual = new Wrapper<TestClass>(new TestClass { Id = 2, Name = "Test" });
+            var actual = new Wrapper<TestClass>(new TestClass { Id = 999, Name = "Test" });
             Must.HaveEqualProperties(expected, actual, new[] { "Id" });
         });
 
@@ -71,7 +71,7 @@ return FUnit.Run(args, describe =>
             actual.Data.MapPrp.Add("key1", 1);
             actual.Data.MapPrp.Add("key2", 2);
             actual.Data.MapPrp.Add("unnecessary", 310);
-            Must.Throw<FUnitException>("Expected condition '$.Data.MapPrp doesn't have key: unnecessary' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
+            Must.Throw<FUnitException>("Expected condition '$.Data.MapPrp doesn't have unnecessary key: unnecessary' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
         });
 
         it("should throw when MapPrp doesn't have necessary key", () =>
@@ -83,7 +83,7 @@ return FUnit.Run(args, describe =>
             var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
             actual.Data.MapPrp.Add("key1", 1);
             actual.Data.MapPrp.Add("key2", 2);
-            Must.Throw<FUnitException>("Expected condition '$.Data.MapPrp has key: required' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
+            Must.Throw<FUnitException>("Expected condition '$.Data.MapPrp has required key: required' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
         });
 
         it("should pass when ListPrp values are equal", () =>
@@ -115,7 +115,7 @@ return FUnit.Run(args, describe =>
             expected.Data.ListPrp.Add(2);
             var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
             actual.Data.ListPrp.Add(1);
-            Must.Throw<FUnitException>("Expected condition '2 items in $.Data.ListPrp' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
+            Must.Throw<FUnitException>("Expected condition '$.Data.ListPrp has 2 items' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
         });
 
         it("should pass when ArrayPrp values are equal", () =>
@@ -142,7 +142,7 @@ return FUnit.Run(args, describe =>
             expected.Data.ArrayPrp = new int[] { 1, 2 };
             var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
             actual.Data.ArrayPrp = new int[] { 1 };
-            Must.Throw<FUnitException>("Expected condition '2 items in $.Data.ArrayPrp' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
+            Must.Throw<FUnitException>("Expected condition '$.Data.ArrayPrp has 2 items' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
         });
     });
 
@@ -165,7 +165,7 @@ return FUnit.Run(args, describe =>
         it("should pass when fields are equal and one is skipped", () =>
         {
             var expected = new Wrapper<TestStruct>(new TestStruct { Value = 10 });
-            var actual = new Wrapper<TestStruct>(new TestStruct { Value = 20 });
+            var actual = new Wrapper<TestStruct>(new TestStruct { Value = 9999 });
             Must.HaveEqualFields(expected, actual, new[] { "Value" });
         });
 
@@ -210,7 +210,7 @@ return FUnit.Run(args, describe =>
             actual.Data.MapFld.Add("key1", 1);
             actual.Data.MapFld.Add("key2", 2);
             actual.Data.MapFld.Add("unnecessary", 310);
-            Must.Throw<FUnitException>("Expected condition '$.m_data.MapFld doesn't have key: unnecessary' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
+            Must.Throw<FUnitException>("Expected condition '$.m_data.MapFld doesn't have unnecessary key: unnecessary' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
         });
 
         it("should throw when MapFld doesn't have necessary key", () =>
@@ -222,7 +222,7 @@ return FUnit.Run(args, describe =>
             var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
             actual.Data.MapFld.Add("key1", 1);
             actual.Data.MapFld.Add("key2", 2);
-            Must.Throw<FUnitException>("Expected condition '$.m_data.MapFld has key: required' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
+            Must.Throw<FUnitException>("Expected condition '$.m_data.MapFld has required key: required' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
         });
 
         it("should pass when ListFld values are equal", () =>
@@ -254,7 +254,7 @@ return FUnit.Run(args, describe =>
             expected.Data.ListFld.Add(2);
             var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
             actual.Data.ListFld.Add(1);
-            Must.Throw<FUnitException>("Expected condition '2 items in $.m_data.ListFld' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
+            Must.Throw<FUnitException>("Expected condition '$.m_data.ListFld has 2 items' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
         });
 
         it("should pass when ArrayFld values are equal", () =>
@@ -281,7 +281,7 @@ return FUnit.Run(args, describe =>
             expected.Data.ArrayFld = new int[] { 1, 2 };
             var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
             actual.Data.ArrayFld = new int[] { 1 };
-            Must.Throw<FUnitException>("Expected condition '2 items in $.m_data.ArrayFld' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
+            Must.Throw<FUnitException>("Expected condition '$.m_data.ArrayFld has 2 items' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
         });
     });
 });

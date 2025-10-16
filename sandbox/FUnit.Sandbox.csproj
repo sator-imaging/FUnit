@@ -8,11 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../src/FUnit.csproj" />
-
     <!--
-    <PackageReference Include="FUnit" Version="0.1.0-rc.3" />
+    <ProjectReference Include="../src/FUnit.csproj" />
     -->
+    <Reference Include="FUnit">
+      <HintPath>../src/bin/$(Configuration)/$(TargetFramework)/FUnit.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
