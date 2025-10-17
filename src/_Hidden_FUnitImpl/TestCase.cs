@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,10 +42,15 @@ namespace FUnitImpl
         /// <summary>
         /// Executes the test case asynchronously.
         /// </summary>
-        /// <returns>A <see cref="FailedTestCase"/> if the test fails, otherwise null.</returns>
-        public async Task<FailedTestCase?> ExecuteAsync()
+        /// <returns>An <see cref="Exception"/> if the test fails, otherwise null.</returns>
+        public async Task<Exception?> ExecuteAsync(CancellationToken cancellationToke = default)
         {
-            FailedTestCase? failedCase = null;
+            if (cancellationToke.IsCancellationRequested)
+            {
+                return null;
+            }
+
+            Exception? error = null;
 
             try
             {
@@ -61,6 +66,25 @@ namespace FUnitImpl
                     case Action test:          { test.Invoke(); break; }
                     case Func<Task> test:      { result = test.Invoke(); break; }
                     case Func<ValueTask> test: { result = test.Invoke(); break; }
+                    // to allow assignment only test --> () => x = 310;
+                    case Func<byte> test:      { test.Invoke(); break; }
+                    case Func<sbyte> test:     { test.Invoke(); break; }
+                    case Func<short> test:     { test.Invoke(); break; }
+                    case Func<ushort> test:    { test.Invoke(); break; }
+                    case Func<int> test:       { test.Invoke(); break; }
+                    case Func<uint> test:      { test.Invoke(); break; }
+                    case Func<long> test:      { test.Invoke(); break; }
+                    case Func<ulong> test:     { test.Invoke(); break; }
+                    case Func<float> test:     { test.Invoke(); break; }
+                    case Func<double> test:    { test.Invoke(); break; }
+                    case Func<decimal> test:   { test.Invoke(); break; }
+                    case Func<nint> test:      { test.Invoke(); break; }
+                    case Func<nuint> test:     { test.Invoke(); break; }
+                    case Func<TimeSpan> test:  { test.Invoke(); break; }
+                    case Func<DateTime> test:  { test.Invoke(); break; }
+                    case Func<DateTimeOffset> test: { test.Invoke(); break; }
+                    case Func<Guid> test:      { test.Invoke(); break; }
+                    case Func<object> test:    { test.Invoke(); break; }
 #pragma warning restore IDE2001
 #pragma warning restore CA2012
 #pragma warning restore format
@@ -90,16 +114,13 @@ namespace FUnitImpl
                 {
                     await valueTask;
                 }
-
-                ConsoleLogger.LogPassed($"  {SR.MarkdownPassed} {this.Description}");
             }
             catch (Exception ex)
             {
-                failedCase = new FailedTestCase(this.Subject, this.Description, ex);
-                ConsoleLogger.LogFailedTestCase($"  {SR.MarkdownFailed} ", failedCase, SR.AnsiColorFailed);
+                error = ex;
             }
 
-            return failedCase;
+            return error;
         }
     }
 }

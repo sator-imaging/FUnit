@@ -16,7 +16,7 @@ Must.NotContainText(FUnit.Result?.ToString() ?? throw new Exception(), NotExecut
 
 string firstTestMessage;
 {
-    using var cts = new CancellationTokenSource(AsyncTestDelayMilliseconds / 10);
+    using var cts = new CancellationTokenSource(AsyncTestDelayMilliseconds / 3);
 
     int result = await FUnit.RunAsync([/* no args! */], describe =>
     {
@@ -46,7 +46,7 @@ string firstTestMessage;
 
 string secondTestMessage;
 {
-    using var cts = new CancellationTokenSource(AsyncTestDelayMilliseconds / 10);
+    using var cts = new CancellationTokenSource(AsyncTestDelayMilliseconds / 3);
 
     int result = await FUnit.RunAsync([/* no args! */], describe =>
     {

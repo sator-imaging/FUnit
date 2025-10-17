@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
 namespace FUnitImpl
 {
     internal static class SR
     {
-        public const string Flag_Times = "--times";
+        public const string Flag_Iterations = "--iterations";
         public const string Flag_Concurrency = "--concurrency";
         public const string Flag_MarkdownOutput = "--markdown";
         public const string Flag_MarkdownOutputShort = "-md";
@@ -34,6 +34,8 @@ namespace FUnitImpl
         public const string MarkdownColorReset = "</span>";
 
         public const int IndentationAdjustment = 6;
+
+        public const string FlakyTestResultAnnotation = "🆘 Flaky Test Detected: Inconsistent results across multiple runs";
 
 
         #region  GetElapsedTime(long) & GetElapsedTime(long, long)
