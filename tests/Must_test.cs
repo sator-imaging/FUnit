@@ -59,7 +59,7 @@ return FUnit.Run(args, describe =>
 
         it("should throw Exception for ambiguous comparisons of IEnumerable", () =>
         {
-            Must.Throw<FUnitException>("Ambiguous comparisons are not permitted in tests. Use 'HaveSameSequence' or 'BeSameReference' instead.", () => Must.NotBeEqual(new List<int> { 1 }, new List<int> { 2 }));
+            Must.Throw<FUnitException>("Ambiguous comparisons are not permitted in tests. Use 'NotHaveSameSequence' or 'NotBeSameReference' instead.", () => Must.NotBeEqual(new List<int> { 1 }, new List<int> { 2 }));
         });
     });
 

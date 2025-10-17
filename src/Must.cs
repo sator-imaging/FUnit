@@ -69,7 +69,7 @@ public static partial class Must
         if (typeof(T) != typeof(string) && typeof(IEnumerable).IsAssignableFrom(typeof(T)))
         {
             throw new FUnitException(
-                $"Ambiguous comparisons are not permitted in tests. Use '{nameof(HaveSameSequence)}' or '{nameof(BeSameReference)}' instead."
+                $"Ambiguous comparisons are not permitted in tests. Use '{nameof(NotHaveSameSequence)}' or '{nameof(NotBeSameReference)}' instead."
                 );
         }
 
