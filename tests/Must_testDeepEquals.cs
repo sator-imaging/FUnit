@@ -291,14 +291,14 @@ return FUnit.Run(args, describe =>
 #pragma warning disable CA1825 // Avoid zero-length array allocations
 #pragma warning disable IDE0032 // Use auto property
 
-file record Wrapper<T>
+file sealed record Wrapper<T>
 {
     private readonly T m_data;
     public T Data => m_data;
     public Wrapper(T data) => m_data = data;
 }
 
-file class TestClass
+file sealed class TestClass
 {
     public int Id { get; set; }
     public string? Name { get; set; }
@@ -309,7 +309,7 @@ file struct TestStruct
     public int Value;
 }
 
-file class AllSupportedFeatures
+file sealed class AllSupportedFeatures
 {
     public string? NullCheckFld;
     public string? NullCheckPrp { get; set; }

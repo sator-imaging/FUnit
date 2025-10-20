@@ -9,6 +9,17 @@ using FUnitImpl;
 partial class Must
 #pragma warning restore CA1050
 {
+    // NOTE: this wrapper is used to compare input objects itself.
+    //       eg., DeepEquals(array, other) <-- without wrapper, DeepEquals doesn't compare array elements!
+    readonly struct Wrap
+    {
+        // use '_' only names to exclude unnecessary name from error message
+        public readonly object? _______;
+        public object? _____ => _______;
+
+        public Wrap(object? value) => _______ = value;
+    }
+
     /// <summary>
     /// Asserts that two objects have equal properties, performing a deep comparison.
     /// </summary>
@@ -24,7 +35,7 @@ partial class Must
         Action<string>? logger = null
     )
     {
-        DeepEquals(expected, actual, depth: 0, propertyOrFieldName: "$", compareByProperty: true, propertyNamesToSkip, logger);
+        DeepEquals(new Wrap(expected), new Wrap(actual), depth: 0, propertyOrFieldPath: "$", compareByProperty: true, propertyNamesToSkip, logger);
     }
 
     /// <summary>
@@ -42,7 +53,7 @@ partial class Must
         Action<string>? logger = null
     )
     {
-        DeepEquals(expected, actual, depth: 0, propertyOrFieldName: "$", compareByProperty: false, fieldNamesToSkip, logger);
+        DeepEquals(new Wrap(expected), new Wrap(actual), depth: 0, propertyOrFieldPath: "$", compareByProperty: false, fieldNamesToSkip, logger);
     }
 
 
@@ -50,7 +61,7 @@ partial class Must
         T expected,
         T actual,
         int depth,
-        string propertyOrFieldName,
+        string propertyOrFieldPath,
         bool compareByProperty,
         string[]? propertyOrFieldNamesToSkip,
         Action<string>? logger
@@ -60,7 +71,7 @@ partial class Must
 
         if (expected == null || actual == null)
         {
-            BeTrue(expected is null && actual is null, $"{propertyOrFieldName} == null");
+            BeTrue(expected is null && actual is null, $"{propertyOrFieldPath} == null");
 
             logger?.Invoke($"{indent}--> null == null");
             return;
@@ -73,7 +84,7 @@ partial class Must
             expected is string ||
             (typedef.IsValueType && typedef.Namespace == "System"))
         {
-            BeEqual(expected, actual, propertyOrFieldName);
+            BeEqual(expected, actual, propertyOrFieldPath);
 
             logger?.Invoke($"{indent}--> {typedef}: '{expected}' == '{actual}'");
             return;
@@ -133,7 +144,10 @@ partial class Must
             checkedValueCount++;
             logger?.Invoke($"{indent}{member.Name}");
 
-            var memberFullPath = $"{propertyOrFieldName}.{member.Name}";
+            var memberFullPath = member.Name.All(x => x is '_')
+                ? propertyOrFieldPath
+                : $"{propertyOrFieldPath}.{member.Name}"
+                ;
 
             // main
             if (E is IDictionary expectedMapUntyped &&
