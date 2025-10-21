@@ -92,7 +92,7 @@ partial class Must
 
         if (depth > byte.MaxValue)
         {
-            (logger ?? Console.Error.WriteLine).Invoke($"  [SKIP] Traversal depth limit exceeded: {depth}");
+            logger?.Invoke($"  [SKIP] Traversal depth limit exceeded: {depth}");
             return;
         }
         ++depth;
@@ -232,7 +232,7 @@ partial class Must
                     !typedef.FullName.StartsWith("System.Collections.Generic.StringEqualityComparer", StringComparison.Ordinal)
                 ))
             {
-                (logger ?? Console.Error.WriteLine).Invoke($"  No property found: {typedef}");
+                logger?.Invoke($"  No property found: {typedef}");
             }
         }
     }

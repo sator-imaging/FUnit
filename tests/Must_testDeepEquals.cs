@@ -144,6 +144,48 @@ return FUnit.Run(args, describe =>
             actual.Data.ArrayPrp = new int[] { 1 };
             Must.Throw<FUnitException>("Expected condition '$.Data.ArrayPrp has 2 items' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
         });
+
+        it("should pass when direct array comparison is equal", () =>
+        {
+            var expected = new[] { 1, 2, 3 };
+            var actual = new[] { 1, 2, 3 };
+            Must.HaveEqualProperties(expected, actual);
+        });
+
+        it("should pass when direct list comparison is equal", () =>
+        {
+            var expected = new List<int> { 4, 5, 6 };
+            var actual = new List<int> { 4, 5, 6 };
+            Must.HaveEqualProperties(expected, actual);
+        });
+
+        it("should pass when direct dictionary comparison is equal", () =>
+        {
+            var expected = new Dictionary<string, int> { { "a", 7 }, { "b", 8 } };
+            var actual = new Dictionary<string, int> { { "a", 7 }, { "b", 8 } };
+            Must.HaveEqualProperties(expected, actual);
+        });
+
+        it("should throw when direct array comparison fails", () =>
+        {
+            var expected = new[] { 1, 2, 3 };
+            var actual = new[] { 1, 2, 99 };
+            Must.Throw<FUnitException>("Expected '3', but was '99'. ($[2])", () => Must.HaveEqualProperties(expected, actual));
+        });
+
+        it("should throw when direct list comparison fails", () =>
+        {
+            var expected = new List<int> { 4, 5, 6 };
+            var actual = new List<int> { 4, 5, 99 };
+            Must.Throw<FUnitException>("Expected '6', but was '99'. ($[2])", () => Must.HaveEqualProperties(expected, actual));
+        });
+
+        it("should throw when direct dictionary comparison fails", () =>
+        {
+            var expected = new Dictionary<string, int> { { "a", 7 }, { "b", 8 } };
+            var actual = new Dictionary<string, int> { { "a", 7 }, { "b", 99 } };
+            Must.Throw<FUnitException>("Expected '8', but was '99'. ($[b])", () => Must.HaveEqualProperties(expected, actual));
+        });
     });
 
     describe("Must.HaveEqualFields", it =>
@@ -282,6 +324,48 @@ return FUnit.Run(args, describe =>
             var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
             actual.Data.ArrayFld = new int[] { 1 };
             Must.Throw<FUnitException>("Expected condition '$.m_data.ArrayFld has 2 items' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
+        });
+
+        it("should pass when direct array comparison is equal", () =>
+        {
+            var expected = new[] { 1, 2, 3 };
+            var actual = new[] { 1, 2, 3 };
+            Must.HaveEqualFields(expected, actual);
+        });
+
+        it("should pass when direct list comparison is equal", () =>
+        {
+            var expected = new List<int> { 4, 5, 6 };
+            var actual = new List<int> { 4, 5, 6 };
+            Must.HaveEqualFields(expected, actual);
+        });
+
+        it("should pass when direct dictionary comparison is equal", () =>
+        {
+            var expected = new Dictionary<string, int> { { "a", 7 }, { "b", 8 } };
+            var actual = new Dictionary<string, int> { { "a", 7 }, { "b", 8 } };
+            Must.HaveEqualFields(expected, actual);
+        });
+
+        it("should throw when direct array comparison fails", () =>
+        {
+            var expected = new[] { 1, 2, 3 };
+            var actual = new[] { 1, 2, 99 };
+            Must.Throw<FUnitException>("Expected '3', but was '99'. ($[2])", () => Must.HaveEqualFields(expected, actual));
+        });
+
+        it("should throw when direct list comparison fails", () =>
+        {
+            var expected = new List<int> { 4, 5, 6 };
+            var actual = new List<int> { 4, 5, 99 };
+            Must.Throw<FUnitException>("Expected '6', but was '99'. ($[2])", () => Must.HaveEqualFields(expected, actual));
+        });
+
+        it("should throw when direct dictionary comparison fails", () =>
+        {
+            var expected = new Dictionary<string, int> { { "a", 7 }, { "b", 8 } };
+            var actual = new Dictionary<string, int> { { "a", 7 }, { "b", 99 } };
+            Must.Throw<FUnitException>("Expected '8', but was '99'. ($[b])", () => Must.HaveEqualFields(expected, actual));
         });
     });
 });

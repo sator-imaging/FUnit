@@ -97,18 +97,27 @@ return FUnit.Run(args, describe =>
 // Value assertion
 // ❌ BeEqual rejects collection type to prevent ambiguous comparisons
 Must.BeEqual(expected, actual);
+Must.NotBeEqual(expected, actual);
 Must.BeSameReference(expected, actual);
+Must.NotBeSameReference(expected, actual);
 
 // Collection assertion
 Must.HaveSameSequence(expected, actual);
+Must.NotHaveSameSequence(expected, actual);
 Must.HaveSameUnorderedElements(expected, actual);
+Must.NotHaveSameUnorderedElements(expected, actual);
 
 // Text assertion
 Must.ContainText(text, substring);
 Must.NotContainText(text, substring);
 
+// Instance assertion (deep comparison using System.Reflection)
+Must.HaveEqualProperties(expected, actual);
+Must.HaveEqualFields(expected, actual);
+
 // Exception assertion
 Must.Throw<T>("Expected error message", () => Test());
+Must.Throw("ExceptionFullTypeName", "Expected error message", () => Test());
 
 // Conditional assertion
 Must.BeTrue(x is >= 0 and < 10);
@@ -162,6 +171,14 @@ dnx FUnit.Run Release
 
 > [!IMPORTANT]
 > *For AI Coding Agents:* SHALL NOT use advanced options unless explicitly requested.
+
+
+### `--iterations int`
+
+```bash
+# run tests 10 times (3 by default)
+dotnet run ./tests/my-test.cs --iterations 10
+```
 
 
 ### `--concurrency int` (Experimental)
