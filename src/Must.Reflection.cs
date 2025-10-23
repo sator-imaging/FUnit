@@ -9,17 +9,6 @@ using FUnitImpl;
 partial class Must
 #pragma warning restore CA1050
 {
-    // NOTE: this wrapper is used to compare input objects itself.
-    //       eg., DeepEquals(array, other) <-- without wrapper, DeepEquals doesn't compare array elements!
-    readonly struct Wrap
-    {
-        // use '_' only names to exclude unnecessary name from error message
-        public readonly object? _______;
-        public object? _____ => _______;
-
-        public Wrap(object? value) => _______ = value;
-    }
-
     /// <summary>
     /// Asserts that two objects have equal properties, performing a deep comparison.
     /// </summary>
@@ -35,7 +24,7 @@ partial class Must
         Action<string>? logger = null
     )
     {
-        DeepEquals(new Wrap(expected), new Wrap(actual), depth: 0, propertyOrFieldPath: "$", compareByProperty: true, propertyNamesToSkip, logger);
+        DeepEquals(expected, actual, depth: 0, propertyOrFieldPath: "$", compareByProperty: true, propertyNamesToSkip, logger);
     }
 
     /// <summary>
@@ -53,7 +42,7 @@ partial class Must
         Action<string>? logger = null
     )
     {
-        DeepEquals(new Wrap(expected), new Wrap(actual), depth: 0, propertyOrFieldPath: "$", compareByProperty: false, fieldNamesToSkip, logger);
+        DeepEquals(expected, actual, depth: 0, propertyOrFieldPath: "$", compareByProperty: false, fieldNamesToSkip, logger);
     }
 
 
@@ -67,6 +56,8 @@ partial class Must
         Action<string>? logger
     )
     {
+        const string IndentForSystemMessage = "  ";
+
         var indent = new string(' ', (depth * 2) + 2);
 
         if (expected == null || actual == null)
@@ -90,13 +81,81 @@ partial class Must
             return;
         }
 
+        // must check right after primitive value comparison
         if (depth > byte.MaxValue)
         {
-            logger?.Invoke($"  [SKIP] Traversal depth limit exceeded: {depth}");
+            logger?.Invoke($"{IndentForSystemMessage}[SKIP] Traversal depth limit exceeded: {depth}");
             return;
         }
         ++depth;
 
+        // collections (DO NOT return)
+        if (expected is IDictionary expectedMapUntyped &&
+            actual is IDictionary actualMapUntyped)
+        {
+            logger?.Invoke($"{indent}IDictionary ({propertyOrFieldPath})");
+
+            var expectedMap = new Dictionary<object, object?>(expectedMapUntyped.Count);
+            foreach (DictionaryEntry kv in expectedMapUntyped)
+            {
+                expectedMap.Add((((kv.Key!))), kv.Value);
+            }
+
+            var actualMap = new Dictionary<object, object?>(actualMapUntyped.Count);
+            foreach (DictionaryEntry kv in actualMapUntyped)
+            {
+                actualMap.Add((((kv.Key!))), kv.Value);
+            }
+
+            // check keys separately for better error message
+            foreach (var key in expectedMap.Keys)
+            {
+                BeTrue(actualMap.ContainsKey(key), $"{propertyOrFieldPath} has required key: {key}");
+            }
+            // actual should not have key that is not in expected
+            foreach (var key in actualMap.Keys)
+            {
+                BeTrue(expectedMap.ContainsKey(key), $"{propertyOrFieldPath} doesn't have unnecessary key: {key}");
+            }
+
+            // both dictionary keys are checked so don't need to check count.
+
+            foreach (var key in expectedMap.Keys)
+            {
+                // key existence has already been tested
+                expectedMap.Remove(key, out var expectedValue);
+                actualMap.Remove(key, out var actualValue);
+
+                DeepEquals(expectedValue, actualValue, depth, $"{propertyOrFieldPath}[{key}]", compareByProperty, propertyOrFieldNamesToSkip, logger);
+            }
+        }
+        else if (
+            expected is not string and IEnumerable expectedEnumerable &&
+            actual is not string and IEnumerable actualEnumerable)
+        {
+            logger?.Invoke($"{indent}IEnumerable ({propertyOrFieldPath})");
+
+            var expectedList = new List<object?>();
+            foreach (var x in expectedEnumerable)
+            {
+                expectedList.Add(x);
+            }
+
+            var actualList = new List<object?>();
+            foreach (var x in actualEnumerable)
+            {
+                actualList.Add(x);
+            }
+
+            BeTrue(expectedList.Count == actualList.Count, $"{propertyOrFieldPath} has {expectedList.Count} items");
+
+            for (int i = 0, count = Math.Min(expectedList.Count, actualList.Count); i < count; i++)
+            {
+                DeepEquals(expectedList[i], actualList[i], depth, $"{propertyOrFieldPath}[{i}]", compareByProperty, propertyOrFieldNamesToSkip, logger);
+            }
+        }
+
+        // properties or fields
         int checkedValueCount = 0;
         foreach (MemberInfo member in compareByProperty
             ? typedef.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty)
@@ -133,9 +192,13 @@ partial class Must
                 throw new FUnitException($"{member.Name} ({typedef}): {error.Message}", error);
             }
 
-            // SyncRoot may be pointing itself
+            // reference may be pointing itself
             if (ReferenceEquals(E, expected) ||
-                ReferenceEquals(A, actual))
+                ReferenceEquals(A, actual) ||
+                // explicitly ignore SyncRoot to avoid indefinitely loop
+                // --> IDictionary -> IEnumerable -> IDictionary -> IEnumerable...
+                member.Name == "System.Collections.ICollection.SyncRoot"
+            )
             {
                 logger?.Invoke($"{indent}[SKIP] reference value is pointing itself: {member.Name} ({typedef})");
                 continue;
@@ -144,81 +207,11 @@ partial class Must
             checkedValueCount++;
             logger?.Invoke($"{indent}{member.Name}");
 
-            var memberFullPath = member.Name.All(x => x is '_')
-                ? propertyOrFieldPath
-                : $"{propertyOrFieldPath}.{member.Name}"
-                ;
+            var memberFullPath = $"{propertyOrFieldPath}.{member.Name}";
 
             // main
-            if (E is IDictionary expectedMapUntyped &&
-                A is IDictionary actualMapUntyped)
-            {
-                var expectedMap = new Dictionary<object, object?>(expectedMapUntyped.Count);
-                foreach (DictionaryEntry kv in expectedMapUntyped)
-                {
-                    expectedMap.Add((((kv.Key!))), kv.Value);
-                }
-
-                var actualMap = new Dictionary<object, object?>(actualMapUntyped.Count);
-                foreach (DictionaryEntry kv in actualMapUntyped)
-                {
-                    actualMap.Add((((kv.Key!))), kv.Value);
-                }
-
-                // check keys separately for better error message
-                foreach (var key in expectedMap.Keys)
-                {
-                    BeTrue(actualMap.ContainsKey(key), $"{memberFullPath} has required key: {key}");
-                }
-                // actual should not have key that is not in expected
-                foreach (var key in actualMap.Keys)
-                {
-                    BeTrue(expectedMap.ContainsKey(key), $"{memberFullPath} doesn't have unnecessary key: {key}");
-                }
-
-                // both dictionary keys are checked so don't need to check count.
-
-                foreach (var key in expectedMap.Keys)
-                {
-                    // key existence has already been tested
-                    expectedMap.Remove(key, out var expectedValue);
-                    actualMap.Remove(key, out var actualValue);
-
-                    DeepEquals(expectedValue, actualValue, depth, $"{memberFullPath}[{key}]", compareByProperty, propertyOrFieldNamesToSkip, logger);
-                }
-
-                continue;
-            }
-            else if (
-                E is not string and IEnumerable expectedEnumerable &&
-                A is not string and IEnumerable actualEnumerable)
-            {
-                var expectedList = new List<object?>();
-                foreach (var x in expectedEnumerable)
-                {
-                    expectedList.Add(x);
-                }
-
-                var actualList = new List<object?>();
-                foreach (var x in actualEnumerable)
-                {
-                    actualList.Add(x);
-                }
-
-                BeTrue(expectedList.Count == actualList.Count, $"{memberFullPath} has {expectedList.Count} items");
-
-                for (int i = 0, count = Math.Min(expectedList.Count, actualList.Count); i < count; i++)
-                {
-                    DeepEquals(expectedList[i], actualList[i], depth, $"{memberFullPath}[{i}]", compareByProperty, propertyOrFieldNamesToSkip, logger);
-                }
-
-                continue;
-            }
-            else
-            {
-                DeepEquals(E, A, depth, memberFullPath, compareByProperty, propertyOrFieldNamesToSkip, logger);
-                continue;
-            }
+            DeepEquals(E, A, depth, memberFullPath, compareByProperty, propertyOrFieldNamesToSkip, logger);
+            continue;
 
             throw new FUnitException($"cannot compare object: expected: '{E}', actual: '{A}'");
         }
@@ -232,7 +225,7 @@ partial class Must
                     !typedef.FullName.StartsWith("System.Collections.Generic.StringEqualityComparer", StringComparison.Ordinal)
                 ))
             {
-                logger?.Invoke($"  No property found: {typedef}");
+                logger?.Invoke($"{IndentForSystemMessage}No property found: {typedef}");
             }
         }
     }

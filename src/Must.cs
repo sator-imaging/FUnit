@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 #pragma warning disable CA1050 // Declare types in namespaces
 /// <summary>
@@ -290,6 +291,18 @@ $@"Expected collections to not be equal ignoring order.
 
 
     /// <summary>
+    /// Asserts that a specific type of exception is thrown by an asynchronous action (Task).
+    /// </summary>
+    /// <typeparam name="TException">The type of the expected exception.</typeparam>
+    /// <param name="expectedMessage">The expected exception message. If null or empty, the message is not checked.</param>
+    /// <param name="testAsync">The asynchronous action to execute that is expected to throw an exception.</param>
+    public static void Throw<TException>(string? expectedMessage, Func<Task> testAsync)
+        where TException : Exception
+    {
+        Throw<TException>(expectedMessage, () => Task.Run(testAsync).Wait());
+    }
+
+    /// <summary>
     /// Asserts that a specific type of exception is thrown by an action.
     /// </summary>
     /// <typeparam name="TException">The type of the expected exception.</typeparam>
@@ -349,6 +362,17 @@ $@"Expected collections to not be equal ignoring order.
 
 
     static MethodInfo? method_ThrowT;
+
+    /// <summary>
+    /// Asserts that a specific type of exception is thrown by an asynchronous action (Task), identified by its full type name.
+    /// </summary>
+    /// <param name="fullTypeName">The full name of the expected exception type (e.g., "System.InvalidOperationException").</param>
+    /// <param name="expectedMessage">The expected exception message. If null or empty, the message is not checked.</param>
+    /// <param name="testAsync">The asynchronous action to execute that is expected to throw an exception.</param>
+    public static void Throw(string fullTypeName, string? expectedMessage, Func<Task> testAsync)
+    {
+        Throw(fullTypeName, expectedMessage, () => Task.Run(testAsync).Wait());
+    }
 
     /// <summary>
     /// Asserts that a specific type of exception is thrown by an action.

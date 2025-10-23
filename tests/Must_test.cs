@@ -96,6 +96,20 @@ return FUnit.Run(args, describe =>
         });
     });
 
+    describe("Must.BeTrue", it =>
+    {
+        it("should assert that a condition is true", () =>
+        {
+            Must.BeTrue(true);
+        });
+
+        it("should throw FUnitException if the condition is false", () =>
+        {
+            Must.Throw<FUnitException>("Expected condition 'false' to be met, but it was not.", () => Must.BeTrue(false));
+            Must.Throw<FUnitException>("Expected condition '0 == 1' to be met, but it was not.", () => Must.BeTrue(0 == 1));
+        });
+    });
+
     describe("Must.HaveSameSequence", it =>
     {
         it("should assert sequence equality", () =>
@@ -264,17 +278,91 @@ return FUnit.Run(args, describe =>
         });
     });
 
-    describe("Must.BeTrue", it =>
+    const int DELAY = 100;
+
+    describe("Must.Throw<T> (async)", it =>
     {
-        it("should assert that a condition is true", () =>
+        it("should assert that a specific exception is thrown by an async ValueTask", () =>
         {
-            Must.BeTrue(true);
+            Must.Throw<InvalidOperationException>("Test exception", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Test exception"); });
         });
 
-        it("should throw FUnitException if the condition is false", () =>
+        it("should assert that a specific exception is thrown by an async Task", () =>
         {
-            Must.Throw<FUnitException>("Expected condition 'false' to be met, but it was not.", () => Must.BeTrue(false));
-            Must.Throw<FUnitException>("Expected condition '0 == 1' to be met, but it was not.", () => Must.BeTrue(0 == 1));
+            Must.Throw<InvalidOperationException>("Test exception", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Test exception"); });
+        });
+
+        it("should throw FUnitException if no exception is thrown by async ValueTask", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got none.", () => Must.Throw<ArgumentNullException>(null, async () => { await Task.Delay(DELAY); /* no exception */ }));
+        });
+
+        it("should throw FUnitException if no exception is thrown by async Task", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got none.", () => Must.Throw<ArgumentNullException>(null, async () => { await Task.Delay(DELAY); /* no exception */ }));
+        });
+
+        it("should throw FUnitException if a different exception type is thrown by async ValueTask", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got 'InvalidOperationException'.", () => Must.Throw<ArgumentNullException>(null, async () => { await Task.Delay(DELAY); throw new InvalidOperationException(); }));
+        });
+
+        it("should throw FUnitException if a different exception type is thrown by async Task", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got 'InvalidOperationException'.", () => Must.Throw<ArgumentNullException>(null, async () => { await Task.Delay(DELAY); throw new InvalidOperationException(); }));
+        });
+
+        it("should throw FUnitException if the error message does not match for async ValueTask", () =>
+        {
+            Must.Throw<FUnitException>("Expected error message to be \"Expected message\", but was \"Wrong message\".", () => Must.Throw<InvalidOperationException>("Expected message", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Wrong message"); }));
+        });
+
+        it("should throw FUnitException if the error message does not match for async Task", () =>
+        {
+            Must.Throw<FUnitException>("Expected error message to be \"Expected message\", but was \"Wrong message\".", () => Must.Throw<InvalidOperationException>("Expected message", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Wrong message"); }));
+        });
+    });
+
+    describe("Must.Throw (async, non-generic)", it =>
+    {
+        it("should assert that a specific exception is thrown by an async ValueTask using non-generic Throw", () =>
+        {
+            Must.Throw("System.InvalidOperationException", "Test exception", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Test exception"); });
+        });
+
+        it("should assert that a specific exception is thrown by an async Task using non-generic Throw", () =>
+        {
+            Must.Throw("System.InvalidOperationException", "Test exception", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Test exception"); });
+        });
+
+        it("should throw FUnitException if no exception is thrown by async ValueTask for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got none.", () => Must.Throw("System.ArgumentNullException", null, async () => { await Task.Delay(DELAY); /* no exception */ }));
+        });
+
+        it("should throw FUnitException if no exception is thrown by async Task for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got none.", () => Must.Throw("System.ArgumentNullException", null, async () => { await Task.Delay(DELAY); /* no exception */ }));
+        });
+
+        it("should throw FUnitException if a different exception type is thrown by async ValueTask for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got 'InvalidOperationException'.", () => Must.Throw("System.ArgumentNullException", null, async () => { await Task.Delay(DELAY); throw new InvalidOperationException(); }));
+        });
+
+        it("should throw FUnitException if a different exception type is thrown by async Task for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected exception of type 'ArgumentNullException', but got 'InvalidOperationException'.", () => Must.Throw("System.ArgumentNullException", null, async () => { await Task.Delay(DELAY); throw new InvalidOperationException(); }));
+        });
+
+        it("should throw FUnitException if the error message does not match for async ValueTask for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected error message to be \"Expected message\", but was \"Wrong message\".", () => Must.Throw("System.InvalidOperationException", "Expected message", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Wrong message"); }));
+        });
+
+        it("should throw FUnitException if the error message does not match for async Task for non-generic Throw", () =>
+        {
+            Must.Throw<FUnitException>("Expected error message to be \"Expected message\", but was \"Wrong message\".", () => Must.Throw("System.InvalidOperationException", "Expected message", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Wrong message"); }));
         });
     });
 });
