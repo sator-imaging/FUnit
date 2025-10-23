@@ -117,7 +117,9 @@ Must.HaveEqualFields(expected, actual);
 
 // Exception assertion
 Must.Throw<T>("Expected error message", () => Test());
+Must.Throw<T>("Expected error message", async () => await TestAsync());
 Must.Throw("ExceptionFullTypeName", "Expected error message", () => Test());
+Must.Throw("ExceptionFullTypeName", "Expected error message", async () => await TestAsync());
 
 // Conditional assertion
 Must.BeTrue(x is >= 0 and < 10);
