@@ -12,37 +12,43 @@ partial class Must
     /// <summary>
     /// Asserts that two objects have equal properties, performing a deep comparison.
     /// </summary>
-    /// <typeparam name="T">The type of the objects to compare.</typeparam>
     /// <param name="expected">The expected object.</param>
     /// <param name="actual">The actual object.</param>
     /// <param name="propertyNamesToSkip">Optional. An array of property names to skip during the comparison.</param>
     /// <param name="logger">Optional. A logger action to output comparison details.</param>
-    public static void HaveEqualProperties<T>(
-        T expected,
-        T actual,
+    public static void HaveEqualProperties<TExpected, TActual>(
+        TExpected expected,
+        TActual actual,
         string[]? propertyNamesToSkip = null,
         Action<string>? logger = null
     )
+        where TActual : TExpected
     {
-        DeepEquals(expected, actual, depth: 0, propertyOrFieldPath: "$", compareByProperty: true, propertyNamesToSkip, logger);
+        DeepEquals(
+            expected, actual, depth: 0, typeof(TExpected).IsAbstract || typeof(TActual).IsAbstract,
+            propertyOrFieldPath: "$", compareByProperty: true, propertyNamesToSkip, logger
+        );
     }
 
     /// <summary>
     /// Asserts that two objects have equal fields, performing a deep comparison.
     /// </summary>
-    /// <typeparam name="T">The type of the objects to compare.</typeparam>
     /// <param name="expected">The expected object.</param>
     /// <param name="actual">The actual object.</param>
     /// <param name="fieldNamesToSkip">Optional. An array of field names to skip during the comparison.</param>
     /// <param name="logger">Optional. A logger action to output comparison details.</param>
-    public static void HaveEqualFields<T>(
-        T expected,
-        T actual,
+    public static void HaveEqualFields<TExpected, TActual>(
+        TExpected expected,
+        TActual actual,
         string[]? fieldNamesToSkip = null,
         Action<string>? logger = null
     )
+        where TActual : TExpected
     {
-        DeepEquals(expected, actual, depth: 0, propertyOrFieldPath: "$", compareByProperty: false, fieldNamesToSkip, logger);
+        DeepEquals(
+            expected, actual, depth: 0, typeof(TExpected).IsAbstract || typeof(TActual).IsAbstract,
+            propertyOrFieldPath: "$", compareByProperty: false, fieldNamesToSkip, logger
+        );
     }
 
 
@@ -50,6 +56,7 @@ partial class Must
         T expected,
         T actual,
         int depth,
+        bool isAbstractType,
         string propertyOrFieldPath,
         bool compareByProperty,
         string[]? propertyOrFieldNamesToSkip,
@@ -126,7 +133,10 @@ partial class Must
                 expectedMap.Remove(key, out var expectedValue);
                 actualMap.Remove(key, out var actualValue);
 
-                DeepEquals(expectedValue, actualValue, depth, $"{propertyOrFieldPath}[{key}]", compareByProperty, propertyOrFieldNamesToSkip, logger);
+                DeepEquals(expectedValue, actualValue, depth,
+                    expectedValue?.GetType().IsAbstract == true || actualValue?.GetType().IsAbstract == true,
+                    $"{propertyOrFieldPath}[{key}]", compareByProperty, propertyOrFieldNamesToSkip, logger
+                );
             }
         }
         else if (
@@ -151,7 +161,10 @@ partial class Must
 
             for (int i = 0, count = Math.Min(expectedList.Count, actualList.Count); i < count; i++)
             {
-                DeepEquals(expectedList[i], actualList[i], depth, $"{propertyOrFieldPath}[{i}]", compareByProperty, propertyOrFieldNamesToSkip, logger);
+                DeepEquals(expectedList[i], actualList[i], depth,
+                    expectedList[i]?.GetType().IsAbstract == true || actualList[i]?.GetType().IsAbstract == true,
+                    $"{propertyOrFieldPath}[{i}]", compareByProperty, propertyOrFieldNamesToSkip, logger
+                );
             }
         }
 
@@ -198,6 +211,11 @@ partial class Must
                 E = compareByProperty ? ((PropertyInfo)member).GetValue(expected) : ((FieldInfo)member).GetValue(expected);
                 A = compareByProperty ? ((PropertyInfo)member).GetValue(actual) : ((FieldInfo)member).GetValue(actual);
             }
+            catch (TargetException) when (isAbstractType)
+            {
+                logger?.Invoke($"{indent}[SKIP] Actual type of abstractions are different: {member.Name} ({typedef})");
+                continue;
+            }
             catch (Exception error)
             {
                 throw new FUnitException($"{member.Name} ({typedef}): {error.Message}", error);
@@ -221,7 +239,12 @@ partial class Must
             var memberFullPath = $"{propertyOrFieldPath}.{member.Name}";
 
             // main
-            DeepEquals(E, A, depth, memberFullPath, compareByProperty, propertyOrFieldNamesToSkip, logger);
+            DeepEquals(
+                E, A, depth,
+                E?.GetType().IsAbstract == true || A?.GetType().IsAbstract == true,
+                memberFullPath, compareByProperty, propertyOrFieldNamesToSkip, logger
+            );
+
             continue;
 
             throw new FUnitException($"cannot compare object: expected: '{E}', actual: '{A}'");
