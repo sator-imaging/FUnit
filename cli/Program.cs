@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 // --filter <string>
-string fileFilter = "*.cs";
+string fileFilter = "*test*.cs";
 {
     const string ARG_FILTER = "--filter";
 
@@ -29,10 +29,20 @@ string fileFilter = "*.cs";
         }
 
         // remove filter arguments
-        var tmp = new List<string>(args);
-        tmp.RemoveAt(index + 1);
-        tmp.RemoveAt(index);
-        args = [.. tmp];
+        args = [.. args[..index], .. args[(index + 2)..]];
+    }
+}
+
+// --no-clean
+bool noClean = false;
+{
+    const string ARG_NO_CLEAN = "--no-clean";
+
+    int index = args.IndexOf(ARG_NO_CLEAN);
+    if (index >= 0)
+    {
+        noClean = true;
+        args = [.. args[..index], .. args[(index + 1)..]];
     }
 }
 
@@ -48,7 +58,6 @@ if (args.Contains(SR.Flag_TEST))
 #endif
 
 const string FUnit = nameof(FUnit);
-const string TargetTestFileName = "test";
 const int MinimumRequiredDotnetVersion = 10;
 byte[] utf8Bom = [0xef, 0xbb, 0xbf];
 
@@ -57,7 +66,7 @@ if (EnsureEnvironment() != 0)
     Environment.Exit(1);
 }
 
-// Step 1: Collect all files with *.cs file extension (case insensitive)
+// Collect all files with *.cs file extension (case insensitive)
 // Assuming the tool should search in the current directory and its subdirectories
 string currentDirectory = Directory.GetCurrentDirectory();
 List<string> csFiles = [.. Directory.GetFiles(currentDirectory, fileFilter, new EnumerationOptions{
@@ -71,31 +80,27 @@ List<string> validFUnitFiles = [];
 
 foreach (string file in csFiles)
 {
-    // Step 2: Check filename that contains 'test' (case insensitive)
-    if (Path.GetFileNameWithoutExtension(file).Contains(TargetTestFileName, StringComparison.OrdinalIgnoreCase))
+    byte[] fileBytes = File.ReadAllBytes(file);
+
+    string fileContent = Encoding.UTF8.GetString(fileBytes);
+    bool startsWithHash = fileContent.StartsWith('#');
+
+    // Check file content starts with a character '#'
+    // if not, try to remove UTF-8 BOM and try step 3 again (once only)
+    if (!startsWithHash)
     {
-        byte[] fileBytes = File.ReadAllBytes(file);
-
-        string fileContent = Encoding.UTF8.GetString(fileBytes);
-        bool startsWithHash = fileContent.StartsWith('#');
-
-        // Step 3: Check file content starts with a character '#'
-        // if not, try to remove UTF-8 BOM and try step 3 again (once only)
-        if (!startsWithHash)
+        // Check for UTF-8 BOM
+        if (fileBytes.Length >= 3 && fileBytes[0] == utf8Bom[0] && fileBytes[1] == utf8Bom[1] && fileBytes[2] == utf8Bom[2])
         {
-            // Check for UTF-8 BOM
-            if (fileBytes.Length >= 3 && fileBytes[0] == utf8Bom[0] && fileBytes[1] == utf8Bom[1] && fileBytes[2] == utf8Bom[2])
-            {
-                fileContent = Encoding.UTF8.GetString(fileBytes, 3, fileBytes.Length - 3);
-                startsWithHash = fileContent.StartsWith('#');
-            }
+            fileContent = Encoding.UTF8.GetString(fileBytes, 3, fileBytes.Length - 3);
+            startsWithHash = fileContent.StartsWith('#');
         }
+    }
 
-        // Step 4: Check file content contains word 'FUnit' (case sensitive)
-        if (startsWithHash && fileContent.Contains(FUnit, StringComparison.Ordinal))
-        {
-            validFUnitFiles.Add(file);
-        }
+    // Check file content contains word 'FUnit' (case sensitive)
+    if (startsWithHash && fileContent.Contains(FUnit, StringComparison.Ordinal))
+    {
+        validFUnitFiles.Add(file);
     }
 }
 
@@ -120,7 +125,7 @@ if (validFUnitFiles.Count > 0)
 
         ConsoleLogger.LogInfo($"# 🔬 `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
 
-        var exitCode = await ExecuteTestAsync(filePath, args);
+        var exitCode = await ExecuteTestAsync(filePath, args, noClean);
         if (exitCode != 0)
         {
             failedSuiteCount++;
@@ -275,7 +280,7 @@ static string BuildEscapedArguments(string[] args)
 
 
 // TODO: can run tests simultaneously but console log will be messed up.
-async ValueTask<int> ExecuteTestAsync(string filePath, string[] args)
+async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noClean)
 {
     var escapedArguments = BuildEscapedArguments(args);
 
@@ -283,7 +288,8 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args)
 
     var subCommandOptions = $"-c \"{options.BuildConfiguration}\" \"{filePath}\"";
 
-    // restore
+    // clean
+    if (!noClean)
     {
         int exitCode = await RunDotnetAsync(
             $"clean {subCommandOptions}",

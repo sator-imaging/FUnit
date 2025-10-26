@@ -39,8 +39,9 @@ return FUnit.Run(args, describe =>
 # Run unit test
 dotnet run ./tests/my-test.cs
 
-# OR use 'dnx' to run all "*test*.cs" (case-insensitive) in project folder
+# OR use 'dnx' to run tests in current or subfolders
 dnx FUnit.Run
+dnx FUnit.Run --no-clean --filter *specificTest*.cs
 ```
 
 

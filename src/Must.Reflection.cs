@@ -241,7 +241,10 @@ partial class Must
             // main
             DeepEquals(
                 E, A, depth,
-                E?.GetType().IsAbstract == true || A?.GetType().IsAbstract == true,
+                (
+                    (member as PropertyInfo)?.PropertyType.IsAbstract == true ||
+                    (member as FieldInfo)?.FieldType.IsAbstract == true
+                ),
                 memberFullPath, compareByProperty, propertyOrFieldNamesToSkip, logger
             );
 
