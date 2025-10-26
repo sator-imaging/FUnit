@@ -145,6 +145,33 @@ return FUnit.Run(args, describe =>
             Must.Throw<FUnitException>("Expected condition '$.Data.ArrayPrp has 2 items' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
         });
 
+        it("should pass when JagArrayPrp values are equal", () =>
+        {
+            var expected = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            expected.Data.JagArrayPrp = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 2.2f } };
+            var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            actual.Data.JagArrayPrp = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 2.2f } };
+            Must.HaveEqualProperties(expected, actual);
+        });
+
+        it("should throw when JagArrayPrp values are not equal", () =>
+        {
+            var expected = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            expected.Data.JagArrayPrp = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 2.2f } };
+            var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            actual.Data.JagArrayPrp = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 99.9f } };
+            Must.Throw<FUnitException>("Expected '2.2', but was '99.9'. ($.Data.JagArrayPrp[1][1])", () => Must.HaveEqualProperties(expected, actual));
+        });
+
+        it("should throw when JagArrayPrp content count is different", () =>
+        {
+            var expected = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            expected.Data.JagArrayPrp = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 2.2f } };
+            var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            actual.Data.JagArrayPrp = new float[][] { new float[] { 1.1f, 1.2f } };
+            Must.Throw<FUnitException>("Expected condition '$.Data.JagArrayPrp has 2 items' to be met, but it was not.", () => Must.HaveEqualProperties(expected, actual));
+        });
+
         it("should pass when direct array comparison is equal", () =>
         {
             var expected = new[] { 1, 2, 3 };
@@ -326,6 +353,33 @@ return FUnit.Run(args, describe =>
             Must.Throw<FUnitException>("Expected condition '$.m_data.ArrayFld has 2 items' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
         });
 
+        it("should pass when JagArrayFld values are equal", () =>
+        {
+            var expected = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            expected.Data.JagArrayFld = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 2.2f } };
+            var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            actual.Data.JagArrayFld = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 2.2f } };
+            Must.HaveEqualFields(expected, actual);
+        });
+
+        it("should throw when JagArrayFld values are not equal", () =>
+        {
+            var expected = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            expected.Data.JagArrayFld = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 2.2f } };
+            var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            actual.Data.JagArrayFld = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 99.9f } };
+            Must.Throw<FUnitException>("Expected '2.2', but was '99.9'. ($.m_data.JagArrayFld[1][1])", () => Must.HaveEqualFields(expected, actual));
+        });
+
+        it("should throw when JagArrayFld content count is different", () =>
+        {
+            var expected = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            expected.Data.JagArrayFld = new float[][] { new float[] { 1.1f, 1.2f }, new float[] { 2.1f, 2.2f } };
+            var actual = new Wrapper<AllSupportedFeatures>(new AllSupportedFeatures());
+            actual.Data.JagArrayFld = new float[][] { new float[] { 1.1f, 1.2f } };
+            Must.Throw<FUnitException>("Expected condition '$.m_data.JagArrayFld has 2 items' to be met, but it was not.", () => Must.HaveEqualFields(expected, actual));
+        });
+
         it("should pass when direct array comparison is equal", () =>
         {
             var expected = new[] { 1, 2, 3 };
@@ -409,4 +463,7 @@ file sealed class AllSupportedFeatures
 
     public int[] ArrayFld = new int[0];
     public int[] ArrayPrp { get; set; } = new int[0];
+
+    public float[][] JagArrayFld = new float[0][];
+    public float[][] JagArrayPrp { get; set; } = new float[0][];
 }
