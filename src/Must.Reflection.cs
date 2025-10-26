@@ -169,15 +169,26 @@ partial class Must
             // for record types
             if (member.CustomAttributes.Any(x => x.AttributeType.FullName == "System.Runtime.CompilerServices.CompilerGeneratedAttribute"))
             {
-                logger?.Invoke($"{indent}[SKIP] compiler generated member: {member.Name} ({typedef})");
+                logger?.Invoke($"{indent}[SKIP] Compiler generated member: {member.Name} ({typedef})");
                 continue;
             }
 
             // indexer (this[]) is always skipped
             if (member is PropertyInfo prop && prop.GetIndexParameters().Length > 0)
             {
-                logger?.Invoke($"{indent}[SKIP] indexer: {member.Name} ({typedef})");
+                logger?.Invoke($"{indent}[SKIP] Indexer: {member.Name} ({typedef})");
                 continue;
+            }
+
+            // ignore Capacity (internal buffer size doesn't matter)
+            if (member.Name == "Capacity" && typedef.FullName != null)
+            {
+                if (typedef.FullName.StartsWith("System.Collections.Generic.Dictionary`2", StringComparison.Ordinal) ||
+                    typedef.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.Ordinal))
+                {
+                    logger?.Invoke($"{indent}[SKIP] Capacity: {member.Name} ({typedef})");
+                    continue;
+                }
             }
 
             object? E;
@@ -200,7 +211,7 @@ partial class Must
                 member.Name == "System.Collections.ICollection.SyncRoot"
             )
             {
-                logger?.Invoke($"{indent}[SKIP] reference value is pointing itself: {member.Name} ({typedef})");
+                logger?.Invoke($"{indent}[SKIP] Reference value is pointing itself: {member.Name} ({typedef})");
                 continue;
             }
 
