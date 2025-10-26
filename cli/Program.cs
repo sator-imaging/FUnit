@@ -7,7 +7,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// must call first!
+// --filter <string>
+string fileFilter = "*.cs";
+{
+    const string ARG_FILTER = "--filter";
+
+    int index = args.IndexOf(ARG_FILTER);
+    if (index >= 0)
+    {
+        if (index == args.Length - 1)
+        {
+            ConsoleLogger.LogFailed($"> [!CAUTION]");
+            ConsoleLogger.LogFailed($"> `{ARG_FILTER}` takes a string parameter.");
+            Environment.Exit(1);
+        }
+
+        fileFilter = args[index + 1];
+        if (!fileFilter.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+        {
+            fileFilter += ".cs";
+        }
+
+        // remove filter arguments
+        var tmp = new List<string>(args);
+        tmp.RemoveAt(index + 1);
+        tmp.RemoveAt(index);
+        args = [.. tmp];
+    }
+}
+
+// then, parse shared args
 var options = CommandLineOptions.Parse(args);
 
 #if DEBUG
@@ -31,7 +60,7 @@ if (EnsureEnvironment() != 0)
 // Step 1: Collect all files with *.cs file extension (case insensitive)
 // Assuming the tool should search in the current directory and its subdirectories
 string currentDirectory = Directory.GetCurrentDirectory();
-List<string> csFiles = [.. Directory.GetFiles(currentDirectory, "*.cs", new EnumerationOptions{
+List<string> csFiles = [.. Directory.GetFiles(currentDirectory, fileFilter, new EnumerationOptions{
     IgnoreInaccessible = true,
     MatchCasing = MatchCasing.CaseInsensitive,
     RecurseSubdirectories = true,
@@ -92,7 +121,7 @@ if (validFUnitFiles.Count > 0)
         ConsoleLogger.LogInfo($"# 🔬 `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
 
         var exitCode = await ExecuteTestAsync(filePath, args);
-        if (exitCode < 0)
+        if (exitCode != 0)
         {
             failedSuiteCount++;
         }
@@ -123,13 +152,15 @@ if (validFUnitFiles.Count > 0)
         {
             ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed");
         }
+
+        Environment.Exit(1);
     }
 }
 else
 {
     ConsoleLogger.LogInfo();
     ConsoleLogger.LogFailed($"> [!CAUTION]");
-    ConsoleLogger.LogFailed($"> No valid {FUnit} test files found matching the criteria.");
+    ConsoleLogger.LogFailed($"> No valid {FUnit} test files found matching the criteria: `{fileFilter}`");
 
     Environment.Exit(1);
 }
