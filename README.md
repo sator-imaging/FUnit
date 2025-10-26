@@ -122,7 +122,9 @@ Must.Throw("ExceptionFullTypeName", "Expected error message", () => Test());
 Must.Throw("ExceptionFullTypeName", "Expected error message", async () => await TestAsync());
 
 // Conditional assertion
+// ❌ BeFalse won't be supported. Instead, use better conditional expression (prefer pattern matching)
 Must.BeTrue(x is >= 0 and < 10);
+Must.BeTrue(x is IEnumerable<char> and not string);
 
 // ❌ Avoid asserting high-level conditions on collections
 // ex Instead of checking if a value is absent, assert the full expected content
