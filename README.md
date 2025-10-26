@@ -133,6 +133,21 @@ Must.BeTrue(!list.Contains(x));  // ✅ Prefer: Must.HaveSameSequence(expectedLi
 
 
 
+## 🧭 `FUnit.Directives`
+
+With FUnit.Directives package, you can *include* external file into file-based app project by adding special directive comment `//:funit:include <path to the file>`.
+
+```cs
+#:package FUnit@*
+#:package FUnit.Directives@*
+
+//:funit:include ./path/to/external-file.cs
+
+return FUnit.Run( /* tests depending on 'external-file.cs */ );
+```
+
+
+
 
 
 # 🧪 Unit Test Execution
