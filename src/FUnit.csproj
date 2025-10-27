@@ -18,6 +18,12 @@
       <Pack>True</Pack><PackagePath>/</PackagePath>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SatorImaging.Jsonable" Version="1.2.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>

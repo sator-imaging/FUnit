@@ -1,4 +1,5 @@
 using FUnitImpl;
+using Jsonable;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,13 +9,12 @@ using System.Text;
 partial class FUnit
 #pragma warning restore CA1050
 {
-    // TODO: JSON-convertible
-
     /// <summary>
     /// Represents the result of a test run.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]  // should not be included in IntelliSense suggestion
-    public sealed class TestResult
+    [ToJson]
+    public sealed partial class TestResult
     {
         /// <summary>
         /// Represents an error that occurred during a test case execution.
@@ -22,7 +22,8 @@ partial class FUnit
         /// <param name="Message">The error message.</param>
         /// <param name="StackTrace">The stack trace where the error occurred.</param>
         /// <param name="IsFUnitError">Indicates whether the error occurred outside the scope of 'describe' or 'it'.</param>
-        public sealed record Error(string Message, string? StackTrace, bool IsFUnitError) { }
+        [ToJson]
+        public sealed partial record Error(string Message, string? StackTrace, bool IsFUnitError) { }
 
         ///// <summary>
         ///// Represents a test subject.
@@ -39,7 +40,8 @@ partial class FUnit
         /// <param name="Description">The description of the test case.</param>
         /// <param name="ExecutionCount">The number of times the test case was executed.</param>
         /// <param name="Errors">The errors that occurred during the test case execution, if any.</param>
-        public sealed record Test(string Description, int ExecutionCount, IReadOnlyList<Error>? Errors) { }
+        [ToJson]
+        public sealed partial record Test(string Description, int ExecutionCount, IReadOnlyList<Error>? Errors) { }
 
 
         /// <summary>

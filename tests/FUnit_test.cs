@@ -213,9 +213,17 @@ ConsoleLogger.LogInfoRaw($@"
 <details><summary><b>TEST</b>: <code>{nameof(FUnit)}.{nameof(FUnit.Result)}.{nameof(FUnit.Result.ToString)}()</code></summary>
 
 ```md
-
 {resultText}
+```
 
+</details>
+");
+
+ConsoleLogger.LogInfoRaw($@"
+<details><summary><b>TEST</b>: <code>{nameof(FUnit)}.{nameof(FUnit.Result)}.{nameof(FUnit.Result.ToJson)}()</code></summary>
+
+```json
+{FUnit.Result?.ToJson(prettyPrint: true)}
 ```
 
 </details>
