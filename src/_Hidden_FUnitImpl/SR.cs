@@ -35,7 +35,7 @@ namespace FUnitImpl
 
         public const int IndentationAdjustment = 6;
 
-        public const string FlakyTestResultAnnotation = "🆘 Flaky Test Detected: Inconsistent results across multiple runs";
+        public const string FlakyTestResultAnnotation = "🔥 Flaky Test Detected: Inconsistent results across multiple runs";
 
 
         #region  GetElapsedTime(long) & GetElapsedTime(long, long)
