@@ -98,14 +98,14 @@ return FUnit.Run(args, describe =>
 // Value assertion
 // ❌ BeEqual rejects collection type to prevent ambiguous comparisons
 Must.BeEqual(expected, actual);
-Must.NotBeEqual(expected, actual);
 Must.BeSameReference(expected, actual);
+Must.NotBeEqual(expected, actual);
 Must.NotBeSameReference(expected, actual);
 
 // Collection assertion
 Must.HaveSameSequence(expected, actual);
-Must.NotHaveSameSequence(expected, actual);
 Must.HaveSameUnorderedElements(expected, actual);
+Must.NotHaveSameSequence(expected, actual);
 Must.NotHaveSameUnorderedElements(expected, actual);
 
 // Text assertion
