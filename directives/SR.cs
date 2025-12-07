@@ -1,3 +1,6 @@
+// Licensed under the MIT License
+// https://github.com/sator-imaging/FUnit
+
 using Microsoft.CodeAnalysis;
 
 #pragma warning disable RS2008 // Enable analyzer release tracking for the analyzer project

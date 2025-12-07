@@ -1,3 +1,6 @@
+// Licensed under the MIT License
+// https://github.com/sator-imaging/FUnit
+
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;

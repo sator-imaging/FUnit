@@ -1,4 +1,7 @@
-﻿using FUnitImpl;
+﻿// Licensed under the MIT License
+// https://github.com/sator-imaging/FUnit
+
+using FUnitImpl;
 using System;
 using System.Collections;
 using System.Collections.Generic;

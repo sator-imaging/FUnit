@@ -1,4 +1,7 @@
-﻿namespace FUnitImpl
+﻿// Licensed under the MIT License
+// https://github.com/sator-imaging/FUnit
+
+namespace FUnitImpl
 {
     /// <summary>
     /// Specifies the verbosity level for FUnit output.

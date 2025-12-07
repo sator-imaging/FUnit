@@ -1,3 +1,6 @@
+// Licensed under the MIT License
+// https://github.com/sator-imaging/FUnit
+
 using FUnitImpl;
 using Jsonable;
 using System;
