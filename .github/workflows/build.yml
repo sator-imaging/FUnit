@@ -12,6 +12,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    matrix:
+      configuration: [Debug, Release]
+
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -24,12 +27,12 @@ jobs:
     
     - name: Build
       run: |
-        dotnet build --no-restore
-        dotnet build --no-restore -c Release
+        dotnet build --no-restore -c ${{ matrix.configuration }}
 
     - name: Test
       run: |
-        dotnet run --project ./cli --TEST
+        dotnet run -c ${{ matrix.configuration }} --project ./cli --TEST
         
-        ##dotnet run --project ./cli --markdown >> $GITHUB_STEP_SUMMARY
-        dnx -y FUnit.Run -- -md >> $GITHUB_STEP_SUMMARY
+        ###dotnet run --project ./cli --markdown >> $GITHUB_STEP_SUMMARY
+        
+        dnx -y FUnit.Run -- -c ${{ matrix.configuration }} -md >> $GITHUB_STEP_SUMMARY
