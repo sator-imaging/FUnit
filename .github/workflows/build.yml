@@ -12,8 +12,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    matrix:
-      configuration: [Debug, Release]
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
 
     steps:
     - uses: actions/checkout@v4
