@@ -266,7 +266,7 @@ static string BuildEscapedArguments(string[] args)
     {
         var arg = args[i];
 
-        if (arg.Contains(' ') || arg.Contains('\\') || arg.Contains('"') || arg.Contains('\''))
+        if (arg.Any(c => c is ' ' or '\\' or '"' or '\'' || !char.IsAscii(c)))
         {
             arg = $"\"{arg.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
         }
@@ -289,7 +289,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
 
     ConsoleLogger.LogInfo($"Arguments: `{(args.Length == 0 ? "<NOTHING>" : escapedArguments)}`  ");
 
-    var subCommandOptions = $"-c \"{options.BuildConfiguration}\" \"{filePath}\"";
+    var subCommandOptions = BuildEscapedArguments(["-c", options.BuildConfiguration, filePath]);
 
     // clean
     if (!noClean)
