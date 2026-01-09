@@ -11,6 +11,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 // --filter <string>
+const string AnsiColorRed = "\u001b[31m";
+const string AnsiColorYellow = "\u001b[33m";
+const string AnsiColorReset = "\u001b[0m";
 string fileFilter = "*test*.cs";
 {
     const string ARG_FILTER = "--filter";
@@ -401,7 +404,7 @@ async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool re
         if (args.Data != null)
         {
             callCounts.Error++;
-            Console.Error.WriteLine(args.Data);  // DO NOT use ConsoleLogger here!
+            Console.Error.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
         }
     };
 
@@ -412,7 +415,7 @@ async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool re
             if (args.Data != null)
             {
                 callCounts.Stdout++;
-                Console.WriteLine(args.Data);  // DO NOT use ConsoleLogger here!
+                Console.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
             }
         };
     }
@@ -479,6 +482,17 @@ static void RunAllTests()
 #endif
 
 
+static string Colorize(string message)
+{
+    if (string.IsNullOrEmpty(message))
+    {
+        return message;
+    }
+
+    message = message.Replace("error", $"{AnsiColorRed}error{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
+    message = message.Replace("warning", $"{AnsiColorYellow}warning{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
+    return message;
+}
 file sealed class ProcessCallbackCallCounts
 {
     public int Error;
