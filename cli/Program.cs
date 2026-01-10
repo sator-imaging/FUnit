@@ -484,7 +484,7 @@ static void RunAllTests()
 
 static string Colorize(string message)
 {
-    if (string.IsNullOrEmpty(message))
+    if (string.IsNullOrWhiteSpace(message))
     {
         return message;
     }
