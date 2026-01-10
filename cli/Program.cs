@@ -10,10 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// --filter <string>
 const string AnsiColorRed = "\u001b[31m";
 const string AnsiColorYellow = "\u001b[33m";
 const string AnsiColorReset = "\u001b[0m";
+
+// --filter <string>
 string fileFilter = "*test*.cs";
 {
     const string ARG_FILTER = "--filter";
