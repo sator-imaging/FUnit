@@ -197,7 +197,7 @@ dnx FUnit.Run Release
 
 ```bash
 # run tests 10 times (3 by default)
-dotnet run ./tests/my-test.cs --iterations 10
+dnx -y FUnit.Run --iterations 10
 ```
 
 
@@ -205,7 +205,7 @@ dotnet run ./tests/my-test.cs --iterations 10
 
 ```bash
 # run max 10 tests simultaneously subject by subject
-dotnet run ./tests/my-test.cs --concurrency 10
+dnx -y FUnit.Run --concurrency 10
 ```
 
 
