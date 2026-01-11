@@ -490,16 +490,16 @@ static string Colorize(string message)
         return message;
     }
 
-    var i = message.IndexOf('\u001b');
-    if (i == -1)
+    var ansiEscapeIndex = message.IndexOf('\u001b');
+    if (ansiEscapeIndex == -1)
     {
         message = message.Replace("error", $"{AnsiColorRed}error{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
         message = message.Replace("warning", $"{AnsiColorYellow}warning{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
     }
     else
     {
-        var head = message[..i];
-        var tail = message[i..];
+        var head = message[..ansiEscapeIndex];
+        var tail = message[ansiEscapeIndex..];
         head = head.Replace("error", $"{AnsiColorRed}error{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
         head = head.Replace("warning", $"{AnsiColorYellow}warning{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
         message = head + tail;
