@@ -10,8 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-const string AnsiColorRed = "\u001b[31m";
-const string AnsiColorYellow = "\u001b[33m";
+const string AnsiColorRed = "\u001b[97;41m";
+const string AnsiColorYellow = "\u001b[97;43m";
 const string AnsiColorReset = "\u001b[0m";
 
 // --filter <string>
@@ -490,8 +490,20 @@ static string Colorize(string message)
         return message;
     }
 
-    message = message.Replace("error", $"{AnsiColorRed}error{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
-    message = message.Replace("warning", $"{AnsiColorYellow}warning{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
+    var i = message.IndexOf('\u001b');
+    if (i == -1)
+    {
+        message = message.Replace("error", $"{AnsiColorRed}error{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
+        message = message.Replace("warning", $"{AnsiColorYellow}warning{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
+    }
+    else
+    {
+        var head = message[..i];
+        var tail = message[i..];
+        head = head.Replace("error", $"{AnsiColorRed}error{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
+        head = head.Replace("warning", $"{AnsiColorYellow}warning{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
+        message = head + tail;
+    }
     return message;
 }
 file sealed class ProcessCallbackCallCounts
