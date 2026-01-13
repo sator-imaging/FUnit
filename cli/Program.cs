@@ -29,7 +29,6 @@ bool noClean = false;
     }
 }
 
-// then, parse shared args
 // NOTE: This logic separates arguments into options (and their values) and file glob patterns.
 // It assumes that any argument starting with a hyphen is an option. Any subsequent argument not
 // starting with a hyphen is treated as its value (e.g., "--threshold 1").
@@ -45,10 +44,15 @@ for (int i = 0; i < args.Length; i++)
     {
         remainingArgs.Add(arg);
         // If the next argument doesn't start with a hyphen, it's a value for the current option
-        if (i + 1 < args.Length && !args[i + 1].StartsWith("-"))
+        if (i + 1 < args.Length)
         {
-            remainingArgs.Add(args[i + 1]);
-            i++; // Skip the next argument since we've already processed it
+            if (!args[i + 1].StartsWith("-") ||
+                // ummmmm..... (FUnit allows specifying Release or Debug configuration without leading '-c')
+                args[i + 1] is SR.Flag_Debug or SR.Flag_Release)
+            {
+                remainingArgs.Add(args[i + 1]);
+                i++; // Skip the next argument since we've already processed it
+            }
         }
     }
     else
