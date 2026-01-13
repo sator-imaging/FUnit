@@ -32,7 +32,8 @@ jobs:
 
     - name: Test
       run: |
-        dotnet run -c ${{ matrix.configuration }} --project ./cli --TEST
+        ### '-- Debug' is required to test the cli option handling ('--TEST' is valid only in Debug build)
+        dotnet run -c ${{ matrix.configuration }} --project ./cli -- Debug --TEST
         
         ###dotnet run --project ./cli --markdown >> $GITHUB_STEP_SUMMARY
         
