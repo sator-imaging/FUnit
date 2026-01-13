@@ -16,18 +16,6 @@ const string AnsiColorYellow = "\u001b[97;43m";
 const string AnsiColorReset = "\u001b[0m";
 
 
-// --no-clean
-bool noClean = false;
-{
-    const string ARG_NO_CLEAN = "--no-clean";
-
-    int index = args.IndexOf(ARG_NO_CLEAN);
-    if (index >= 0)
-    {
-        noClean = true;
-        args = [.. args[..index], .. args[(index + 1)..]];
-    }
-}
 
 // then, parse shared args
 // NOTE: This logic separates arguments into options (and their values) and file glob patterns.
@@ -138,7 +126,7 @@ if (validFUnitFiles.Count > 0)
 
         ConsoleLogger.LogInfo($"# 🔬 `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
 
-        var exitCode = await ExecuteTestAsync(filePath, [.. remainingArgs], noClean);
+        var exitCode = await ExecuteTestAsync(filePath, [.. remainingArgs]);
         if (exitCode != 0)
         {
             failedSuiteCount++;
@@ -294,7 +282,7 @@ static string BuildEscapedArguments(string[] args)
 
 
 // TODO: can run tests simultaneously but console log will be messed up.
-async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noClean)
+async ValueTask<int> ExecuteTestAsync(string filePath, string[] args)
 {
     var escapedArguments = BuildEscapedArguments(args);
 
@@ -302,60 +290,24 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
 
     var subCommandOptions = BuildEscapedArguments(["-c", options.BuildConfiguration, filePath]);
 
-    // clean
-    if (!noClean)
+    // FUnit: dotnet run command can handle everything.
+    // just call dotnet run and wait for it to finish.
+    // 'dotnet clean', 'dotnet restore', 'dotnet build' are not needed.
+    // because they can't be used with a single cs file.
+    var exitCode = await RunDotnetAsync(
+        $"run {subCommandOptions}",
+        escapedArguments,
+        requireStdOutLogging: true,
+        requireDetails: false);
+
+    if (exitCode != 0)
     {
-        int exitCode = await RunDotnetAsync(
-            $"clean {subCommandOptions}",
-            "",
-            requireStdOutLogging: false,
-            requireDetails: true);
-
-        if (exitCode != 0)
-        {
-            ConsoleLogger.LogInfo();
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: 'dotnet clean' command failed with exit code {exitCode}.");
-
-            return exitCode;
-        }
+        ConsoleLogger.LogInfo();
+        ConsoleLogger.LogFailed($"> [!CAUTION]");
+        ConsoleLogger.LogFailed($"> Error: 'dotnet run' command failed with exit code {exitCode}.");
     }
 
-    // build
-    {
-        var exitCode = await RunDotnetAsync(
-            $"build {subCommandOptions}",
-            "",
-            requireStdOutLogging: true,
-            requireDetails: true);
-
-        if (exitCode != 0)
-        {
-            ConsoleLogger.LogInfo();
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: 'dotnet run' command failed with exit code {exitCode}.");
-
-            return exitCode;
-        }
-    }
-
-    // run
-    {
-        var exitCode = await RunDotnetAsync(
-            $"run {subCommandOptions} --no-build",
-            escapedArguments,
-            requireStdOutLogging: true,
-            requireDetails: false);
-
-        if (exitCode != 0)
-        {
-            ConsoleLogger.LogInfo();
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: 'dotnet run' command failed with exit code {exitCode}.");
-        }
-
-        return exitCode;
-    }
+    return exitCode;
 }
 
 async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool requireStdOutLogging, bool requireDetails)
