@@ -32,9 +32,10 @@ bool noClean = false;
 // then, parse shared args
 // NOTE: This logic separates arguments into options (and their values) and file glob patterns.
 // It assumes that any argument starting with a hyphen is an option. Any subsequent argument not
-// starting with a hyphen is treated as its value (e.g., "--threshold 1"). All other arguments
-// are considered glob patterns. Flags that require special handling (like "--no-clean") are
-// processed before this loop.
+// starting with a hyphen is treated as its value (e.g., "--threshold 1").
+// Arguments like "--threshold -1" will fail because the parser will treat "-1" as a new option.
+// All other arguments are considered glob patterns. Flags that require special handling
+// (like "--no-clean") are processed before this loop.
 var fileGlobs = new List<string>();
 var remainingArgs = new List<string>();
 for (int i = 0; i < args.Length; i++)
