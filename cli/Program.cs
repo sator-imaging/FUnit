@@ -302,6 +302,24 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
 
     var subCommandOptions = BuildEscapedArguments(["-c", options.BuildConfiguration, filePath]);
 
+    // restore
+    {
+        int exitCode = await RunDotnetAsync(
+            $"restore {BuildEscapedArguments([filePath])}",
+            "",
+            requireStdOutLogging: false,
+            requireDetailsTag: true);
+
+        if (exitCode != 0)
+        {
+            ConsoleLogger.LogInfo();
+            ConsoleLogger.LogFailed($"> [!CAUTION]");
+            ConsoleLogger.LogFailed($"> Error: 'dotnet restore' command failed with exit code {exitCode}.");
+
+            return exitCode;
+        }
+    }
+
     // clean
     if (!noClean)
     {
@@ -309,7 +327,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             $"clean {subCommandOptions}",
             "",
             requireStdOutLogging: false,
-            requireDetails: true);
+            requireDetailsTag: true);
 
         if (exitCode != 0)
         {
@@ -327,7 +345,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             $"build {subCommandOptions}",
             "",
             requireStdOutLogging: true,
-            requireDetails: true);
+            requireDetailsTag: true);
 
         if (exitCode != 0)
         {
@@ -345,7 +363,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             $"run {subCommandOptions} --no-build",
             escapedArguments,
             requireStdOutLogging: true,
-            requireDetails: false);
+            requireDetailsTag: false);
 
         if (exitCode != 0)
         {
@@ -358,7 +376,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
     }
 }
 
-async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool requireStdOutLogging, bool requireDetails)
+async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool requireStdOutLogging, bool requireDetailsTag)
 {
     var subCommandWithoutFilePath = string.Join(" ", subCommand.Split(' ').Take(3));
     arguments = subCommand + (string.IsNullOrWhiteSpace(arguments) ? string.Empty : $" -- {arguments}");
@@ -369,7 +387,7 @@ async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool re
     }
     else
     {
-        if (requireDetails)
+        if (requireDetailsTag)
         {
             ConsoleLogger.LogInfoRaw();
             ConsoleLogger.LogInfoRaw($"<details><summary>dotnet {subCommandWithoutFilePath}</summary>");
@@ -385,7 +403,7 @@ async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool re
         ConsoleLogger.LogInfo($"dotnet {arguments}");
         ConsoleLogger.LogInfo($"```");
 
-        if (requireDetails)
+        if (requireDetailsTag)
         {
             ConsoleLogger.LogInfoRaw();
             ConsoleLogger.LogInfoRaw("```");
@@ -444,7 +462,7 @@ async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool re
 
     if (ConsoleLogger.EnableMarkdownOutput)
     {
-        if (requireDetails)
+        if (requireDetailsTag)
         {
             if (callCounts.Stdout == 0 && callCounts.Error == 0)
             {
