@@ -17,6 +17,10 @@
     <ProjectReference Include="../src/FUnit.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
+  </ItemGroup>
+
   <!--                            -->
   <!-- nuget.org publish settings -->
   <!--                            -->

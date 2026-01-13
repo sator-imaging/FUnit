@@ -2,6 +2,7 @@
 // https://github.com/sator-imaging/FUnit
 
 using FUnitImpl;
+using Microsoft.Extensions.FileSystemGlobbing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,31 +15,6 @@ const string AnsiColorRed = "\u001b[97;41m";
 const string AnsiColorYellow = "\u001b[97;43m";
 const string AnsiColorReset = "\u001b[0m";
 
-// --filter <string>
-string fileFilter = "*test*.cs";
-{
-    const string ARG_FILTER = "--filter";
-
-    int index = args.IndexOf(ARG_FILTER);
-    if (index >= 0)
-    {
-        if (index == args.Length - 1)
-        {
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> `{ARG_FILTER}` takes a string parameter.");
-            Environment.Exit(1);
-        }
-
-        fileFilter = args[index + 1];
-        if (!fileFilter.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-        {
-            fileFilter += ".cs";
-        }
-
-        // remove filter arguments
-        args = [.. args[..index], .. args[(index + 2)..]];
-    }
-}
 
 // --no-clean
 bool noClean = false;
@@ -54,7 +30,33 @@ bool noClean = false;
 }
 
 // then, parse shared args
-var options = CommandLineOptions.Parse(args);
+// NOTE: This logic separates arguments into options (and their values) and file glob patterns.
+// It assumes that any argument starting with a hyphen is an option. Any subsequent argument not
+// starting with a hyphen is treated as its value (e.g., "--threshold 1").
+// Arguments like "--threshold -1" will fail because the parser will treat "-1" as a new option.
+// All other arguments are considered glob patterns. Flags that require special handling
+// (like "--no-clean") are processed before this loop.
+var fileGlobs = new List<string>();
+var remainingArgs = new List<string>();
+for (int i = 0; i < args.Length; i++)
+{
+    string arg = args[i];
+    if (arg.StartsWith("-"))
+    {
+        remainingArgs.Add(arg);
+        // If the next argument doesn't start with a hyphen, it's a value for the current option
+        if (i + 1 < args.Length && !args[i + 1].StartsWith("-"))
+        {
+            remainingArgs.Add(args[i + 1]);
+            i++; // Skip the next argument since we've already processed it
+        }
+    }
+    else
+    {
+        fileGlobs.Add(arg);
+    }
+}
+var options = CommandLineOptions.Parse([.. remainingArgs]);
 
 #if DEBUG
 if (args.Contains(SR.Flag_TEST))
@@ -76,12 +78,16 @@ if (EnsureEnvironment() != 0)
 // Collect all files with *.cs file extension (case insensitive)
 // Assuming the tool should search in the current directory and its subdirectories
 string currentDirectory = Directory.GetCurrentDirectory();
-List<string> csFiles = [.. Directory.GetFiles(currentDirectory, fileFilter, new EnumerationOptions{
-    IgnoreInaccessible = true,
-    MatchCasing = MatchCasing.CaseInsensitive,
-    RecurseSubdirectories = true,
-    ReturnSpecialDirectories = false,
-})];
+var matcher = new Matcher(StringComparison.OrdinalIgnoreCase);
+if (fileGlobs.Count == 0)
+{
+    matcher.AddInclude("**/*test*.cs");
+}
+else
+{
+    matcher.AddIncludePatterns(fileGlobs);
+}
+var csFiles = matcher.GetResultsInFullPath(currentDirectory).ToList();
 
 List<string> validFUnitFiles = [];
 
@@ -132,7 +138,7 @@ if (validFUnitFiles.Count > 0)
 
         ConsoleLogger.LogInfo($"# 🔬 `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
 
-        var exitCode = await ExecuteTestAsync(filePath, args, noClean);
+        var exitCode = await ExecuteTestAsync(filePath, [.. remainingArgs], noClean);
         if (exitCode != 0)
         {
             failedSuiteCount++;
@@ -172,7 +178,8 @@ else
 {
     ConsoleLogger.LogInfo();
     ConsoleLogger.LogFailed($"> [!CAUTION]");
-    ConsoleLogger.LogFailed($"> No valid {FUnit} test files found matching the criteria: `{fileFilter}`");
+    var patterns = fileGlobs.Count > 0 ? string.Join(", ", fileGlobs) : "**/*test*.cs";
+    ConsoleLogger.LogFailed($"> No valid {FUnit} test files found matching the criteria: `{patterns}`");
 
     Environment.Exit(1);
 }
