@@ -30,6 +30,9 @@ bool noClean = false;
 }
 
 // then, parse shared args
+// NOTE: This logic assumes that any argument that does not start with a hyphen is a file glob pattern.
+// If a new command-line option is introduced that does not take a value (e.g., a flag),
+// it must be processed before this loop to avoid being misinterpreted as a glob pattern.
 var fileGlobs = new List<string>();
 var remainingArgs = new List<string>();
 for (int i = 0; i < args.Length; i++)
