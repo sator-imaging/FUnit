@@ -43,12 +43,11 @@ for (int i = 0; i < args.Length; i++)
     if (arg.StartsWith("-"))
     {
         remainingArgs.Add(arg);
+        
         // If the next argument doesn't start with a hyphen, it's a value for the current option
         if (i + 1 < args.Length)
         {
-            if (!args[i + 1].StartsWith("-") ||
-                // ummmmm..... (FUnit allows specifying Release or Debug configuration without leading '-c')
-                args[i + 1] is SR.Flag_Debug or SR.Flag_Release)
+            if (!args[i + 1].StartsWith("-"))
             {
                 remainingArgs.Add(args[i + 1]);
                 i++; // Skip the next argument since we've already processed it
@@ -57,7 +56,15 @@ for (int i = 0; i < args.Length; i++)
     }
     else
     {
-        fileGlobs.Add(arg);
+        // ummmmm..... (FUnit allows specifying Release or Debug configuration without leading '-c')
+        if (arg is SR.Flag_Debug or SR.Flag_Release)
+        {
+            remainingArgs.Add(arg);
+        }
+        else
+        {
+            fileGlobs.Add(arg);
+        }
     }
 }
 var options = CommandLineOptions.Parse([.. remainingArgs]);
