@@ -29,7 +29,7 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
             it("should work", async () =>
             {
                 await Task.Delay(10);
-                Interlocked.Increment(ref callCounts.FuncTask)
+                Interlocked.Increment(ref callCounts.FuncTask);
             });
 
             it("should throw", async () =>
