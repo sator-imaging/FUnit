@@ -2,10 +2,13 @@
 //#:package FUnit@*
 
 using FUnitImpl;
+using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 #pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 #pragma warning disable CA1822 // Mark members as static
@@ -120,103 +123,105 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
 }
 
 
-const int AsyncTestDelayMilliseconds = 1000;
-var startTimestamp = Stopwatch.GetTimestamp();
-
-var callCounts = new CallCounts();
-var sync = new object();
-
-int failedTestCount = FUnit.Run(args, describe =>
+// async test case execution
 {
-    describe("Action", it =>
-    {
-        it("should increment action call count", () =>
-        {
-            Interlocked.Increment(ref callCounts.Action);
-        });
-    });
+    const int AsyncTestDelayMilliseconds = 1000;
+    var startTimestamp = Stopwatch.GetTimestamp();
 
-    describe("Func<Task>", it =>
-    {
-        it("should increment func task call count", task);
-        async Task task()
-        {
-            await Task.Delay(AsyncTestDelayMilliseconds);  // must wait a second to check
-            Interlocked.Increment(ref callCounts.FuncTask);
-        }
-    });
+    var callCounts = new CallCounts();
+    var sync = new object();
 
-    describe("Func<ValueTask>", it =>
+    int failedTestCount = FUnit.Run(args, describe =>
     {
-        it("should increment func value task call count", task);
-        async ValueTask task()
+        describe("Action", it =>
         {
-            await Task.Delay(AsyncTestDelayMilliseconds);  // must wait a second to check
-            Interlocked.Increment(ref callCounts.FuncValueTask);
-        }
-    });
-
-    describe("Func<object>", it => it("should pass", () => new object()));
-
-    // negative tests
-    describe("Empty test is not allowed", it => { });
-    describe("Action<T>", it => it("should throw", (object obj) => { }));
-    describe("Func<MyValueType>", it => it("should throw", () => new MyValueType()));
-    describe("Func<ValueTask<T>>", it =>
-    {
-        it("should throw", task);
-        async ValueTask<int> task() { await Task.CompletedTask; return 310; }
-    });
-    describe("Incorrect global state", it =>
-    {
-        it("should pass only once", () =>
-        {
-            lock (sync)
+            it("should increment action call count", () =>
             {
-                using var x = new StringBuilderCache();
-                x.Append("test");
-                Must.BeEqual("test", x.ToString());
+                Interlocked.Increment(ref callCounts.Action);
+            });
+        });
+
+        describe("Func<Task>", it =>
+        {
+            it("should increment func task call count", task);
+            async Task task()
+            {
+                await Task.Delay(AsyncTestDelayMilliseconds);  // must wait a second to check
+                Interlocked.Increment(ref callCounts.FuncTask);
             }
         });
+
+        describe("Func<ValueTask>", it =>
+        {
+            it("should increment func value task call count", task);
+            async ValueTask task()
+            {
+                await Task.Delay(AsyncTestDelayMilliseconds);  // must wait a second to check
+                Interlocked.Increment(ref callCounts.FuncValueTask);
+            }
+        });
+
+        describe("Func<object>", it => it("should pass", () => new object()));
+
+        // negative tests
+        describe("Empty test is not allowed", it => { });
+        describe("Action<T>", it => it("should throw", (object obj) => { }));
+        describe("Func<MyValueType>", it => it("should throw", () => new MyValueType()));
+        describe("Func<ValueTask<T>>", it =>
+        {
+            it("should throw", task);
+            async ValueTask<int> task() { await Task.CompletedTask; return 310; }
+        });
+        describe("Incorrect global state", it =>
+        {
+            it("should pass only once", () =>
+            {
+                lock (sync)
+                {
+                    using var x = new StringBuilderCache();
+                    x.Append("test");
+                    Must.BeEqual("test", x.ToString());
+                }
+            });
+        });
+
+        // Must tests
+        describe("Error messages", it => it("should throw", () => { Must.HaveSameSequence([1, 2], [1, 2, 3]); }));
+
+        // test descriptor tests
+        describe("Error outside of 'it' scope", it =>
+        {
+            it("should pass empty test function", () => { });
+            it("should pass empty test function", () => { });  // should get error due to naming conflict
+
+            throw new Exception($"Failed outside of '{nameof(it)}'");
+        });
+
+        throw new Exception($"Failed outside of '{nameof(describe)}'");
     });
 
-    // Must tests
-    describe("Error messages", it => it("should throw", () => { Must.HaveSameSequence([1, 2], [1, 2, 3]); }));
 
-    // test descriptor tests
-    describe("Error outside of 'it' scope", it =>
-    {
-        it("should pass empty test function", () => { });
-        it("should pass empty test function", () => { });  // should get error due to naming conflict
+    // async tests must be awaited correctly
+    var elapsedTime = Stopwatch.GetElapsedTime(startTimestamp);
+    var expectedTime = AsyncTestDelayMilliseconds * 2;
+    Must.BeTrue(elapsedTime.TotalMilliseconds > expectedTime);
 
-        throw new Exception($"Failed outside of '{nameof(it)}'");
-    });
+    var resultText = FUnit.Result?.ToString() ?? throw new Exception("must not be reached");
+    Must.BeEqual(1, Regex.Count(resultText, @" 'it' must be called at least once"));
+    Must.BeEqual(1, Regex.Count(resultText, @" Test case conflict"));
+    Must.BeEqual(1, Regex.Count(resultText, @" FUnit got error from outside of 'it' scope"));
+    Must.BeEqual(1, Regex.Count(resultText, @" FUnit got error from outside of 'describe' scope"));
+    Must.BeEqual(1, Regex.Count(resultText, @" Flaky Test Detected: Inconsistent results across multiple runs"));
 
-    throw new Exception($"Failed outside of '{nameof(describe)}'");
-});
+    // errors outside of test descriptor scope should be captured
+    const int ExpectedErrorCount = 9;
+    Must.BeEqual(ExpectedErrorCount, failedTestCount);
 
+    Must.BeEqual(3, callCounts.Action);
+    Must.BeEqual(3, callCounts.FuncTask);
+    Must.BeEqual(3, callCounts.FuncValueTask);
 
-// async tests must be awaited correctly
-var elapsedTime = Stopwatch.GetElapsedTime(startTimestamp);
-var expectedTime = AsyncTestDelayMilliseconds * 2;
-Must.BeTrue(elapsedTime.TotalMilliseconds > expectedTime);
-
-var resultText = FUnit.Result?.ToString() ?? throw new Exception("must not be reached");
-Must.BeEqual(1, Regex.Count(resultText, @" 'it' must be called at least once"));
-Must.BeEqual(1, Regex.Count(resultText, @" Test case conflict"));
-Must.BeEqual(1, Regex.Count(resultText, @" FUnit got error from outside of 'it' scope"));
-Must.BeEqual(1, Regex.Count(resultText, @" FUnit got error from outside of 'describe' scope"));
-Must.BeEqual(1, Regex.Count(resultText, @" Flaky Test Detected: Inconsistent results across multiple runs"));
-
-// errors outside of test descriptor scope should be captured
-const int ExpectedErrorCount = 9;
-Must.BeEqual(ExpectedErrorCount, failedTestCount);
-
-Must.BeEqual(3, callCounts.Action);
-Must.BeEqual(3, callCounts.FuncTask);
-Must.BeEqual(3, callCounts.FuncValueTask);
-
-ConsoleLogger.LogInfoRaw($@"
+    ConsoleLogger.LogInfoRaw($@"
 <details><summary><b>TEST</b>: <code>{nameof(FUnit)}.{nameof(FUnit.Result)}.{nameof(FUnit.Result.ToString)}()</code></summary>
 
 ```md
@@ -226,7 +231,7 @@ ConsoleLogger.LogInfoRaw($@"
 </details>
 ");
 
-ConsoleLogger.LogInfoRaw($@"
+    ConsoleLogger.LogInfoRaw($@"
 <details><summary><b>TEST</b>: <code>{nameof(FUnit)}.{nameof(FUnit.Result)}.{nameof(FUnit.Result.ToJson)}()</code></summary>
 
 ```json
@@ -236,11 +241,18 @@ ConsoleLogger.LogInfoRaw($@"
 </details>
 ");
 
+    ConsoleLogger.LogPassed($"{SR.MarkdownPassed} OK: {ExpectedErrorCount} expected errors are captured correctly");
+}
 
-ConsoleLogger.LogPassed($"{SR.MarkdownPassed} OK: {ExpectedErrorCount} expected errors are captured correctly");
+
+
+
+
 ConsoleLogger.LogPassed($"{SR.MarkdownPassed} All tests successfully completed");
 
 return 0;
+
+
 
 
 

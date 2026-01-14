@@ -2,6 +2,9 @@
 //#:package FUnit@*
 
 using FUnitImpl;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 return FUnit.Run(args, describe =>
 {

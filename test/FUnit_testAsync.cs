@@ -2,7 +2,10 @@
 //#:package FUnit@*
 
 using FUnitImpl;
+using System;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 
 const int AsyncTestDelayMilliseconds = 1000;
