@@ -5,6 +5,7 @@ using FUnitImpl;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 #pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 #pragma warning disable CA1822 // Mark members as static
@@ -20,7 +21,7 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
 
 // build and execute
 {
-    var calls = new CallCounts();
+    var callCounts = new CallCounts();
     var suite = FUnit.Build(describe =>
     {
         describe("Build & Execute", it =>
@@ -28,7 +29,7 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
             it("should work", async () =>
             {
                 await Task.Delay(10);
-                calls.FuncTask++;
+                Interlocked.Increment(ref callCounts.FuncTask)
             });
 
             it("should throw", async () =>
@@ -46,7 +47,7 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
     var result = suite.ExecuteTests([.. args, "--iterations", numIterations.ToString()]);
 
     // +1 because explicit execute was performed
-    Must.BeEqual(numIterations + 1, calls.FuncTask);
+    Must.BeEqual(numIterations + 1, callCounts.FuncTask);
     Must.BeEqual(numIterations + 1, result.TestsBySubject["Build & Execute"][0].ExecutionCount);
     Must.BeEqual(numIterations + 1, result.TestsBySubject["Build & Execute"][1].ExecutionCount);
 }
@@ -55,33 +56,39 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
 // --iterations
 {
     const int TestIterationCount = 7;
-    var calls = new CallCounts();
+    var callCounts = new CallCounts();
     var desc = "--iterations " + TestIterationCount;
     FUnit.Run([.. args, "--iterations", TestIterationCount.ToString()], describe =>
     {
         describe(desc, it =>
         {
-            it("should pass", () => calls.Action++);
+            it("should pass", () =>
+            {
+                Interlocked.Increment(ref callCounts.Action);
+            });
         });
     });
 
     Must.BeEqual(TestIterationCount, FUnit.Result!.TestsBySubject[desc][0].ExecutionCount);
-    Must.BeEqual(TestIterationCount, calls.Action);
+    Must.BeEqual(TestIterationCount, callCounts.Action);
 }
 {
     const int TestIterationCount = 1;
-    var calls = new CallCounts();
+    var callCounts = new CallCounts();
     var desc = "--iterations " + TestIterationCount;
     FUnit.Run([.. args, "--iterations", TestIterationCount.ToString()], describe =>
     {
         describe(desc, it =>
         {
-            it("should pass", () => calls.Action++);
+            it("should pass", () =>
+            {
+                Interlocked.Increment(ref callCounts.Action);
+            });
         });
     });
 
     Must.BeEqual(TestIterationCount, FUnit.Result!.TestsBySubject[desc][0].ExecutionCount);
-    Must.BeEqual(TestIterationCount, calls.Action);
+    Must.BeEqual(TestIterationCount, callCounts.Action);
 }
 
 
@@ -90,7 +97,7 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
     const int DelayMilliseconds = 1000;
     var ts = Stopwatch.GetTimestamp();
 
-    var calls = new CallCounts();
+    var callCounts = new CallCounts();
     Must.BeEqual(0, FUnit.Run([.. args, "--concurrency", "1", "--iterations", "10"], describe =>
     {
         describe("should run simutaneously", it =>
@@ -98,7 +105,7 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
             it("should work", async () =>
             {
                 await Task.Delay(DelayMilliseconds);
-                calls.FuncTask++;
+                Interlocked.Increment(ref callCounts.FuncTask);
             });
         });
     }));
@@ -109,7 +116,7 @@ Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Par
 
     var result = FUnit.Result ?? throw new Exception("must not be reached");
     Must.BeEqual(10, result.TestsBySubject.First().Value[0].ExecutionCount);
-    Must.BeEqual(10, calls.FuncTask);
+    Must.BeEqual(10, callCounts.FuncTask);
 }
 
 
@@ -125,7 +132,7 @@ int failedTestCount = FUnit.Run(args, describe =>
     {
         it("should increment action call count", () =>
         {
-            callCounts.Action++;
+            Interlocked.Increment(ref callCounts.Action);
         });
     });
 
@@ -135,7 +142,7 @@ int failedTestCount = FUnit.Run(args, describe =>
         async Task task()
         {
             await Task.Delay(AsyncTestDelayMilliseconds);  // must wait a second to check
-            callCounts.FuncTask++;
+            Interlocked.Increment(ref callCounts.FuncTask);
         }
     });
 
@@ -145,7 +152,7 @@ int failedTestCount = FUnit.Run(args, describe =>
         async ValueTask task()
         {
             await Task.Delay(AsyncTestDelayMilliseconds);  // must wait a second to check
-            callCounts.FuncValueTask++;
+            Interlocked.Increment(ref callCounts.FuncValueTask);
         }
     });
 
@@ -239,9 +246,9 @@ return 0;
 
 file sealed class CallCounts
 {
-    public int Action;
-    public int FuncTask;
-    public int FuncValueTask;
+    public volatile int Action;
+    public volatile int FuncTask;
+    public volatile int FuncValueTask;
 }
 
 file struct MyValueType { }

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 const string AnsiColorRed = "\u001b[97;41m";
@@ -440,7 +441,7 @@ async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool re
     {
         if (args.Data != null)
         {
-            callCounts.Error++;
+            Interlocked.Increment(ref callCounts.Error);
             Console.Error.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
         }
     };
@@ -451,7 +452,7 @@ async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool re
         {
             if (args.Data != null)
             {
-                callCounts.Stdout++;
+                Interlocked.Increment(ref callCounts.Stdout);
                 Console.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
             }
         };
@@ -544,6 +545,6 @@ static string Colorize(string message)
 }
 file sealed class ProcessCallbackCallCounts
 {
-    public int Error;
-    public int Stdout;
+    public volatile int Error;
+    public volatile int Stdout;
 }
