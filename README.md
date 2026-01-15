@@ -1,17 +1,25 @@
+<div align="center">
+
+# FUnit
+
+**Structured Unit Testing as a File-based App**
+
 [![FUnit](https://img.shields.io/nuget/vpre/FUnit?label=FUnit)](https://www.nuget.org/packages/FUnit)
 [![FUnit.Run](https://img.shields.io/nuget/vpre/FUnit.Run?label=Run)](https://www.nuget.org/packages/FUnit.Run)
 [![FUnit.Directives](https://img.shields.io/nuget/vpre/FUnit.Directives?label=Directives)](https://www.nuget.org/packages/FUnit.Directives)
+<br/>
 [![build](https://github.com/sator-imaging/FUnit/actions/workflows/build.yml/badge.svg)](https://github.com/sator-imaging/FUnit/actions/workflows/build.yml)
-&nbsp;
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sator-imaging/FUnit)
 
+</div>
 
 
+&nbsp;
 
 
-# 🔬 Unit Testing Framework for File-based Apps
+## 🔬 Concept
 
-`FUnit` provides structured test descriptor for file-based apps introduced in .NET 10.0. (i.e., no `.csproj` is required anymore)
+`FUnit` provides structured test descriptor for file-based C# project introduced in .NET 10.0. (i.e., no `.csproj` is required anymore)
 
 ```cs
 #:project ../src
@@ -22,12 +30,12 @@ return FUnit.Run(args, describe =>
     // Organize tests by test subject
     describe("Test Subject", it =>
     {
-        it("should be ...", async () =>  // async can be used
+        it("should be ... when ...", async () =>  // async test supported
         {
-            // Write actual test here: Arrange, Act, Assert
+            // Write test: Arrange, Act, Assert
         });
 
-        it("can have multiple test cases", ...);
+        it("can have multiple tests within a 'describe' block", ...);
     });
 
     describe("Inspired by vitest", ...);
@@ -36,13 +44,16 @@ return FUnit.Run(args, describe =>
 
 
 ```bash
-# Run unit test
+# Run unit test (.NET 10 can run a .cs file as a project)
 dotnet run ./tests/my-test.cs
 
-# OR use 'dnx' to run tests in current or subfolders
+# OR use 'dnx' to run tests in current or sub folders
 dnx FUnit.Run
-dnx FUnit.Run --no-clean --filter *specificTest*.cs
+dnx FUnit.Run --no-clean "**/*test*.cs"
 ```
+
+
+&nbsp;
 
 
 
