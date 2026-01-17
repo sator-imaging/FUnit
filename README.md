@@ -67,6 +67,9 @@ dnx FUnit.Run --no-clean "**/*test*.cs"
 > - SHALL use `#:package` to add nuget package reference. (`*` or semantic version must be specified)
 > - SHALL NOT use `#r` or other directives formerly used for *dotnet-script* (`.csx`) files.
 
+> [!TIP]
+> Unit tests should follow W.H.Y. (What, How, Yields) principle.
+
 ```cs
 #:project ../src
 #:package FUnit@*
@@ -77,16 +80,15 @@ return FUnit.Run(args, describe =>
     // Organize tests by test subject
     describe("Test Subject", it =>
     {
-        // Expected result and test function
-        it("should be ...", () =>
+        it("should be ... when ...", () =>
         {
-            // Write actual test here: Arrange, Act, Assert
+            // Write test: Arrange, Act, Assert
         });
 
         // Other test cases
-        it("should not ...", async () =>
+        it("should throw ... when ...", async () =>
         {
-            // Async test can also be written
+            // Async test is also supported
         });
 
         it(...);
