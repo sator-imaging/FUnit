@@ -363,7 +363,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
         {
             ConsoleLogger.LogInfo();
             ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: 'dotnet run' command failed with exit code {exitCode}.");
+            ConsoleLogger.LogFailed($"> Error: 'dotnet build' command failed with exit code {exitCode}.");
 
             return exitCode;
         }
