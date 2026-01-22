@@ -1,4 +1,4 @@
-name: build
+name: Test
 
 on:
   push:
@@ -8,31 +8,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
 
+  debug:
     runs-on: ubuntu-latest
-
-    #strategy:
-    #  matrix:
-    #    configuration: [Debug, Release]
-
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.x.x
 
-    - name: Restore dependencies
-      run: dotnet restore
-    
     - name: Test (Debug)
       run: |
         # Omit '-c' for configuration option (testing CLI tool option handling; NOT dotnet command)
         # * '--TEST' is valid only in Debug build
         dotnet run -c Debug --project ./cli -- Debug --TEST
         dotnet run -c Debug --project ./cli -- Debug -md --warnings >> $GITHUB_STEP_SUMMARY
-    
+
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.x.x
+
     - name: Test (Release)
       run: |
+        # no '--warnings'
         dotnet run -c Release --project ./cli -- Release -md >> $GITHUB_STEP_SUMMARY
