@@ -412,7 +412,7 @@ async ValueTask<int> RunDotnetAsync(
     var subCommandWithoutFilePath = string.Join(" ", subCommand.Split(' ').Take(3));
     if (addNoWarn)
     {
-        subCommand += " -p:NoWarn=\"*\"";
+        subCommand += " -p:WarningLevel=0";
     }
     arguments = subCommand + (string.IsNullOrWhiteSpace(arguments) ? string.Empty : $" -- {arguments}");
 
