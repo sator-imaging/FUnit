@@ -334,7 +334,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             "",
             requireStdOutLogging: false,
             requireDetailsTag: true,
-            addNoWarn: !showWarnings);
+            addNoWarn: false);
 
         if (exitCode != 0)
         {
