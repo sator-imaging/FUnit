@@ -415,7 +415,7 @@ async ValueTask<int> RunDotnetAsync(
     var subCommandWithoutFilePath = string.Join(" ", subCommand.Split(' ').Take(3));
     if (addNoWarn)
     {
-        subCommand += " --nologo -p:NoWarn=\\\"*\\\"";
+        subCommand += " -p:NoWarn=\\\"*\\\"";
     }
     arguments = subCommand + (string.IsNullOrWhiteSpace(arguments) ? string.Empty : $" -- {arguments}");
 
