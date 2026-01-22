@@ -334,8 +334,8 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     // restore
     {
         int exitCode = await RunDotnetAsync(
-            $"restore {BuildEscapedArguments([filePath])}",
-            "",
+            $"restore {subCommandOptions}",
+            arguments: BuildEscapedArguments([filePath]),
             requireStdOutLogging: false,
             requireDetailsTag: true,
             addNoWarn: false);
@@ -355,7 +355,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     {
         int exitCode = await RunDotnetAsync(
             $"clean {subCommandOptions}",
-            "",
+            arguments: "",
             requireStdOutLogging: false,
             requireDetailsTag: true,
             addNoWarn: false);
@@ -373,8 +373,8 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     // build
     {
         var exitCode = await RunDotnetAsync(
-            $"build {subCommandOptions}",
-            "",
+            $"build {subCommandOptions} --no-restore",
+            arguments: "",
             requireStdOutLogging: true,
             requireDetailsTag: true,
             addNoWarn: !showWarnings);
@@ -393,7 +393,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     {
         var exitCode = await RunDotnetAsync(
             $"run {subCommandOptions} --no-build",
-            escapedArguments,
+            arguments: escapedArguments,
             requireStdOutLogging: true,
             requireDetailsTag: false,
             addNoWarn: !showWarnings);
@@ -545,7 +545,8 @@ static void RunAllTests()
 
 static string Colorize(string message)
 {
-    if (string.IsNullOrWhiteSpace(message))
+    if (ConsoleLogger.EnableMarkdownOutput ||  // TODO: use <Span> tag instead of ANSI escape
+        string.IsNullOrWhiteSpace(message))
     {
         return message;
     }
@@ -566,6 +567,8 @@ static string Colorize(string message)
     }
     return message;
 }
+
+
 file sealed class ProcessCallbackCallCounts
 {
     public volatile int Error;
