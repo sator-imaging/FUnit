@@ -334,7 +334,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     // restore
     {
         int exitCode = await RunDotnetAsync(
-            $"restore {subCommandOptions}",
+            $"restore",
             arguments: BuildEscapedArguments([filePath]),
             requireStdOutLogging: false,
             requireDetailsTag: true,
