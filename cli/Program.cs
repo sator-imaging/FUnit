@@ -144,7 +144,7 @@ foreach (string file in csFiles)
 
 if (validFUnitFiles.Count > 0)
 {
-    string failedTestFiles = new List<string>();
+    var failedTestFiles = new List<string>();
     int failedTestCaseCount = 0;
 
     bool needNewLine = !ConsoleLogger.EnableMarkdownOutput;
