@@ -144,7 +144,7 @@ foreach (string file in csFiles)
 
 if (validFUnitFiles.Count > 0)
 {
-    int failedSuiteCount = 0;
+    string failedTestFiles = new List<string>();
     int failedTestCaseCount = 0;
 
     bool needNewLine = !ConsoleLogger.EnableMarkdownOutput;
@@ -172,7 +172,7 @@ if (validFUnitFiles.Count > 0)
             }
             else
             {
-                failedSuiteCount++;
+                failedTestFiles.Add(filePath);
             }
         }
     }
@@ -181,7 +181,7 @@ if (validFUnitFiles.Count > 0)
     ConsoleLogger.LogInfo();
     ConsoleLogger.LogInfo($"# {FUnit} Result");
 
-    if (failedSuiteCount == 0 && failedTestCaseCount == 0)
+    if (failedTestFiles.Count == 0 && failedTestCaseCount == 0)
     {
         ConsoleLogger.LogPassed($"{SR.MarkdownPassed} Total {validFUnitFiles.Count} test suites successfully completed");
     }
@@ -195,9 +195,9 @@ if (validFUnitFiles.Count > 0)
             ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed.");
         }
 
-        if (failedSuiteCount > 0)
+        if (failedTestFiles.Count > 0)
         {
-            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} {failedSuiteCount} of {validFUnitFiles.Count} test suites were failed to run.");
+            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} {failedTestFiles.Count} of {validFUnitFiles.Count} test files were failed to build: {string.Join(", ", failedTestFiles.Select(Path.GetFileName))}");
         }
 
         Environment.Exit(1);
