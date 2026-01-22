@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+#warning THIS WARNING IS EMITTED BY PREPROCESSOR DIRECTIVE
+
 return FUnit.Run(args, describe =>
 {
     describe("Must.BeEqual", it =>

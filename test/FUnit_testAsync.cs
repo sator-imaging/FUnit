@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
+#warning THIS WARNING IS EMITTED BY PREPROCESSOR DIRECTIVE
 
 const int AsyncTestDelayMilliseconds = 1000;
 var startTimestamp = Stopwatch.GetTimestamp();

@@ -16,7 +16,6 @@ const string AnsiColorRed = "\u001b[97;41m";
 const string AnsiColorYellow = "\u001b[97;43m";
 const string AnsiColorReset = "\u001b[0m";
 
-#warning THIS WARNING IS EMITTED BY PREPROCESSOR DIRECTIVE
 
 // --no-clean
 bool noClean = false;

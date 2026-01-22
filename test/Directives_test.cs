@@ -11,6 +11,8 @@
 //:funit:include ./Directives_TestClass.cs
 //:funit:include ./Directives_TestClass.cs
 
+#warning THIS WARNING IS EMITTED BY PREPROCESSOR DIRECTIVE
+
 return FUnit.Run(args, describe =>
 {
     describe("FUnit.Directives", it =>

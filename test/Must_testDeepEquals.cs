@@ -6,6 +6,8 @@ using System.Collections.Generic;
 #pragma warning disable CA1861 // Avoid constant arrays as arguments
 #pragma warning disable IDE0300 // Simplify collection initialization
 
+#warning THIS WARNING IS EMITTED BY PREPROCESSOR DIRECTIVE
+
 return FUnit.Run(args, describe =>
 {
     describe("Must.HaveEqualProperties", it =>

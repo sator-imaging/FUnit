@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 #pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 #pragma warning disable CA1822 // Mark members as static
 
+#warning THIS WARNING IS EMITTED BY PREPROCESSOR DIRECTIVE
+
 // command line options
 Must.Throw<ArgumentException>("Unknown command line option: foo", () => CommandLineOptions.Parse(["foo"]));
 Must.Throw<ArgumentException>("'--concurrency' takes 1 positive integer parameter", () => CommandLineOptions.Parse(["--concurrency"]));
