@@ -30,6 +30,19 @@ bool noClean = false;
     }
 }
 
+// --warnings
+bool showWarnings = false;
+{
+    const string ARG_WARNINGS = "--warnings";
+
+    int index = args.IndexOf(ARG_WARNINGS);
+    if (index >= 0)
+    {
+        showWarnings = true;
+        args = [.. args[..index], .. args[(index + 1)..]];
+    }
+}
+
 // NOTE: This logic separates arguments into options (and their values) and file glob patterns.
 // It assumes that any argument starting with a hyphen is an option. Any subsequent argument not
 // starting with a hyphen is treated as its value (e.g., "--threshold 1").
@@ -150,7 +163,7 @@ if (validFUnitFiles.Count > 0)
 
         ConsoleLogger.LogInfo($"# 🔬 `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
 
-        var exitCode = await ExecuteTestAsync(filePath, [.. remainingArgs], noClean);
+        var exitCode = await ExecuteTestAsync(filePath, [.. remainingArgs], noClean, showWarnings);
         if (exitCode != 0)
         {
             failedSuiteCount++;
@@ -306,7 +319,7 @@ static string BuildEscapedArguments(string[] args)
 
 
 // TODO: can run tests simultaneously but console log will be messed up.
-async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noClean)
+async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noClean, bool showWarnings)
 {
     var escapedArguments = BuildEscapedArguments(args);
 
@@ -320,7 +333,8 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             $"restore {BuildEscapedArguments([filePath])}",
             "",
             requireStdOutLogging: false,
-            requireDetailsTag: true);
+            requireDetailsTag: true,
+            addNoWarn: !showWarnings);
 
         if (exitCode != 0)
         {
@@ -339,7 +353,8 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             $"clean {subCommandOptions}",
             "",
             requireStdOutLogging: false,
-            requireDetailsTag: true);
+            requireDetailsTag: true,
+            addNoWarn: !showWarnings);
 
         if (exitCode != 0)
         {
@@ -357,7 +372,8 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             $"build {subCommandOptions}",
             "",
             requireStdOutLogging: true,
-            requireDetailsTag: true);
+            requireDetailsTag: true,
+            addNoWarn: !showWarnings);
 
         if (exitCode != 0)
         {
@@ -375,7 +391,8 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             $"run {subCommandOptions} --no-build",
             escapedArguments,
             requireStdOutLogging: true,
-            requireDetailsTag: false);
+            requireDetailsTag: false,
+            addNoWarn: !showWarnings);
 
         if (exitCode != 0)
         {
@@ -388,9 +405,18 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
     }
 }
 
-async ValueTask<int> RunDotnetAsync(string subCommand, string arguments, bool requireStdOutLogging, bool requireDetailsTag)
+async ValueTask<int> RunDotnetAsync(
+    string subCommand,
+    string arguments,
+    bool requireStdOutLogging,
+    bool requireDetailsTag,
+    bool addNoWarn = false)
 {
     var subCommandWithoutFilePath = string.Join(" ", subCommand.Split(' ').Take(3));
+    if (addNoWarn)
+    {
+        subCommand += " --nologo -nowarn";
+    }
     arguments = subCommand + (string.IsNullOrWhiteSpace(arguments) ? string.Empty : $" -- {arguments}");
 
     if (!ConsoleLogger.EnableMarkdownOutput)
