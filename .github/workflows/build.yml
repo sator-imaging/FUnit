@@ -35,5 +35,4 @@ jobs:
         # Omit '-c' for configuration option (testing CLI tool option handling; NOT dotnet command)
         # * '--TEST' is valid only in Debug build
         dotnet run -c ${{ matrix.configuration }} --project ./cli -- Debug --TEST
-
-        dnx -y FUnit.Run -- ${{ matrix.configuration }} -md >> $GITHUB_STEP_SUMMARY
+        dotnet run -c ${{ matrix.configuration }} --project ./cli -- ${{ matrix.configuration }} -md >> $GITHUB_STEP_SUMMARY
