@@ -23,6 +23,8 @@ namespace FUnitImpl
         int Iterations = 3
     )
     {
+        public bool ShowStackTrace { get; private set; }
+
         // NOTE: BuildConfiguration should be hidden from log because it may be different from
         //       actual build configuration if command line flag '-c Release' is used incorrectly.
         //       (ex. missing '--' delimiter)
@@ -129,6 +131,12 @@ namespace FUnitImpl
                     case SR.Flag_Delimiter:
                     case SR.Flag_TEST:
                         {
+                            continue;
+                        }
+
+                    case SR.Flag_StackTrace:
+                        {
+                            ret.ShowStackTrace = true;
                             continue;
                         }
 

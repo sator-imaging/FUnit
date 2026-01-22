@@ -17,6 +17,33 @@ const string AnsiColorYellow = "\u001b[97;43m";
 const string AnsiColorReset = "\u001b[0m";
 
 
+// --help
+if (args.Contains(SR.Flag_Help))
+{
+    Console.WriteLine("""
+    FUnit Test Runner
+
+    Usage:
+      funit [options] [glob patterns...]
+
+    Options:
+      --help                    Show this help message and exit.
+      --stacktrace              Show stack trace on test failure.
+      --no-clean                Disable cleaning the project before building.
+      --warnings                Show build warnings.
+      -c, --configuration       Build configuration (e.g., "Debug" or "Release").
+      --iterations <N>          Number of times to run each test case.
+      --concurrency <N>         Maximum number of tests to run simultaneously.
+      -md, --markdown           Enable Markdown output.
+
+    Examples:
+      funit
+      funit "tests/**/*Tests.cs"
+      funit --stacktrace --iterations 10 "tests/**/MyTest.cs"
+    """);
+    return 0;
+}
+
 // --no-clean
 bool noClean = false;
 {
