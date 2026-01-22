@@ -44,71 +44,9 @@ if (args.Contains(SR.Flag_Help))
     return 0;
 }
 
-// --no-clean
-bool noClean = false;
-{
-    const string ARG_NO_CLEAN = "--no-clean";
-
-    int index = args.IndexOf(ARG_NO_CLEAN);
-    if (index >= 0)
-    {
-        noClean = true;
-        args = [.. args[..index], .. args[(index + 1)..]];
-    }
-}
-
-// --warnings
-bool showWarnings = false;
-{
-    const string ARG_WARNINGS = "--warnings";
-
-    int index = args.IndexOf(ARG_WARNINGS);
-    if (index >= 0)
-    {
-        showWarnings = true;
-        args = [.. args[..index], .. args[(index + 1)..]];
-    }
-}
-
-// NOTE: This logic separates arguments into options (and their values) and file glob patterns.
-// It assumes that any argument starting with a hyphen is an option. Any subsequent argument not
-// starting with a hyphen is treated as its value (e.g., "--threshold 1").
-// Arguments like "--threshold -1" will fail because the parser will treat "-1" as a new option.
-// All other arguments are considered glob patterns. Flags that require special handling
-// (like "--no-clean") are processed before this loop.
-var fileGlobs = new List<string>();
-var remainingArgs = new List<string>();
-for (int i = 0; i < args.Length; i++)
-{
-    string arg = args[i];
-    if (arg.StartsWith("-"))
-    {
-        remainingArgs.Add(arg);
-        
-        // If the next argument doesn't start with a hyphen, it's a value for the current option
-        if (i + 1 < args.Length)
-        {
-            if (!args[i + 1].StartsWith("-"))
-            {
-                remainingArgs.Add(args[i + 1]);
-                i++; // Skip the next argument since we've already processed it
-            }
-        }
-    }
-    else
-    {
-        // ummmmm..... (FUnit allows specifying Release or Debug configuration without leading '-c')
-        if (arg is SR.Flag_Debug or SR.Flag_Release)
-        {
-            remainingArgs.Add(arg);
-        }
-        else
-        {
-            fileGlobs.Add(arg);
-        }
-    }
-}
-var options = CommandLineOptions.Parse([.. remainingArgs]);
+var options = CommandLineOptions.Parse(args, throwOnUnknown: false);
+var fileGlobs = options.UnknownOptions;
+var executionArgs = args.Except(fileGlobs).ToArray();
 
 #if DEBUG
 if (args.Contains(SR.Flag_TEST))
@@ -131,7 +69,7 @@ if (EnsureEnvironment() != 0)
 // Assuming the tool should search in the current directory and its subdirectories
 string currentDirectory = Directory.GetCurrentDirectory();
 var matcher = new Matcher(StringComparison.OrdinalIgnoreCase);
-if (fileGlobs.Count == 0)
+if (fileGlobs.Length == 0)
 {
     matcher.AddInclude("**/*test*.cs");
 }
@@ -190,7 +128,7 @@ if (validFUnitFiles.Count > 0)
 
         ConsoleLogger.LogInfo($"# 🔬 `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
 
-        var (exitCode, isTestRan) = await ExecuteTestAsync(filePath, [.. remainingArgs], noClean, showWarnings);
+        var (exitCode, isTestRan) = await ExecuteTestAsync(filePath, executionArgs);
         if (exitCode != 0)
         {
             if (isTestRan)
@@ -234,7 +172,7 @@ else
 {
     ConsoleLogger.LogInfo();
     ConsoleLogger.LogFailed($"> [!CAUTION]");
-    var patterns = fileGlobs.Count > 0 ? string.Join(", ", fileGlobs) : "**/*test*.cs";
+    var patterns = fileGlobs.Length > 0 ? string.Join(", ", fileGlobs) : "**/*test*.cs";
     ConsoleLogger.LogFailed($"> No valid {FUnit} test files found matching the criteria: `{patterns}`");
 
     Environment.Exit(1);
@@ -350,7 +288,7 @@ static string BuildEscapedArguments(string[] args)
 
 
 // TODO: can run tests simultaneously but console log will be messed up.
-async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath, string[] args, bool noClean, bool showWarnings)
+async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath, string[] args)
 {
     var escapedArguments = BuildEscapedArguments(args);
 
@@ -378,7 +316,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     }
 
     // clean
-    if (!noClean)
+    if (!options.NoClean)
     {
         int exitCode = await RunDotnetAsync(
             $"clean {subCommandOptions}",
@@ -404,7 +342,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
             arguments: "",
             requireStdOutLogging: true,
             requireDetailsTag: true,
-            addNoWarn: !showWarnings);
+            addNoWarn: !options.ShowWarnings);
 
         if (exitCode != 0)
         {
@@ -423,7 +361,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
             arguments: escapedArguments,
             requireStdOutLogging: true,
             requireDetailsTag: false,
-            addNoWarn: !showWarnings);
+            addNoWarn: !options.ShowWarnings);
 
         return (exitCode, true);
     }

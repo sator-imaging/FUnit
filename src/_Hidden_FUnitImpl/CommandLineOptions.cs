@@ -24,6 +24,9 @@ namespace FUnitImpl
     )
     {
         public bool ShowStackTrace { get; private set; }
+        public bool NoClean { get; private set; }
+        public bool ShowWarnings { get; private set; }
+        public string[] UnknownOptions { get; private set; } = System.Array.Empty<string>();
 
         // NOTE: BuildConfiguration should be hidden from log because it may be different from
         //       actual build configuration if command line flag '-c Release' is used incorrectly.
@@ -65,10 +68,12 @@ namespace FUnitImpl
         /// Parses the command line arguments and returns a <see cref="CommandLineOptions"/> object.
         /// </summary>
         /// <param name="args">The command line arguments.</param>
+        /// <param name="throwOnUnknown">true to throw when unknown options are encountered; otherwise, false.</param>
         /// <returns>A <see cref="CommandLineOptions"/> object populated with the parsed arguments.</returns>
-        public static CommandLineOptions Parse(string[] args)
+        public static CommandLineOptions Parse(string[] args, bool throwOnUnknown = true)
         {
             var ret = new CommandLineOptions();
+            var unknownOptions = new System.Collections.Generic.List<string>();
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -140,13 +145,39 @@ namespace FUnitImpl
                             continue;
                         }
 
+                    case SR.Flag_NoClean:
+                        {
+                            ret.NoClean = true;
+                            continue;
+                        }
+
+                    case SR.Flag_Warnings:
+                        {
+                            ret.ShowWarnings = true;
+                            continue;
+                        }
+
                     default:
+                        if (args[i].StartsWith("-"))
+                        {
+                            if (throwOnUnknown)
+                            {
+                                throw new ArgumentException($"Unknown command line option: {args[i]}");
+                            }
+                            else
+                            {
+                                unknownOptions.Add(args[i]);
+                            }
+                        }
+                        else
+                        {
+                            unknownOptions.Add(args[i]);
+                        }
                         break;
                 }
-
-                throw new ArgumentException($"Unknown command line option: {args[i]}");
             }
 
+            ret.UnknownOptions = unknownOptions.ToArray();
             return ret;
         }
 
