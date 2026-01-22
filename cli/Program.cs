@@ -163,14 +163,17 @@ if (validFUnitFiles.Count > 0)
 
         ConsoleLogger.LogInfo($"# 🔬 `{relFilePath}` ({currentNumber} of {validFUnitFiles.Count})");
 
-        var exitCode = await ExecuteTestAsync(filePath, [.. remainingArgs], noClean, showWarnings);
+        var (exitCode, isTestRan) = await ExecuteTestAsync(filePath, [.. remainingArgs], noClean, showWarnings);
         if (exitCode != 0)
         {
-            failedSuiteCount++;
-        }
-        else
-        {
-            failedTestCaseCount += exitCode;
+            if (isTestRan)
+            {
+                failedTestCaseCount += exitCode;
+            }
+            else
+            {
+                failedSuiteCount++;
+            }
         }
     }
 
@@ -187,13 +190,14 @@ if (validFUnitFiles.Count > 0)
         ConsoleLogger.LogInfo();
         ConsoleLogger.LogFailed($"> [!CAUTION]");
 
-        if (failedSuiteCount > 0)
-        {
-            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} {failedSuiteCount} of {validFUnitFiles.Count} test suites were failed to run");
-        }
         if (failedTestCaseCount > 0)
         {
-            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed");
+            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed.");
+        }
+
+        if (failedSuiteCount > 0)
+        {
+            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} {failedSuiteCount} of {validFUnitFiles.Count} test suites were failed to run.");
         }
 
         Environment.Exit(1);
@@ -319,7 +323,7 @@ static string BuildEscapedArguments(string[] args)
 
 
 // TODO: can run tests simultaneously but console log will be messed up.
-async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noClean, bool showWarnings)
+async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath, string[] args, bool noClean, bool showWarnings)
 {
     var escapedArguments = BuildEscapedArguments(args);
 
@@ -342,7 +346,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             ConsoleLogger.LogFailed($"> [!CAUTION]");
             ConsoleLogger.LogFailed($"> Error: 'dotnet restore' command failed with exit code {exitCode}.");
 
-            return exitCode;
+            return (exitCode, false);
         }
     }
 
@@ -362,7 +366,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             ConsoleLogger.LogFailed($"> [!CAUTION]");
             ConsoleLogger.LogFailed($"> Error: 'dotnet clean' command failed with exit code {exitCode}.");
 
-            return exitCode;
+            return (exitCode, false);
         }
     }
 
@@ -381,7 +385,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             ConsoleLogger.LogFailed($"> [!CAUTION]");
             ConsoleLogger.LogFailed($"> Error: 'dotnet build' command failed with exit code {exitCode}.");
 
-            return exitCode;
+            return (exitCode, false);
         }
     }
 
@@ -394,14 +398,7 @@ async ValueTask<int> ExecuteTestAsync(string filePath, string[] args, bool noCle
             requireDetailsTag: false,
             addNoWarn: !showWarnings);
 
-        if (exitCode != 0)
-        {
-            ConsoleLogger.LogInfo();
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: 'dotnet run' command failed with exit code {exitCode}.");
-        }
-
-        return exitCode;
+        return (exitCode, true);
     }
 }
 
@@ -410,7 +407,7 @@ async ValueTask<int> RunDotnetAsync(
     string arguments,
     bool requireStdOutLogging,
     bool requireDetailsTag,
-    bool addNoWarn = false)
+    bool addNoWarn)
 {
     var subCommandWithoutFilePath = string.Join(" ", subCommand.Split(' ').Take(3));
     if (addNoWarn)
