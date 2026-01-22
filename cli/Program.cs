@@ -31,7 +31,7 @@ if (args.Contains(SR.Flag_Help))
       --stacktrace              Show stack trace on test failure.
       --no-clean                Disable cleaning the project before building.
       --warnings                Show build warnings.
-      -c, --configuration       Build configuration (e.g., "Debug" or "Release").
+      -c, --configuration <CONFIG> Build configuration (e.g., "Debug" or "Release").
       --iterations <N>          Number of times to run each test case.
       --concurrency <N>         Maximum number of tests to run simultaneously.
       -md, --markdown           Enable Markdown output.

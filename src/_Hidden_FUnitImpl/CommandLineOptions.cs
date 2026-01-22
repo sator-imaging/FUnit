@@ -158,16 +158,9 @@ namespace FUnitImpl
                         }
 
                     default:
-                        if (args[i].StartsWith("-"))
+                        if (throwOnUnknown)
                         {
-                            if (throwOnUnknown)
-                            {
-                                throw new ArgumentException($"Unknown command line option: {args[i]}");
-                            }
-                            else
-                            {
-                                unknownOptions.Add(args[i]);
-                            }
+                            throw new ArgumentException($"Unknown command line option: {args[i]}");
                         }
                         else
                         {
