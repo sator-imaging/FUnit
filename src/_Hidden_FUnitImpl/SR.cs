@@ -20,6 +20,7 @@ namespace FUnitImpl
         public const string Flag_Delimiter = "--";
 
         public const string Flag_Help = "--help";
+        public const string Flag_Lint = "--lint";
         public const string Flag_StackTrace = "--stacktrace";
         public const string Flag_NoClean = "--no-clean";
         public const string Flag_Warnings = "--warnings";

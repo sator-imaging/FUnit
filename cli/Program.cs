@@ -34,6 +34,7 @@ if (args.Contains(SR.Flag_Help))
       --no-clean                Disable cleaning the project before building.
       --warnings                Show build warnings.
       --stacktrace              Show stack trace on test failure.
+      --lint                    Run `dotnet build --no-incremental -p:TreatWarningsAsErrors=true`.
       --help                    Show this help message and exit.
 
     Examples:
@@ -45,6 +46,18 @@ if (args.Contains(SR.Flag_Help))
 }
 
 var options = CommandLineOptions.Parse(args, throwOnUnknown: false);
+
+if (options.Lint)
+{
+    ConsoleLogger.LogInfo("Linting...");
+    return await RunDotnetAsync(
+        $"build --no-incremental -p:TreatWarningsAsErrors=true",
+        arguments: "",
+        requireStdOutLogging: true,
+        requireDetailsTag: false,
+        addNoWarn: false);
+}
+
 var fileGlobs = options.UnknownOptions;
 var executionArgs = args.Except(fileGlobs).ToArray();
 
