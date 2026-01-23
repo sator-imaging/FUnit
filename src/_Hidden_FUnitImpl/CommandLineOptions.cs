@@ -73,7 +73,7 @@ namespace FUnitImpl
         public static CommandLineOptions Parse(string[] args, bool throwOnUnknown = true)
         {
             var ret = new CommandLineOptions();
-            var unknownOptions = new System.Collections.Generic.List<string>();
+            System.Collections.Generic.List<string>? unknownOptions = null;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -164,13 +164,17 @@ namespace FUnitImpl
                         }
                         else
                         {
+                            unknownOptions ??= new();
                             unknownOptions.Add(args[i]);
                         }
                         break;
                 }
             }
 
-            ret.UnknownOptions = unknownOptions.ToArray();
+            if (unknownOptions is not null)
+            {
+                ret.UnknownOptions = unknownOptions.ToArray();
+            }
             return ret;
         }
 
