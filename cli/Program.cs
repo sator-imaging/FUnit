@@ -24,22 +24,22 @@ if (args.Contains(SR.Flag_Help))
     FUnit Test Runner
 
     Usage:
-      funit [options] [glob patterns...]
+      dnx -y FUnit.Run [options] [glob patterns...]
 
     Options:
-      --help                    Show this help message and exit.
-      --stacktrace              Show stack trace on test failure.
-      --no-clean                Disable cleaning the project before building.
-      --warnings                Show build warnings.
-      -c, --configuration <CONFIG> Build configuration (e.g., "Debug" or "Release").
+      -md, --markdown           Enable Markdown output.
       --iterations <N>          Number of times to run each test case.
       --concurrency <N>         Maximum number of tests to run simultaneously.
-      -md, --markdown           Enable Markdown output.
+      -c, --configuration <CFG> Build configuration (e.g., "Debug" or "Release").
+      --no-clean                Disable cleaning the project before building.
+      --warnings                Show build warnings.
+      --stacktrace              Show stack trace on test failure.
+      --help                    Show this help message and exit.
 
     Examples:
-      funit
-      funit "tests/**/*Tests.cs"
-      funit --stacktrace --iterations 10 "tests/**/MyTest.cs"
+      dnx -y FUnit.Run
+      dnx -y FUnit.Run "tests/**/*Tests.cs"
+      dnx -y FUnit.Run --stacktrace --iterations 10 "tests/**/MyTest.cs"
     """);
     return 0;
 }
@@ -161,6 +161,11 @@ if (validFUnitFiles.Count > 0)
         if (failedTestCaseCount > 0)
         {
             ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed.");
+
+            if (!options.ShowStackTrace)
+            {
+                ConsoleLogger.LogFailed($"> {new string(' ', SR.MarkdownFailed.Length)} *Tip*: Use `{SR.Flag_StackTrace}` option for details.");
+            }
         }
 
         if (failedTestFiles.Count > 0)
