@@ -305,7 +305,24 @@ partial class FUnit
                             errors = failedCases.Select(failedCase =>
                             {
                                 var e = failedCase.error;
-                                return new TestResult.Error(e.Message, e.StackTrace, IsFUnitError: false);
+                                var msg = e.Message;
+
+                                var st = new StackTrace(e, fNeedFileInfo: true);
+                                if (st.FrameCount > 0)
+                                {
+                                    var frame = st.GetFrame(0);
+                                    if (frame is not null)
+                                    {
+                                        int lineNumber = frame.GetFileLineNumber();
+                                        if (lineNumber > 0)
+                                        {
+                                            int column = frame.GetFileColumnNumber();
+                                            msg = $"{frame.GetFileName()}({lineNumber},{column}): {e.Message}";
+                                        }
+                                    }
+                                }
+
+                                return new TestResult.Error(msg, e.StackTrace, IsFUnitError: false);
                             })
                             .ToList();
                         }

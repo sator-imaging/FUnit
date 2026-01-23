@@ -75,8 +75,7 @@ public static partial class FUnit
                 : $" {SR.FlakyTestResultAnnotation}"
                 ;
             var error = args.errors.First();
-            var stackTrace = options.ShowStackTrace ? Environment.NewLine + error.StackTrace : string.Empty;
-            ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} {args.description}{annotation} - {error.Message}{stackTrace}");
+            ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} {args.description}{annotation} - {error.Message}");
         };
 
         testSuite.OnCanceledExecutionReportStarting += () => ConsoleLogger.LogFailed($"- [{nameof(FUnit)}] Tests Canceled");
@@ -132,8 +131,20 @@ public static partial class FUnit
                             ;
 
                         var error = test.Errors[0];
-                        var stackTrace = options.ShowStackTrace ? Environment.NewLine + error.StackTrace : string.Empty;
-                        ConsoleLogger.LogFailed($"{SR.MarkdownFailed} [{subject}] {test.Description}{annotation} - {error.Message}{stackTrace}");
+                        ConsoleLogger.LogFailed($"{SR.MarkdownFailed} [{subject}] {test.Description}{annotation} - {error.Message}");
+
+                        if (options.ShowStackTrace)
+                        {
+                            foreach (var st in error.StackTrace.Split("\n"))
+                            {
+                                if (string.IsNullOrWhiteSpace(st))
+                                {
+                                    continue;
+                                }
+
+                                ConsoleLogger.LogInfo($"{new string(' ', SR.MarkdownFailed.Length)} {st.TrimEnd()}");
+                            }
+                        }
                     }
                 }
             }
