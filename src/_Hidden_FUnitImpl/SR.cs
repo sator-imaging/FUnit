@@ -19,6 +19,11 @@ namespace FUnitImpl
         public const string Flag_Release = "Release";
         public const string Flag_Delimiter = "--";
 
+        public const string Flag_Help = "--help";
+        public const string Flag_StackTrace = "--stacktrace";
+        public const string Flag_NoClean = "--no-clean";
+        public const string Flag_Warnings = "--warnings";
+
         public const string EmojiPassed = "✓";
         public const string EmojiFailed = "×";
 
