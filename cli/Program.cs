@@ -48,6 +48,9 @@ var options = CommandLineOptions.Parse(args, throwOnUnknown: false);
 var fileGlobs = options.UnknownOptions;
 var executionArgs = args.Except(fileGlobs).ToArray();
 
+// Verify that the arguments to be passed to the test executable are valid.
+CommandLineOptions.Parse(executionArgs, throwOnUnknown: true);
+
 #if DEBUG
 if (args.Contains(SR.Flag_TEST))
 {
