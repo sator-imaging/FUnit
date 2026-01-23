@@ -22,7 +22,7 @@ jobs:
         dotnet-version: 10.x.x
 
     - name: Test (Debug)
-      if: ${{ matrix.configuration }} == Debug
+      if: matrix.configuration == 'Debug'
       run: |
         # Omit '-c' for configuration option (testing CLI tool option handling; NOT dotnet command)
         # * '--TEST' is valid only in Debug build
@@ -30,7 +30,7 @@ jobs:
         dotnet run -c ${{ matrix.configuration }} --project ./cli -- ${{ matrix.configuration }} -md --warnings >> $GITHUB_STEP_SUMMARY
 
     - name: Test (Release)
-      if: ${{ matrix.configuration }} == Release
+      if: matrix.configuration == 'Release'
       run: |
         # no '--warnings'
         dotnet run -c ${{ matrix.configuration }} --project ./cli -- ${{ matrix.configuration }} -md >> $GITHUB_STEP_SUMMARY
