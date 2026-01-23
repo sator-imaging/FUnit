@@ -8,7 +8,7 @@
 [![FUnit.Run](https://img.shields.io/nuget/vpre/FUnit.Run?label=Run)](https://www.nuget.org/packages/FUnit.Run)
 [![FUnit.Directives](https://img.shields.io/nuget/vpre/FUnit.Directives?label=Directives)](https://www.nuget.org/packages/FUnit.Directives)
 <br/>
-[![build](https://github.com/sator-imaging/FUnit/actions/workflows/build.yml/badge.svg)](https://github.com/sator-imaging/FUnit/actions/workflows/build.yml)
+[![test](https://github.com/sator-imaging/FUnit/actions/workflows/test.yml/badge.svg)](https://github.com/sator-imaging/FUnit/actions/workflows/test.yml)
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sator-imaging/FUnit)
 
 </div>
