@@ -23,7 +23,6 @@ namespace FUnitImpl
         int Iterations = 3
     )
     {
-        public bool Lint { get; private set; }
         public bool ShowStackTrace { get; private set; }
         public bool NoClean { get; private set; }
         public bool ShowWarnings { get; private set; }
@@ -148,7 +147,6 @@ namespace FUnitImpl
 
                     case SR.Flag_Lint:
                         {
-                            ret.Lint = true;
                             continue;
                         }
 

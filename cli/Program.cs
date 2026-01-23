@@ -45,9 +45,8 @@ if (args.Contains(SR.Flag_Help))
     return 0;
 }
 
-var options = CommandLineOptions.Parse(args, throwOnUnknown: false);
-
-if (options.Lint)
+// --lint
+if (args.Contains(SR.Flag_Lint))
 {
     ConsoleLogger.LogInfo("Linting...");
     return await RunDotnetAsync(
@@ -58,6 +57,7 @@ if (options.Lint)
         addNoWarn: false);
 }
 
+var options = CommandLineOptions.Parse(args, throwOnUnknown: false);
 var fileGlobs = options.UnknownOptions;
 var executionArgs = args.Except(fileGlobs).ToArray();
 
