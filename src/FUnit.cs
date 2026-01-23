@@ -142,7 +142,7 @@ public static partial class FUnit
                                     continue;
                                 }
 
-                                ConsoleLogger.LogInfo($"{new string(' ', SR.MarkdownFailed)} {st.TrimEnd()}");
+                                ConsoleLogger.LogInfo($"{new string(' ', SR.MarkdownFailed.Length)} {st.TrimEnd()}");
                             }
                         }
                     }
