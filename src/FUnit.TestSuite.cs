@@ -280,7 +280,7 @@ partial class FUnit
                         errors.Add(
                             new(description, 1, new List<TestResult.Error>()
                             {
-                            new(error.Message, error.StackTrace, IsFUnitError: true),
+                                new(error.Message, error.StackTrace, IsFUnitError: true),
                             }));
                     }
                 }

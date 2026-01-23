@@ -133,7 +133,7 @@ public static partial class FUnit
                         var error = test.Errors[0];
                         ConsoleLogger.LogFailed($"{SR.MarkdownFailed} [{subject}] {test.Description}{annotation} - {error.Message}");
 
-                        if (options.ShowStackTrace)
+                        if (options.ShowStackTrace && error.StackTrace is not null)
                         {
                             foreach (var st in error.StackTrace.Split("\n"))
                             {
