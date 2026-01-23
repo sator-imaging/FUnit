@@ -311,11 +311,14 @@ partial class FUnit
                                 if (st.FrameCount > 0)
                                 {
                                     var frame = st.GetFrame(0);
-                                    int lineNumber = frame.GetFileLineNumber();
-                                    if (lineNumber > 0)
+                                    if (frame is not null)
                                     {
-                                        int column = frame.GetFileColumnNumber();
-                                        msg = $"{frame.GetFileName()}({lineNumber},{column}): {e.Message}";
+                                        int lineNumber = frame.GetFileLineNumber();
+                                        if (lineNumber > 0)
+                                        {
+                                            int column = frame.GetFileColumnNumber();
+                                            msg = $"{frame.GetFileName()}({lineNumber},{column}): {e.Message}";
+                                        }
                                     }
                                 }
 
