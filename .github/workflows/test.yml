@@ -9,8 +9,12 @@ on:
 
 jobs:
 
-  debug:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-dotnet@v4
@@ -18,21 +22,15 @@ jobs:
         dotnet-version: 10.x.x
 
     - name: Test (Debug)
+      if: ${{ matrix.configuration }} == Debug
       run: |
         # Omit '-c' for configuration option (testing CLI tool option handling; NOT dotnet command)
         # * '--TEST' is valid only in Debug build
-        dotnet run -c Debug --project ./cli -- Debug --TEST
-        dotnet run -c Debug --project ./cli -- Debug -md --warnings >> $GITHUB_STEP_SUMMARY
-
-  release:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.x.x
+        dotnet run -c ${{ matrix.configuration }} --project ./cli -- ${{ matrix.configuration }} --TEST
+        dotnet run -c ${{ matrix.configuration }} --project ./cli -- ${{ matrix.configuration }} -md --warnings >> $GITHUB_STEP_SUMMARY
 
     - name: Test (Release)
+      if: ${{ matrix.configuration }} == Release
       run: |
         # no '--warnings'
-        dotnet run -c Release --project ./cli -- Release -md >> $GITHUB_STEP_SUMMARY
+        dotnet run -c ${{ matrix.configuration }} --project ./cli -- ${{ matrix.configuration }} -md >> $GITHUB_STEP_SUMMARY
