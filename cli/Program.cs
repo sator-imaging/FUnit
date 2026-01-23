@@ -160,12 +160,11 @@ if (validFUnitFiles.Count > 0)
 
         if (failedTestCaseCount > 0)
         {
-            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed.");
-
-            if (!options.ShowStackTrace)
-            {
-                ConsoleLogger.LogFailed($"> {new string(' ', SR.MarkdownFailed.Length)} *Tip*: Use `{SR.Flag_StackTrace}` option for details.");
-            }
+            string guidance = options.ShowStackTrace
+                ? string.Empty
+                : $" Rerun with '{SR.Flag_StackTrace}' option for more detailed log."
+                ;
+            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed.{guidance}");
         }
 
         if (failedTestFiles.Count > 0)
