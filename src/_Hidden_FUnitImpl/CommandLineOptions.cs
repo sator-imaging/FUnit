@@ -145,6 +145,15 @@ namespace FUnitImpl
                             continue;
                         }
 
+                    // CLI only flags.
+                    // NOTE: This is for preventing these flags from being treated as unknown options.
+                    //       These flags are handled by the CLI runner and do not affect the test executable.
+                    case SR.Flag_Help:
+                    case SR.Flag_Lint:
+                        {
+                            continue;
+                        }
+
                     case SR.Flag_NoClean:
                         {
                             ret.NoClean = true;

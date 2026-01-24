@@ -34,6 +34,7 @@ if (args.Contains(SR.Flag_Help))
       --no-clean                Disable cleaning the project before building.
       --warnings                Show build warnings.
       --stacktrace              Show stack trace on test failure.
+      --lint                    Run `dotnet build --no-incremental -p:TreatWarningsAsErrors=true`.
       --help                    Show this help message and exit.
 
     Examples:
@@ -42,6 +43,18 @@ if (args.Contains(SR.Flag_Help))
       dnx -y FUnit.Run --stacktrace --iterations 10 "tests/**/MyTest.cs"
     """);
     return 0;
+}
+
+// --lint
+if (args.Contains(SR.Flag_Lint))
+{
+    ConsoleLogger.LogInfo("Linting...");
+    return await RunDotnetAsync(
+        $"build --no-incremental -p:TreatWarningsAsErrors=true",
+        arguments: "",
+        requireStdOutLogging: true,
+        requireDetailsTag: false,
+        addNoWarn: false);
 }
 
 var options = CommandLineOptions.Parse(args, throwOnUnknown: false);
