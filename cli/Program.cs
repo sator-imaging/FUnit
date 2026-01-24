@@ -28,7 +28,7 @@ if (args.Contains(SR.Flag_Help) || args.Contains(SR.Flag_HelpShort))
 
     Options:
       -md, --markdown           Enable Markdown output.
-      --iterations <N>          Number of times to run each test case.
+      --iterations <N>          Number of times to run each test case (3 by default).
       --concurrency <N>         Maximum number of tests to run simultaneously.
       -c, --configuration <CFG> Build configuration (e.g., "Debug" or "Release").
       --no-clean                Disable cleaning the project before building.

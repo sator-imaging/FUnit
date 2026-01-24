@@ -48,8 +48,8 @@ return FUnit.Run(args, describe =>
 dotnet run ./tests/my-test.cs
 
 # OR use 'dnx' to run tests in current or sub folders
-dnx FUnit.Run
-dnx FUnit.Run --no-clean "**/*test*.cs"
+dnx -y FUnit.Run
+dnx -y FUnit.Run --stacktrace "**/*test*.cs"
 ```
 
 
@@ -193,36 +193,33 @@ dnx -y FUnit.Run -- -md >> $GITHUB_STEP_SUMMARY
 
 ```bash
 # ❌ Incorrect (no '--')
-dnx FUnit.Run -c Release
+dnx -y FUnit.Run -c Release
 
 # ✅ Correct (with '--')
-dnx FUnit.Run -- -c Release
+dnx -y FUnit.Run -- -c Release
 
 # ✅ Shortcut: without '-c' is valid for Debug or Release
-dnx FUnit.Run Release
+dnx -y FUnit.Run Release
 ```
 
 
-## ⚙ Advanced Options
+## ⚙ Command-Line Options
 
 > [!IMPORTANT]
 > *For AI Coding Agents:* SHALL NOT use advanced options unless explicitly requested.
 
 
-### `--iterations int`
-
-```bash
-# run tests 10 times (3 by default)
-dnx -y FUnit.Run --iterations 10
-```
-
-
-### `--concurrency int` (Experimental)
-
-```bash
-# run max 10 tests simultaneously subject by subject
-dnx -y FUnit.Run --concurrency 10
-```
+| Option                  | Alias | Description |
+|-------------------------|-------|-------------|
+| `--markdown`            | `-md` | Enable Markdown output for GitHub Actions summary (`$GITHUB_STEP_SUMMARY`).
+| `--iterations <N>`      |       | Number of times to run each test case (3 by default).
+| `--concurrency <N>`     |       | Maximum number of tests to run simultaneously.
+| `--configuration <CFG>` | `-c`  | Build configuration (e.g., "Debug" or "Release").
+| `--no-clean`            |       | Disable cleaning the project before building.
+| `--warnings`            |       | Show build warnings.
+| `--stacktrace`          |       | Show stack trace on test failure.
+| `--lint`                |       | Run `dotnet build --no-incremental -p:TreatWarningsAsErrors=true`.
+| `--help`                | `-h`  | Show this help message and exit.
 
 
 &nbsp;
@@ -260,18 +257,3 @@ GlobalCleanup();  // ✅ cleanup after Run call
 
 return numFailures;
 ```
-&nbsp;
-
-## 🚀 Command-Line Options
-
-| Option | Alias | Description |
-|---|---|---|
-| `--markdown` | `-md` | Enable Markdown output for GitHub Actions summary. |
-| `--iterations <N>` | | Number of times to run each test case. |
-| `--concurrency <N>` | | Maximum number of tests to run simultaneously. |
-| `--configuration <CFG>` | `-c` | Build configuration (e.g., "Debug" or "Release"). |
-| `--no-clean` | | Disable cleaning the project before building. |
-| `--warnings` | | Show build warnings. |
-| `--stacktrace` | | Show stack trace on test failure. |
-| `--lint` | | Run `dotnet build --no-incremental -p:TreatWarningsAsErrors=true`. |
-| `--help` | `-h` | Show this help message and exit. |
