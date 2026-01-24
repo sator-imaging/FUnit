@@ -274,4 +274,4 @@ return numFailures;
 | `--warnings` | | Show build warnings. |
 | `--stacktrace` | | Show stack trace on test failure. |
 | `--lint` | | Run `dotnet build --no-incremental -p:TreatWarningsAsErrors=true`. |
-| `--help` | | Show this help message and exit. |
+| `--help` | `-h` | Show this help message and exit. |
