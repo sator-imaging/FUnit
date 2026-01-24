@@ -355,10 +355,20 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
         }
     }
 
+    // Force generate debug info even if --stacktrace option is not present.
+    // * FUnit always uses filename and line/column number as a error message prefix (e.g., Foo.cs(310,42): ...).
+    var debugInfoFlags = " -p:DebugType=portable -p:DebugSymbols=true";
+
+    // Optimize may break the debug info retrieval.
+    if (options.ShowStackTrace)
+    {
+        debugInfoFlags += " -p:Optimize=false";
+    }
+
     // build
     {
         var exitCode = await RunDotnetAsync(
-            $"build {subCommandOptions} --no-restore",
+            $"build {subCommandOptions} --no-restore {debugInfoFlags}",
             arguments: "",
             requireStdOutLogging: true,
             requireDetailsTag: true,
@@ -377,7 +387,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     // run
     {
         var exitCode = await RunDotnetAsync(
-            $"run {subCommandOptions} --no-build",
+            $"run {subCommandOptions} --no-build {debugInfoFlags}",
             arguments: escapedArguments,
             requireStdOutLogging: true,
             requireDetailsTag: false,
