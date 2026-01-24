@@ -18,7 +18,7 @@ const string AnsiColorReset = "\u001b[0m";
 
 
 // --help
-if (args.Contains(SR.Flag_Help) || args.Contains("-h"))
+if (args.Contains(SR.Flag_Help) || args.Contains(SR.Flag_HelpShort))
 {
     Console.WriteLine("""
     FUnit Test Runner
