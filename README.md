@@ -260,3 +260,18 @@ GlobalCleanup();  // ✅ cleanup after Run call
 
 return numFailures;
 ```
+&nbsp;
+
+## 🚀 Command-Line Options
+
+| Option | Alias | Description |
+|---|---|---|
+| `--markdown` | `-md` | Enable Markdown output for GitHub Actions summary. |
+| `--iterations <N>` | | Number of times to run each test case. |
+| `--concurrency <N>` | | Maximum number of tests to run simultaneously. |
+| `--configuration <CFG>` | `-c` | Build configuration (e.g., "Debug" or "Release"). |
+| `--no-clean` | | Disable cleaning the project before building. |
+| `--warnings` | | Show build warnings. |
+| `--stacktrace` | | Show stack trace on test failure. |
+| `--lint` | | Run `dotnet build --no-incremental -p:TreatWarningsAsErrors=true`. |
+| `--help` | `-h` | Show this help message and exit. |
