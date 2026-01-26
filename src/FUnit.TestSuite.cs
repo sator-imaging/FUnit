@@ -322,7 +322,7 @@ partial class FUnit
                                     }
                                 }
 
-                                return new TestResult.Error(msg, e.StackTrace, IsFUnitError: false);
+                                return new TestResult.Error(msg, e.StackTrace, IsFUnitError: e is not FUnitException);
                             })
                             .ToList();
                         }
