@@ -319,7 +319,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     // restore
     {
         int exitCode = await RunDotnetAsync(
-            $"restore",
+            $"restore --force --no-http-cache",
             arguments: BuildEscapedArguments([filePath]),
             requireStdOutLogging: false,
             requireDetailsTag: true,
