@@ -123,6 +123,22 @@ return FUnit.Run(args, describe =>
             Must.HaveSameSequence(new string[] { "a", "b" }, new string[] { "a", "b" });
         });
 
+        it("should work with various combinations (Array, IEnumerable, Span, ReadOnlySpan)", () =>
+        {
+            int[] arr = new[] { 1, 2, 3 };
+            List<int> list = new() { 1, 2, 3 };
+            ReadOnlySpan<int> ros = new[] { 1, 2, 3 };
+            Span<int> span = new int[] { 1, 2, 3 };
+
+            Must.HaveSameSequence(arr, arr);
+            Must.HaveSameSequence(arr, list);
+            Must.HaveSameSequence(list, arr);
+            Must.HaveSameSequence(arr, ros);
+            Must.HaveSameSequence(ros, arr);
+            Must.HaveSameSequence(ros, ros);
+            Must.HaveSameSequence(span, ros);
+        });
+
         it("should throw FUnitException for sequence inequality", () =>
         {
             Must.Throw<FUnitException>("Expected collections to be equal in order.", () => Must.HaveSameSequence(new List<int> { 1, 2, 3 }, new List<int> { 1, 3, 2 }));
@@ -139,6 +155,13 @@ return FUnit.Run(args, describe =>
             Must.NotHaveSameSequence(new List<int> { 1, 2, 3 }, new List<int> { 1, 3, 2 });
             Must.NotHaveSameSequence(new string[] { "a", "b" }, new string[] { "b", "a" });
             Must.NotHaveSameSequence(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 });
+
+            int[] arr1 = new[] { 1, 2, 3 };
+            int[] arr2 = new[] { 3, 2, 1 };
+            ReadOnlySpan<int> ros1 = new[] { 1, 2, 3 };
+            ReadOnlySpan<int> ros2 = new[] { 3, 2, 1 };
+            Must.NotHaveSameSequence(arr1, arr2);
+            Must.NotHaveSameSequence(ros1, ros2);
         });
 
         it("should throw FUnitException for sequence equality", () =>
@@ -154,6 +177,13 @@ return FUnit.Run(args, describe =>
         {
             Must.HaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 3, 1, 2 });
             Must.HaveSameUnorderedElements(new string[] { "a", "b" }, new string[] { "b", "a" });
+
+            int[] arr1 = new[] { 1, 2, 3 };
+            int[] arr2 = new[] { 3, 2, 1 };
+            ReadOnlySpan<int> ros1 = new[] { 1, 2, 3 };
+            ReadOnlySpan<int> ros2 = new[] { 3, 2, 1 };
+            Must.HaveSameUnorderedElements(arr1, arr2);
+            Must.HaveSameUnorderedElements(ros1, ros2);
         });
 
         it("should throw FUnitException for unordered sequence inequality", () =>
@@ -174,6 +204,13 @@ return FUnit.Run(args, describe =>
             Must.NotHaveSameUnorderedElements(new List<int> { 1, 2, 3 }, new List<int> { 1, 2, 4 });
             Must.NotHaveSameUnorderedElements(new string[] { "a", "b" }, new string[] { "a", "c" });
             Must.NotHaveSameUnorderedElements(new List<int> { 1, 2 }, new List<int> { 1, 2, 3 });
+
+            int[] arr1 = new[] { 1, 2, 3 };
+            int[] arr2 = new[] { 1, 2, 4 };
+            ReadOnlySpan<int> ros1 = new[] { 1, 2, 3 };
+            ReadOnlySpan<int> ros2 = new[] { 1, 2, 4 };
+            Must.NotHaveSameUnorderedElements(arr1, arr2);
+            Must.NotHaveSameUnorderedElements(ros1, ros2);
         });
 
         it("should throw FUnitException for unordered sequence equality", () =>
@@ -371,76 +408,4 @@ return FUnit.Run(args, describe =>
         });
     });
 
-    describe("Must Collection Assertion Overload Ambiguity", it =>
-    {
-        it("HaveSameSequence should work with arrays (T[] vs T[])", () =>
-        {
-            int[] expected = new[] { 1, 2, 3 };
-            int[] actual = new[] { 1, 2, 3 };
-            Must.HaveSameSequence(expected, actual);
-        });
-
-        it("HaveSameSequence should work with array vs List (T[] vs IEnumerable<T>)", () =>
-        {
-            int[] expected = new[] { 1, 2, 3 };
-            List<int> actual = new() { 1, 2, 3 };
-            Must.HaveSameSequence(expected, actual);
-        });
-
-        it("HaveSameSequence should work with List vs array (IEnumerable<T> vs T[])", () =>
-        {
-            List<int> expected = new() { 1, 2, 3 };
-            int[] actual = new[] { 1, 2, 3 };
-            Must.HaveSameSequence(expected, actual);
-        });
-
-        it("HaveSameSequence should work with array vs ReadOnlySpan (T[] vs ReadOnlySpan<T>)", () =>
-        {
-            int[] expected = new[] { 1, 2, 3 };
-            ReadOnlySpan<int> actual = new[] { 1, 2, 3 };
-            Must.HaveSameSequence(expected, actual);
-        });
-
-        it("HaveSameSequence should work with ReadOnlySpan vs array (ReadOnlySpan<T> vs T[])", () =>
-        {
-            ReadOnlySpan<int> expected = new[] { 1, 2, 3 };
-            int[] actual = new[] { 1, 2, 3 };
-            Must.HaveSameSequence(expected, actual);
-        });
-
-        it("HaveSameSequence should work with ReadOnlySpan vs ReadOnlySpan", () =>
-        {
-            ReadOnlySpan<int> expected = new[] { 1, 2, 3 };
-            ReadOnlySpan<int> actual = new[] { 1, 2, 3 };
-            Must.HaveSameSequence(expected, actual);
-        });
-
-        it("HaveSameSequence should work with Span vs ReadOnlySpan", () =>
-        {
-            Span<int> expected = new int[] { 1, 2, 3 };
-            ReadOnlySpan<int> actual = new int[] { 1, 2, 3 };
-            Must.HaveSameSequence(expected, actual);
-        });
-
-        it("HaveSameUnorderedElements should work with arrays", () =>
-        {
-            int[] expected = new[] { 1, 2, 3 };
-            int[] actual = new[] { 3, 2, 1 };
-            Must.HaveSameUnorderedElements(expected, actual);
-        });
-
-        it("NotHaveSameSequence should work with arrays", () =>
-        {
-            int[] expected = new[] { 1, 2, 3 };
-            int[] actual = new[] { 3, 2, 1 };
-            Must.NotHaveSameSequence(expected, actual);
-        });
-
-        it("NotHaveSameUnorderedElements should work with arrays", () =>
-        {
-            int[] expected = new[] { 1, 2, 3 };
-            int[] actual = new[] { 1, 2, 4 };
-            Must.NotHaveSameUnorderedElements(expected, actual);
-        });
-    });
 });
