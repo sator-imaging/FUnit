@@ -370,4 +370,77 @@ return FUnit.Run(args, describe =>
             Must.Throw<FUnitException>("Expected error message to be \"Expected message\", but was \"Wrong message\".", () => Must.Throw("System.InvalidOperationException", "Expected message", async () => { await Task.Delay(DELAY); throw new InvalidOperationException("Wrong message"); }));
         });
     });
+
+    describe("Must Collection Assertion Overload Ambiguity", it =>
+    {
+        it("HaveSameSequence should work with various combinations (Array, IEnumerable, Span, ReadOnlySpan)", () =>
+        {
+            int[] arr = new[] { 1, 2, 3 };
+            List<int> list = new() { 1, 2, 3 };
+            ReadOnlySpan<int> ros = new[] { 1, 2, 3 };
+            Span<int> span = new int[] { 1, 2, 3 };
+
+            Must.HaveSameSequence(arr, arr);
+            Must.HaveSameSequence(arr, list);
+            Must.HaveSameSequence(list, arr);
+            Must.HaveSameSequence(arr, ros);
+            Must.HaveSameSequence(ros, arr);
+            Must.HaveSameSequence(ros, ros);
+            Must.HaveSameSequence(span, ros);
+        });
+
+        it("NotHaveSameSequence should work with various combinations", () =>
+        {
+            int[] arr1 = new[] { 1, 2, 3 };
+            int[] arr2 = new[] { 3, 2, 1 };
+            List<int> list2 = new() { 3, 2, 1 };
+            ReadOnlySpan<int> ros1 = new[] { 1, 2, 3 };
+            ReadOnlySpan<int> ros2 = new[] { 3, 2, 1 };
+            Span<int> span1 = new int[] { 1, 2, 3 };
+
+            Must.NotHaveSameSequence(arr1, arr2);
+            Must.NotHaveSameSequence(arr1, list2);
+            Must.NotHaveSameSequence(list2, arr1);
+            Must.NotHaveSameSequence(arr1, ros2);
+            Must.NotHaveSameSequence(ros1, arr2);
+            Must.NotHaveSameSequence(ros1, ros2);
+            Must.NotHaveSameSequence(span1, ros2);
+        });
+
+        it("HaveSameUnorderedElements should work with various combinations", () =>
+        {
+            int[] arr1 = new[] { 1, 2, 3 };
+            int[] arr2 = new[] { 3, 2, 1 };
+            List<int> list2 = new() { 3, 2, 1 };
+            ReadOnlySpan<int> ros1 = new[] { 1, 2, 3 };
+            ReadOnlySpan<int> ros2 = new[] { 3, 2, 1 };
+            Span<int> span1 = new int[] { 1, 2, 3 };
+
+            Must.HaveSameUnorderedElements(arr1, arr2);
+            Must.HaveSameUnorderedElements(arr1, list2);
+            Must.HaveSameUnorderedElements(list2, arr1);
+            Must.HaveSameUnorderedElements(arr1, ros2);
+            Must.HaveSameUnorderedElements(ros1, arr2);
+            Must.HaveSameUnorderedElements(ros1, ros2);
+            Must.HaveSameUnorderedElements(span1, ros2);
+        });
+
+        it("NotHaveSameUnorderedElements should work with various combinations", () =>
+        {
+            int[] arr1 = new[] { 1, 2, 3 };
+            int[] arr2 = new[] { 1, 2, 4 };
+            List<int> list2 = new() { 1, 2, 4 };
+            ReadOnlySpan<int> ros1 = new[] { 1, 2, 3 };
+            ReadOnlySpan<int> ros2 = new[] { 1, 2, 4 };
+            Span<int> span1 = new int[] { 1, 2, 3 };
+
+            Must.NotHaveSameUnorderedElements(arr1, arr2);
+            Must.NotHaveSameUnorderedElements(arr1, list2);
+            Must.NotHaveSameUnorderedElements(list2, arr1);
+            Must.NotHaveSameUnorderedElements(arr1, ros2);
+            Must.NotHaveSameUnorderedElements(ros1, arr2);
+            Must.NotHaveSameUnorderedElements(ros1, ros2);
+            Must.NotHaveSameUnorderedElements(span1, ros2);
+        });
+    });
 });
