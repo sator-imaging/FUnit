@@ -22,7 +22,7 @@ public static partial class Must
     private static readonly char[] NewLineChars = new[] { '\n', '\r' };
 
     /// <summary>
-    /// Asserts that two objects are equal. For collections, use <see cref="HaveSameSequence{T}"/> or <see cref="BeSameReference"/>.
+    /// Asserts that two objects are equal. For collections, use <see cref="HaveSameSequence{T}(IEnumerable{T}, IEnumerable{T})"/> or <see cref="BeSameReference"/>.
     /// </summary>
     /// <typeparam name="T">The type of the objects to compare.</typeparam>
     /// <param name="expected">The expected value.</param>
@@ -62,7 +62,7 @@ public static partial class Must
     }
 
     /// <summary>
-    /// Asserts that two objects are not equal. For collections, use <see cref="NotHaveSameSequence{T}"/> or <see cref="NotBeSameReference"/>.
+    /// Asserts that two objects are not equal. For collections, use <see cref="NotHaveSameSequence{T}(IEnumerable{T}, IEnumerable{T})"/> or <see cref="NotBeSameReference"/>.
     /// </summary>
     /// <typeparam name="T">The type of the objects to compare.</typeparam>
     /// <param name="expected">The expected value.</param>
@@ -164,6 +164,74 @@ $@"Expected collections to be equal in order.
     }
 
     /// <summary>
+    /// Asserts that two sequences are equal and in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void HaveSameSequence<T>(ReadOnlySpan<T> expected, ReadOnlySpan<T> actual)
+        => HaveSameSequence((IEnumerable<T>)expected.ToArray(), (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two sequences are equal and in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void HaveSameSequence<T>(ReadOnlySpan<T> expected, IEnumerable<T> actual)
+        => HaveSameSequence((IEnumerable<T>)expected.ToArray(), actual);
+
+    /// <summary>
+    /// Asserts that two sequences are equal and in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void HaveSameSequence<T>(IEnumerable<T> expected, ReadOnlySpan<T> actual)
+        => HaveSameSequence(expected, (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two sequences are equal and in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void HaveSameSequence<T>(T[] expected, T[] actual) => HaveSameSequence((IEnumerable<T>)expected, (IEnumerable<T>)actual);
+
+    /// <summary>
+    /// Asserts that two sequences are equal and in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void HaveSameSequence<T>(T[] expected, IEnumerable<T> actual) => HaveSameSequence((IEnumerable<T>)expected, actual);
+
+    /// <summary>
+    /// Asserts that two sequences are equal and in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void HaveSameSequence<T>(IEnumerable<T> expected, T[] actual) => HaveSameSequence(expected, (IEnumerable<T>)actual);
+
+    /// <summary>
+    /// Asserts that two sequences are equal and in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void HaveSameSequence<T>(T[] expected, ReadOnlySpan<T> actual) => HaveSameSequence((IEnumerable<T>)expected, (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two sequences are equal and in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void HaveSameSequence<T>(ReadOnlySpan<T> expected, T[] actual) => HaveSameSequence((IEnumerable<T>)expected.ToArray(), (IEnumerable<T>)actual);
+
+
+    /// <summary>
     /// Asserts that two sequences are not equal or not in the same order.
     /// </summary>
     /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
@@ -180,6 +248,73 @@ $@"Expected collections to not be equal in order.
                 );
         }
     }
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(ReadOnlySpan<T> expected, ReadOnlySpan<T> actual)
+        => NotHaveSameSequence((IEnumerable<T>)expected.ToArray(), (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(ReadOnlySpan<T> expected, IEnumerable<T> actual)
+        => NotHaveSameSequence((IEnumerable<T>)expected.ToArray(), actual);
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(IEnumerable<T> expected, ReadOnlySpan<T> actual)
+        => NotHaveSameSequence(expected, (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(T[] expected, T[] actual) => NotHaveSameSequence((IEnumerable<T>)expected, (IEnumerable<T>)actual);
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(T[] expected, IEnumerable<T> actual) => NotHaveSameSequence((IEnumerable<T>)expected, actual);
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(IEnumerable<T> expected, T[] actual) => NotHaveSameSequence(expected, (IEnumerable<T>)actual);
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(T[] expected, ReadOnlySpan<T> actual) => NotHaveSameSequence((IEnumerable<T>)expected, (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two sequences are not equal or not in the same order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequences.</typeparam>
+    /// <param name="expected">The expected sequence.</param>
+    /// <param name="actual">The actual sequence.</param>
+    public static void NotHaveSameSequence<T>(ReadOnlySpan<T> expected, T[] actual) => NotHaveSameSequence((IEnumerable<T>)expected.ToArray(), (IEnumerable<T>)actual);
 
     /// <summary>
     /// Asserts that two collections contain the same elements, regardless of order.
@@ -219,6 +354,74 @@ $@"Expected collections to be equal ignoring order.
     }
 
     /// <summary>
+    /// Asserts that two collections contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void HaveSameUnorderedElements<T>(ReadOnlySpan<T> expected, ReadOnlySpan<T> actual)
+        => HaveSameUnorderedElements((IEnumerable<T>)expected.ToArray(), (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two collections contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void HaveSameUnorderedElements<T>(ReadOnlySpan<T> expected, IEnumerable<T> actual)
+        => HaveSameUnorderedElements((IEnumerable<T>)expected.ToArray(), actual);
+
+    /// <summary>
+    /// Asserts that two collections contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void HaveSameUnorderedElements<T>(IEnumerable<T> expected, ReadOnlySpan<T> actual)
+        => HaveSameUnorderedElements(expected, (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two collections contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void HaveSameUnorderedElements<T>(T[] expected, T[] actual) => HaveSameUnorderedElements((IEnumerable<T>)expected, (IEnumerable<T>)actual);
+
+    /// <summary>
+    /// Asserts that two collections contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void HaveSameUnorderedElements<T>(T[] expected, IEnumerable<T> actual) => HaveSameUnorderedElements((IEnumerable<T>)expected, actual);
+
+    /// <summary>
+    /// Asserts that two collections contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void HaveSameUnorderedElements<T>(IEnumerable<T> expected, T[] actual) => HaveSameUnorderedElements(expected, (IEnumerable<T>)actual);
+
+    /// <summary>
+    /// Asserts that two collections contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void HaveSameUnorderedElements<T>(T[] expected, ReadOnlySpan<T> actual) => HaveSameUnorderedElements((IEnumerable<T>)expected, (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two collections contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void HaveSameUnorderedElements<T>(ReadOnlySpan<T> expected, T[] actual) => HaveSameUnorderedElements((IEnumerable<T>)expected.ToArray(), (IEnumerable<T>)actual);
+
+
+    /// <summary>
     /// Asserts that two collections do not contain the same elements, regardless of order.
     /// </summary>
     /// <typeparam name="T">The type of the elements in the collections.</typeparam>
@@ -256,6 +459,73 @@ $@"Expected collections to not be equal ignoring order.
     EXIT:
         ;
     }
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(ReadOnlySpan<T> expected, ReadOnlySpan<T> actual)
+        => NotHaveSameUnorderedElements((IEnumerable<T>)expected.ToArray(), (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(ReadOnlySpan<T> expected, IEnumerable<T> actual)
+        => NotHaveSameUnorderedElements((IEnumerable<T>)expected.ToArray(), actual);
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(IEnumerable<T> expected, ReadOnlySpan<T> actual)
+        => NotHaveSameUnorderedElements(expected, (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(T[] expected, T[] actual) => NotHaveSameUnorderedElements((IEnumerable<T>)expected, (IEnumerable<T>)actual);
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(T[] expected, IEnumerable<T> actual) => NotHaveSameUnorderedElements((IEnumerable<T>)expected, actual);
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(IEnumerable<T> expected, T[] actual) => NotHaveSameUnorderedElements(expected, (IEnumerable<T>)actual);
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(T[] expected, ReadOnlySpan<T> actual) => NotHaveSameUnorderedElements((IEnumerable<T>)expected, (IEnumerable<T>)actual.ToArray());
+
+    /// <summary>
+    /// Asserts that two collections do not contain the same elements, regardless of order.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the collections.</typeparam>
+    /// <param name="expected">The expected collection.</param>
+    /// <param name="actual">The actual collection.</param>
+    public static void NotHaveSameUnorderedElements<T>(ReadOnlySpan<T> expected, T[] actual) => NotHaveSameUnorderedElements((IEnumerable<T>)expected.ToArray(), (IEnumerable<T>)actual);
 
 
     /// <summary>
