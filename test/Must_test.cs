@@ -415,6 +415,13 @@ return FUnit.Run(args, describe =>
             Must.HaveSameSequence(expected, actual);
         });
 
+        it("HaveSameSequence should work with Span vs ReadOnlySpan", () =>
+        {
+            Span<int> expected = new int[] { 1, 2, 3 };
+            ReadOnlySpan<int> actual = new int[] { 1, 2, 3 };
+            Must.HaveSameSequence(expected, actual);
+        });
+
         it("HaveSameUnorderedElements should work with arrays", () =>
         {
             int[] expected = new[] { 1, 2, 3 };
