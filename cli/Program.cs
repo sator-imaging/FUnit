@@ -534,6 +534,7 @@ static void RunAllTests()
     ConsoleLogger.LogInfo($"Complex string escape result:");
     ConsoleLogger.LogInfo($"  source: {complex}");
     ConsoleLogger.LogInfo($"  result: {actual}");
+
     ConsoleLogger.LogPassed("All tests successfully completed");
 }
 #endif
@@ -543,7 +544,7 @@ static string ColorizeInternal(string text)
 {
     return LogRegex.WarningOrError().Replace(text, match =>
     {
-        var color = match.Value.Equals("error", StringComparison.OrdinalIgnoreCase) ? AnsiColorRed : AnsiColorYellow;
+        var color = match.Value.StartsWith("err", StringComparison.OrdinalIgnoreCase) ? AnsiColorRed : AnsiColorYellow;
         return $"{color}{match.Value}{AnsiColorReset}";
     });
 }
@@ -581,6 +582,6 @@ file sealed class ProcessCallbackCallCounts
 
 internal static partial class LogRegex
 {
-    [GeneratedRegex(@"\b(warning|error)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\b(warning|error|warn|err)\b", RegexOptions.IgnoreCase)]
     public static partial Regex WarningOrError();
 }
