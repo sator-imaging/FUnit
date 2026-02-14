@@ -125,7 +125,7 @@ public static partial class FUnit
                 ConsoleLogger.LogFailed($"Failed: {failedCount}  ");
                 if (erroredCount > 0)
                 {
-                    ConsoleLogger.LogFailed($"Errored: {erroredCount}  ");
+                    ConsoleLogger.LogFailed($"Error: {erroredCount}  ");
                 }
 
                 foreach (var (subject, test) in failedTestCases)
