@@ -98,8 +98,8 @@ public static partial class FUnit
             .ToList();
 
         // NOTE: remove system errors from result
-        var totalTestCaseCount = Result.TestsBySubject.Sum(x => x.Value.Count(y => y.Errors?.All(error => error.IsFUnitError) != true));
-        var failedTestCaseCountWithoutSystemErrors = failedTestCases.Count(x => x.test.Errors?.Count(error => !error.IsFUnitError) is > 0);
+        var totalTestCaseCount = Result.TestsBySubject.Sum(x => x.Value.Count(y => y.Errors?.All(error => error.IsFUnitSystemError) != true));
+        var failedTestCaseCountWithoutSystemErrors = failedTestCases.Count(x => x.test.Errors?.Count(error => !error.IsFUnitSystemError) is > 0);
 
         ConsoleLogger.LogInfo();
         ConsoleLogger.LogInfo("## Test Summary");
@@ -119,7 +119,7 @@ public static partial class FUnit
             }
             else
             {
-                var failedCount = failedTestCases.Count(x => x.test.Errors?.Any(y => y.IsFailure) ?? false);
+                var failedCount = failedTestCases.Count(x => x.test.Errors?.Any(y => y.IsAssertionFailure) ?? false);
                 var erroredCount = failedTestCases.Count - failedCount;
                 ConsoleLogger.LogPassed($"Passed: {totalTestCaseCount - failedTestCaseCountWithoutSystemErrors} ({totalTestCaseCount})  ");
                 ConsoleLogger.LogFailed($"Failed: {failedCount}  ");
@@ -138,7 +138,7 @@ public static partial class FUnit
                             ;
 
                         var error = test.Errors[0];
-                        var result = error.IsFailure ? "Failed" : "Error";
+                        var result = error.IsAssertionFailure ? "Failed" : "Error";
                         ConsoleLogger.LogFailed($"{SR.MarkdownFailed} [{subject}] {test.Description}{annotation} - [{result}] {error.Message}");
 
                         if (options.ShowStackTrace && error.StackTrace is not null)
