@@ -25,7 +25,7 @@ partial class FUnit
         /// <param name="Message">The error message.</param>
         /// <param name="StackTrace">The stack trace where the error occurred.</param>
         /// <param name="IsFUnitSystemError">Indicates whether the error occurred outside the scope of 'describe' or 'it'.</param>
-        /// <param name="IsAssertionFailure">Indicates whether the error is an assertion failure. A test is considered 'failed' if this is `true`, and 'errored' if `false`.</param>
+        /// <param name="IsAssertionFailure">Indicates whether the error is an assertion failure. A test is considered 'failed' if this is `true`, and 'error' if `false`.</param>
         [ToJson]
         public sealed partial record Error(string Message, string? StackTrace, bool IsFUnitSystemError, bool IsAssertionFailure) { }
 
