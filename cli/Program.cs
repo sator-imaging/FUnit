@@ -535,6 +535,25 @@ static void RunAllTests()
     ConsoleLogger.LogInfo($"  source: {complex}");
     ConsoleLogger.LogInfo($"  result: {actual}");
 
+    Debug.Assert(Colorize("warning") == $"{AnsiColorYellow}warning{AnsiColorReset}", "warning");
+    Debug.Assert(Colorize("error") == $"{AnsiColorRed}error{AnsiColorReset}", "error");
+    Debug.Assert(Colorize("warn") == $"{AnsiColorYellow}warn{AnsiColorReset}", "warn");
+    Debug.Assert(Colorize("err") == $"{AnsiColorRed}err{AnsiColorReset}", "err");
+
+    Debug.Assert(Colorize("warnings") == $"{AnsiColorYellow}warnings{AnsiColorReset}", "warnings");
+    Debug.Assert(Colorize("errors") == $"{AnsiColorRed}errors{AnsiColorReset}", "errors");
+    Debug.Assert(Colorize("warning(s)") == $"{AnsiColorYellow}warning(s){AnsiColorReset}", "warning(s)");
+    Debug.Assert(Colorize("error(s)") == $"{AnsiColorRed}error(s){AnsiColorReset}", "error(s)");
+
+    // Mixed case
+    Debug.Assert(Colorize("WARNINGS") == $"{AnsiColorYellow}WARNINGS{AnsiColorReset}", "WARNINGS");
+
+    // No match
+    Debug.Assert(Colorize("word") == "word", "no match");
+
+    // Partial match (should not match)
+    Debug.Assert(Colorize("warningabc") == "warningabc", "partial match");
+
     ConsoleLogger.LogPassed("All tests successfully completed");
 }
 #endif
@@ -582,6 +601,6 @@ file sealed class ProcessCallbackCallCounts
 
 internal static partial class LogRegex
 {
-    [GeneratedRegex(@"\b(warning|error|warn|err)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\b(warning(\(s\)|s)?|error(\(s\)|s)?|warn|err)(?!\w)", RegexOptions.IgnoreCase)]
     public static partial Regex WarningOrError();
 }
