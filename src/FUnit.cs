@@ -75,7 +75,8 @@ public static partial class FUnit
                 : $" {SR.FlakyTestResultAnnotation}"
                 ;
             var error = args.errors.First();
-            ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} {args.description}{annotation} - {error.Message}");
+            var result = error is FUnitException ? "Failed" : "Error";
+            ConsoleLogger.LogFailed($"  {SR.MarkdownFailed} {args.description}{annotation} - [{result}] {error.Message}");
         };
 
         testSuite.OnCanceledExecutionReportStarting += () => ConsoleLogger.LogFailed($"- [{nameof(FUnit)}] Tests Canceled");
@@ -118,8 +119,14 @@ public static partial class FUnit
             }
             else
             {
+                var failedCount = failedTestCases.Count(x => x.test.Errors?.Any(y => y.IsFailure) ?? false);
+                var erroredCount = failedTestCases.Count - failedCount;
                 ConsoleLogger.LogPassed($"Passed: {totalTestCaseCount - failedTestCaseCountWithoutSystemErrors} ({totalTestCaseCount})  ");
-                ConsoleLogger.LogFailed($"Failed: {failedTestCases.Count}  ");
+                ConsoleLogger.LogFailed($"Failed: {failedCount}  ");
+                if (erroredCount > 0)
+                {
+                    ConsoleLogger.LogFailed($"Error: {erroredCount}  ");
+                }
 
                 foreach (var (subject, test) in failedTestCases)
                 {
@@ -131,7 +138,8 @@ public static partial class FUnit
                             ;
 
                         var error = test.Errors[0];
-                        ConsoleLogger.LogFailed($"{SR.MarkdownFailed} [{subject}] {test.Description}{annotation} - {error.Message}");
+                        var result = error.IsFailure ? "Failed" : "Error";
+                        ConsoleLogger.LogFailed($"{SR.MarkdownFailed} [{subject}] {test.Description}{annotation} - [{result}] {error.Message}");
 
                         if (options.ShowStackTrace && error.StackTrace is not null)
                         {
