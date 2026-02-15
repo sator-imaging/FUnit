@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -533,9 +534,20 @@ static void RunAllTests()
     ConsoleLogger.LogInfo($"Complex string escape result:");
     ConsoleLogger.LogInfo($"  source: {complex}");
     ConsoleLogger.LogInfo($"  result: {actual}");
+
     ConsoleLogger.LogPassed("All tests successfully completed");
 }
 #endif
+
+
+static string ColorizeInternal(string text)
+{
+    return LogRegex.WarningOrError().Replace(text, match =>
+    {
+        var color = match.Value.StartsWith("err", StringComparison.OrdinalIgnoreCase) ? AnsiColorRed : AnsiColorYellow;
+        return $"{color}{match.Value}{AnsiColorReset}";
+    });
+}
 
 
 static string Colorize(string message)
@@ -549,16 +561,13 @@ static string Colorize(string message)
     var ansiEscapeIndex = message.IndexOf('\u001b');
     if (ansiEscapeIndex == -1)
     {
-        message = message.Replace("error", $"{AnsiColorRed}error{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
-        message = message.Replace("warning", $"{AnsiColorYellow}warning{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
+        message = ColorizeInternal(message);
     }
     else
     {
         var head = message[..ansiEscapeIndex];
         var tail = message[ansiEscapeIndex..];
-        head = head.Replace("error", $"{AnsiColorRed}error{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
-        head = head.Replace("warning", $"{AnsiColorYellow}warning{AnsiColorReset}", StringComparison.OrdinalIgnoreCase);
-        message = head + tail;
+        message = ColorizeInternal(head) + tail;
     }
     return message;
 }
@@ -568,4 +577,11 @@ file sealed class ProcessCallbackCallCounts
 {
     public volatile int Error;
     public volatile int Stdout;
+}
+
+
+internal static partial class LogRegex
+{
+    [GeneratedRegex(@"\b(warning|error|warn|err)\b", RegexOptions.IgnoreCase)]
+    public static partial Regex WarningOrError();
 }
