@@ -24,10 +24,10 @@ partial class FUnit
         /// </summary>
         /// <param name="Message">The error message.</param>
         /// <param name="StackTrace">The stack trace where the error occurred.</param>
-        /// <param name="IsFUnitError">Indicates whether the error occurred outside the scope of 'describe' or 'it'.</param>
-        /// <param name="IsFailure">The value that indicates whether the test case is failed or errored.</param>
+        /// <param name="IsFUnitSystemError">Indicates whether the error occurred outside the scope of 'describe' or 'it'.</param>
+        /// <param name="IsAssertionFailure">The value that indicates whether the test case is failed or errored.</param>
         [ToJson]
-        public sealed partial record Error(string Message, string? StackTrace, bool IsFUnitError, bool IsFailure) { }
+        public sealed partial record Error(string Message, string? StackTrace, bool IsFUnitSystemError, bool IsAssertionFailure) { }
 
         ///// <summary>
         ///// Represents a test subject.

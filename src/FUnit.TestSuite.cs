@@ -280,7 +280,7 @@ partial class FUnit
                         errors.Add(
                             new(description, 1, new List<TestResult.Error>()
                             {
-                                new(error.Message, error.StackTrace, IsFUnitError: true, IsFailure: false),
+                                new(error.Message, error.StackTrace, IsFUnitSystemError: true, IsAssertionFailure: false),
                             }));
                     }
                 }
@@ -322,7 +322,7 @@ partial class FUnit
                                     }
                                 }
 
-                                return new TestResult.Error(msg, e.StackTrace, IsFUnitError: false, IsFailure: e is FUnitException);
+                                return new TestResult.Error(msg, e.StackTrace, IsFUnitSystemError: false, IsAssertionFailure: e is FUnitException);
                             })
                             .ToList();
                         }
