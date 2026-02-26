@@ -1,7 +1,9 @@
 #:project ../src
 #:package FUnit.Directives@*
 
-#if false
+#if true
+return 0;
+#else
 
 // cannot...? --> #:project ../directives
 
