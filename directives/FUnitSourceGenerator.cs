@@ -95,15 +95,15 @@ namespace FUnit.Directives
                     var keyword = parts.FirstOrDefault()?.Trim() ?? string.Empty;
                     var args = parts.Length > 1 ? parts[1].Trim() : string.Empty;
 
-                    if (!keyword.Equals(SR.FUnitKeyword, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
 #if DEBUG
                     context.ReportDiagnostic(
                         Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), trimmedText));
 #endif
+
+                    if (!keyword.Equals(SR.FUnitKeyword, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
 
                     // Shift!
                     var subParts = args.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
