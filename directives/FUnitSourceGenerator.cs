@@ -80,19 +80,13 @@ namespace FUnit.Directives
                     }
 
                     var fullText = trivia.ToString();
-                    if (!fullText.StartsWith("#", StringComparison.Ordinal))
+                    if (!fullText.StartsWith("#warning", StringComparison.Ordinal))
                     {
                         continue;
                     }
 
-                    var textAfterHash = fullText.Substring(1).TrimStart();
-                    if (!textAfterHash.StartsWith("warning", StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    // 7 is the length of "warning" keyword
-                    var textAfterWarning = textAfterHash.Substring(7).TrimStart();
+                    // 8 is the length of "#warning"
+                    var textAfterWarning = fullText.Substring(8).TrimStart();
                     if (!textAfterWarning.StartsWith(SR.DirectivePrefix, StringComparison.Ordinal))
                     {
                         continue;
