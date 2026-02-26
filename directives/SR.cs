@@ -11,9 +11,10 @@ namespace FUnit.Directives
     {
         public const string DirectivePrefix = "//:funit:";
         public const string WarningDirectivePrefix = "#warning";
+        public const string FUnitKeyword = "funit";
         public const string DiagnosticCategory = nameof(FUnit);
 
-        public static readonly char[] DirectiveSeparators = new[] { ' ' };
+        public static readonly char[] DirectiveSeparators = new[] { ' ', '\t' };
         public static readonly char[] InvalidChars = new[] { '/', '\\', ':' };  // File.Exists will reject invalid path so remove only directory separators
 
         public static DiagnosticDescriptor MissingFileNameDiagnostic = new(

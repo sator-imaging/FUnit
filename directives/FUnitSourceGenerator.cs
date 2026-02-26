@@ -98,6 +98,19 @@ namespace FUnit.Directives
                     var keyword = parts.FirstOrDefault()?.Trim() ?? string.Empty;
                     var args = parts.Length > 1 ? parts[1].Trim() : string.Empty;
 
+                    if (trivia.IsKind(SyntaxKind.WarningDirectiveTrivia))
+                    {
+                        if (!keyword.Equals(SR.FUnitKeyword, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        // Shift!
+                        var subParts = args.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
+                        keyword = subParts.FirstOrDefault()?.Trim() ?? string.Empty;
+                        args = subParts.Length > 1 ? subParts[1].Trim() : string.Empty;
+                    }
+
                     if (keyword.Length == 0)
                     {
                         if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))

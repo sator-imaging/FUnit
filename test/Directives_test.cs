@@ -5,11 +5,11 @@
 
 // [TEST] allow multiple include directives scattered in project
 //:funit:include Directives_TestClass.cs
-#warning include Directives_TestClass.cs
+#warning funit include Directives_TestClass.cs
 
 // [TEST] no duplicate even if same file is specified in different way
 //:funit:include ./Directives_TestClass.cs
-#warning include ./Directives_TestClass.cs
+#warning funit include ./Directives_TestClass.cs
 
 #warning THIS WARNING IS EMITTED BY PREPROCESSOR DIRECTIVE
 
