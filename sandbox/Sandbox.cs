@@ -13,9 +13,9 @@ return FUnit.Run(args, describe =>
 /* uncomment to test FUnit.Directives
 
 // multiple include of same file should be allowed
+//:funit:include Sandbox.cs
 #warning include Sandbox.cs
-#warning include Sandbox.cs
-#warning include ./Sandbox.cs
+//:funit:include ./Sandbox.cs
 #warning include ./Sandbox.cs
 
 // IGNORED: directive must be placed at line beginning
@@ -27,7 +27,10 @@ return FUnit.Run(args, describe =>
 // ERRORS
 #warning include
 #warning include  NotFound.cs
+// unknown keyword is ignored for #warning
 #warning unknown
+// but not for legacy syntax
+//:funit:unknown
 #warning
 #warning include  file not supported
 

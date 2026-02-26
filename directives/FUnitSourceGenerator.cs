@@ -59,7 +59,7 @@ namespace FUnit.Directives
                 var root = syntaxTree.GetCompilationUnitRoot();
                 var directives = root
                     .DescendantTrivia()
-                    .Where(t => t.IsKind(SyntaxKind.WarningDirectiveTrivia))
+                    .Where(t => t.IsKind(SyntaxKind.WarningDirectiveTrivia) || t.IsKind(SyntaxKind.SingleLineCommentTrivia))
                     .ToList();
 
                 foreach (var trivia in directives)
@@ -72,7 +72,8 @@ namespace FUnit.Directives
                         continue;
                     }
 
-                    if (!trivia.ToString().StartsWith(SR.DirectivePrefix, StringComparison.Ordinal))
+                    var prefix = trivia.IsKind(SyntaxKind.WarningDirectiveTrivia) ? SR.WarningDirectivePrefix : SR.DirectivePrefix;
+                    if (!trivia.ToString().StartsWith(prefix, StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -91,7 +92,7 @@ namespace FUnit.Directives
                         Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), fullText));
 #endif
 
-                    var keywordAndArgs = fullText.Substring(SR.DirectivePrefix.Length);
+                    var keywordAndArgs = fullText.Substring(prefix.Length);
 
                     var parts = keywordAndArgs.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
                     var keyword = parts.FirstOrDefault()?.Trim() ?? string.Empty;
@@ -99,8 +100,11 @@ namespace FUnit.Directives
 
                     if (keyword.Length == 0)
                     {
-                        context.ReportDiagnostic(
-                            Diagnostic.Create(SR.EmptyFUnitDirectiveDiagnostic, trivia.GetLocation()));
+                        if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+                        {
+                            context.ReportDiagnostic(
+                                Diagnostic.Create(SR.EmptyFUnitDirectiveDiagnostic, trivia.GetLocation()));
+                        }
                         continue;
                     }
 
@@ -116,7 +120,7 @@ namespace FUnit.Directives
                             context.AddSource(hintName, generatedContent);
                         }
                     }
-                    else
+                    else if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
                     {
                         context.ReportDiagnostic(
                             Diagnostic.Create(SR.UnknownFUnitDirectiveDiagnostic, trivia.GetLocation(), keyword));
