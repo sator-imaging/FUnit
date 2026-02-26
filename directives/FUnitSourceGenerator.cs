@@ -66,13 +66,8 @@ namespace FUnit.Directives
                 {
                     if (trivia.SyntaxTree is null)
                     {
-                        // Handle the case where SyntaxTree is null, though it should be rare.
-                        // For now, we'll just skip processing this trivia.
-                        // A more robust solution might involve reporting a diagnostic.
                         continue;
                     }
-
-                    var fullText = trivia.ToString().Trim();
 
                     // Check for no indentation
                     var charPos = trivia.GetLocation().GetLineSpan().StartLinePosition.Character;
@@ -81,12 +76,14 @@ namespace FUnit.Directives
                         continue;
                     }
 
-                    if (!fullText.StartsWith("#", StringComparison.Ordinal))
+                    var fullText = trivia.ToString();
+                    var trimmedText = fullText.Trim();
+                    if (!trimmedText.StartsWith("#", StringComparison.Ordinal))
                     {
                         continue;
                     }
 
-                    var afterHash = fullText.Substring(1).TrimStart();
+                    var afterHash = trimmedText.Substring(1).TrimStart();
                     if (!afterHash.StartsWith("warning", StringComparison.Ordinal))
                     {
                         continue;
@@ -94,7 +91,7 @@ namespace FUnit.Directives
 
 #if DEBUG
                     context.ReportDiagnostic(
-                        Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), fullText));
+                        Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), trimmedText));
 #endif
 
                     var keywordAndArgs = afterHash.Substring(7); // skip "warning"

@@ -1,15 +1,13 @@
 #:project ../src
-#:project ../directives/FUnit.Directives.csproj
+#:package FUnit.Directives@*
 
 // [TEST] allow multiple include directives scattered in project
 #warning funit include Directives_TestClass.cs
-#warning funit include Directives_TestClass.cs
+//:funit:include Directives_TestClass.cs
 
 // [TEST] no duplicate even if same file is specified in different way
 #warning funit include ./Directives_TestClass.cs
-#warning funit include ./Directives_TestClass.cs
-
-#warning THIS WARNING IS EMITTED BY PREPROCESSOR DIRECTIVE
+//:funit:include ./Directives_TestClass.cs
 
 return FUnit.Run(args, describe =>
 {
