@@ -9,7 +9,6 @@ namespace FUnit.Directives
 {
     internal class SR
     {
-        public const string DirectivePrefix = "//:funit:";
         public const string WarningDirectivePrefix = "#warning";
         public const string FUnitKeyword = "funit";
         public const string DiagnosticCategory = nameof(FUnit);
