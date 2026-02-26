@@ -14,9 +14,9 @@ return FUnit.Run(args, describe =>
 
 // multiple include of same file should be allowed
 #warning funit include Sandbox.cs
-#warning funit include Sandbox.cs
+#warning funit include Sandbox.cs  
 #warning funit include ./Sandbox.cs
-#warning funit include ./Sandbox.cs
+#warning funit include ./Sandbox.cs  
 
 // IGNORED: prefix must be #warning funit and placed at line beginning
 //   #warning funit
