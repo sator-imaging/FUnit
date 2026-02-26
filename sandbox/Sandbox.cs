@@ -20,7 +20,7 @@ return FUnit.Run(args, describe =>
 
 // IGNORED: directive must be placed at line beginning
 //   #warning
-/#warning
+///#warning
 // leading space is not allowed
     #warning
 
