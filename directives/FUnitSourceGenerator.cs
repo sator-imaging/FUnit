@@ -57,23 +57,18 @@ namespace FUnit.Directives
             foreach (var syntaxTree in context.Compilation.SyntaxTrees)
             {
                 var root = syntaxTree.GetCompilationUnitRoot();
-                var comments = root
+                var directives = root
                     .DescendantTrivia()
-                    .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia))
+                    .Where(t => t.IsKind(SyntaxKind.WarningDirectiveTrivia))
                     .ToList();  // ToList is better than ToImmutableList in this case
 
-                foreach (var trivia in comments)
+                foreach (var trivia in directives)
                 {
                     if (trivia.SyntaxTree is null)
                     {
                         // Handle the case where SyntaxTree is null, though it should be rare.
                         // For now, we'll just skip processing this trivia.
                         // A more robust solution might involve reporting a diagnostic.
-                        continue;
-                    }
-
-                    if (!trivia.ToString().StartsWith(SR.DirectivePrefix, StringComparison.Ordinal))
-                    {
                         continue;
                     }
 
@@ -84,14 +79,30 @@ namespace FUnit.Directives
                         continue;
                     }
 
-                    var fullText = trivia.ToString().TrimEnd();
+                    var fullText = trivia.ToString();
+                    if (!fullText.StartsWith("#", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    var textAfterHash = fullText.Substring(1).TrimStart();
+                    if (!textAfterHash.StartsWith("warning", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    var textAfterWarning = textAfterHash.Substring(7).TrimStart();
+                    if (!textAfterWarning.StartsWith(SR.DirectivePrefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
 
 #if DEBUG
                     context.ReportDiagnostic(
-                        Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), fullText));
+                        Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), fullText.TrimEnd()));
 #endif
 
-                    var keywordAndArgs = fullText.Substring(SR.DirectivePrefix.Length);
+                    var keywordAndArgs = textAfterWarning.Substring(SR.DirectivePrefix.Length);
 
                     var parts = keywordAndArgs.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
                     var keyword = parts.FirstOrDefault()?.Trim() ?? string.Empty;
