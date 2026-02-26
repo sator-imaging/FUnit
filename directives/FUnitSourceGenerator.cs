@@ -57,12 +57,12 @@ namespace FUnit.Directives
             foreach (var syntaxTree in context.Compilation.SyntaxTrees)
             {
                 var root = syntaxTree.GetCompilationUnitRoot();
-                var comments = root
+                var directives = root
                     .DescendantTrivia()
-                    .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia))
-                    .ToList();  // ToList is better than ToImmutableList in this case
+                    .Where(t => t.IsKind(SyntaxKind.WarningDirectiveTrivia))
+                    .ToList();
 
-                foreach (var trivia in comments)
+                foreach (var trivia in directives)
                 {
                     if (trivia.SyntaxTree is null)
                     {

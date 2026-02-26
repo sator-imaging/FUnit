@@ -9,7 +9,7 @@ namespace FUnit.Directives
 {
     internal class SR
     {
-        public const string DirectivePrefix = "//:funit:";
+        public const string DirectivePrefix = "#warning";
         public const string DiagnosticCategory = nameof(FUnit);
 
         public static readonly char[] DirectiveSeparators = new[] { ' ' };

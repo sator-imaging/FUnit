@@ -13,28 +13,28 @@ return FUnit.Run(args, describe =>
 /* uncomment to test FUnit.Directives
 
 // multiple include of same file should be allowed
-//:funit:include Sandbox.cs
-//:funit:include Sandbox.cs  
-//:funit:include ./Sandbox.cs
-//:funit:include ./Sandbox.cs  
+#warning include Sandbox.cs
+#warning include Sandbox.cs
+#warning include ./Sandbox.cs
+#warning include ./Sandbox.cs
 
-// IGNORED: prefix must be single line comment and placed at line beginning
-//   //:funit:
-///:funit:
+// IGNORED: directive must be placed at line beginning
+//   #warning
+/#warning
 // leading space is not allowed
-    //:funit:
+    #warning
 
 // ERRORS
-//:funit:include 
-//:funit:include  NotFound.cs
-//:funit:unknown
-//:funit: 
-//:funit:include  file not supported
+#warning include
+#warning include  NotFound.cs
+#warning unknown
+#warning
+#warning include  file not supported
 
 */
 
 
 // IGNORED: in multiline comment
 /*
-//:funit:
+#warning
 */
