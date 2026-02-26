@@ -72,27 +72,32 @@ namespace FUnit.Directives
                         continue;
                     }
 
-                    var prefix = SR.WarningDirectivePrefix;
-                    if (!trivia.ToString().StartsWith(prefix, StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
+                    var fullText = trivia.ToString().Trim();
 
                     // Check for no indentation
-                    var line = trivia.GetLocation().GetLineSpan().StartLinePosition.Character;
-                    if (line != 0)
+                    var charPos = trivia.GetLocation().GetLineSpan().StartLinePosition.Character;
+                    if (charPos != 0)
                     {
                         continue;
                     }
 
-                    var fullText = trivia.ToString().TrimEnd();
+                    if (!fullText.StartsWith("#", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    var afterHash = fullText.Substring(1).TrimStart();
+                    if (!afterHash.StartsWith("warning", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
 
 #if DEBUG
                     context.ReportDiagnostic(
                         Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), fullText));
 #endif
 
-                    var keywordAndArgs = fullText.Substring(prefix.Length);
+                    var keywordAndArgs = afterHash.Substring(7); // skip "warning"
 
                     var parts = keywordAndArgs.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
                     var keyword = parts.FirstOrDefault()?.Trim() ?? string.Empty;
