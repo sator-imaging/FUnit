@@ -1,5 +1,7 @@
 #:project ../src
-#:project ../directives/FUnit.Directives.csproj
+#:package FUnit.Directives@*
+
+#if false
 
 // cannot...? --> #:project ../directives
 
@@ -23,3 +25,5 @@ return FUnit.Run(args, describe =>
         });
     });
 });
+
+#endif
