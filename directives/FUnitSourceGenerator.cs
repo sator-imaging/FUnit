@@ -86,13 +86,14 @@ namespace FUnit.Directives
                     }
 
                     var textAfterHash = fullText.Substring(1).TrimStart();
-                    if (!textAfterHash.StartsWith("warning", StringComparison.OrdinalIgnoreCase))
+                    if (!textAfterHash.StartsWith("warning", StringComparison.Ordinal))
                     {
                         continue;
                     }
 
+                    // 7 is the length of "warning" keyword
                     var textAfterWarning = textAfterHash.Substring(7).TrimStart();
-                    if (!textAfterWarning.StartsWith(SR.DirectivePrefix, StringComparison.OrdinalIgnoreCase))
+                    if (!textAfterWarning.StartsWith(SR.DirectivePrefix, StringComparison.Ordinal))
                     {
                         continue;
                     }
