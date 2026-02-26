@@ -89,11 +89,6 @@ namespace FUnit.Directives
                         continue;
                     }
 
-#if DEBUG
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), trimmedText));
-#endif
-
                     var keywordAndArgs = afterHash.Substring(7); // skip "warning"
 
                     var parts = keywordAndArgs.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
@@ -105,6 +100,11 @@ namespace FUnit.Directives
                         continue;
                     }
 
+#if DEBUG
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(SR.DebugDiagnostic, trivia.GetLocation(), trimmedText));
+#endif
+
                     // Shift!
                     var subParts = args.Split(SR.DirectiveSeparators, 2, StringSplitOptions.RemoveEmptyEntries);
                     keyword = subParts.FirstOrDefault()?.Trim() ?? string.Empty;
@@ -112,6 +112,8 @@ namespace FUnit.Directives
 
                     if (keyword.Length == 0)
                     {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(SR.EmptyFUnitDirectiveDiagnostic, trivia.GetLocation()));
                         continue;
                     }
 
@@ -126,6 +128,11 @@ namespace FUnit.Directives
                         {
                             context.AddSource(hintName, generatedContent);
                         }
+                    }
+                    else
+                    {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(SR.UnknownFUnitDirectiveDiagnostic, trivia.GetLocation(), keyword));
                     }
                 }
             }

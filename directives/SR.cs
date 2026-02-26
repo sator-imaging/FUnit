@@ -32,6 +32,22 @@ namespace FUnit.Directives
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
+        public static DiagnosticDescriptor UnknownFUnitDirectiveDiagnostic = new(
+            id: "FUNIT003",
+            title: "Unknown FUnit directive",
+            messageFormat: "Unknown FUnit directive '{0}'",
+            category: DiagnosticCategory,
+            defaultSeverity: DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
+
+        public static DiagnosticDescriptor EmptyFUnitDirectiveDiagnostic = new(
+            id: "FUNIT004",
+            title: "Empty FUnit directive",
+            messageFormat: "FUnit directive prefix found, but no directive specified",
+            category: DiagnosticCategory,
+            defaultSeverity: DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
+
         public static DiagnosticDescriptor FileExtensionNotSupportedDiagnostic = new(
             id: "FUNIT005",
             title: "File extension not supported",

@@ -27,9 +27,8 @@ return FUnit.Run(args, describe =>
 // ERRORS
 #warning funit include
 #warning funit include  NotFound.cs
-// unknown keyword is ignored for #warning
 #warning funit unknown
-#warning
+#warning funit
 #warning funit include  file not supported
 
 */
