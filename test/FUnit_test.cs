@@ -1,5 +1,5 @@
 #:project ../src
-//#:package FUnit@*
+//#:package FUnit@*-*
 
 using FUnitImpl;
 using System;
