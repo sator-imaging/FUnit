@@ -1,8 +1,8 @@
 #:project ../src
 #:package FUnit.Directives@*-*
 
-// Set 'false' to temporarily disable this test
-#if true
+// Set 'true' to temporarily disable this test
+#if false
 return 0;
 #else
 
