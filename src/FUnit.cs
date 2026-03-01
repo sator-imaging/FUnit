@@ -91,11 +91,11 @@ public static partial class FUnit
         var failedTestCases = Result.TestsBySubject
             .SelectMany(x => x.Value.Select(test => (subject: x.Key, test)))
             .Where(x => x.test.Errors?.Count is > 0)
-            .ToList();
+            .ToArray();
         var skippedTestCases = Result.TestsBySubject
             .SelectMany(x => x.Value)
             .Where(x => x.ExecutionCount == 0)
-            .ToList();
+            .ToArray();
 
         // NOTE: remove system errors from result
         var totalTestCaseCount = Result.TestsBySubject.Sum(x => x.Value.Count(y => y.Errors?.All(error => error.IsFUnitSystemError) != true));

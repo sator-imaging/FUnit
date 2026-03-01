@@ -53,7 +53,7 @@ partial class FUnit
         /// Gets a read-only dictionary where the key is the test subject and the value is a list of test case descriptions.
         /// </summary>
         public IReadOnlyDictionary<string, IReadOnlyList<string>> TestsBySubject =>
-            this.cache_TestsBySubject ??= this._testCasesBySubject.ToDictionary(k => k.Key, v => v.Value.Select(x => x.Description).ToList() as IReadOnlyList<string>);
+            this.cache_TestsBySubject ??= this._testCasesBySubject.ToDictionary(k => k.Key, v => v.Value.Select(x => x.Description).ToArray() as IReadOnlyList<string>);
         private Dictionary<string, IReadOnlyList<string>>? cache_TestsBySubject;
 
         internal TestSuite(Action<Descriptor> builder)
@@ -324,7 +324,7 @@ partial class FUnit
 
                                 return new TestResult.Error(msg, e.StackTrace, IsFUnitSystemError: false, IsAssertionFailure: e is FUnitException);
                             })
-                            .ToList();
+                            .ToArray();
                         }
 
                         tests.Add(new(tc.Description, tc.ExecutionCount, errors));
