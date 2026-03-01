@@ -59,8 +59,7 @@ namespace FUnit.Directives
                 var root = syntaxTree.GetCompilationUnitRoot();
                 var directives = root
                     .DescendantTrivia()
-                    .Where(t => t.IsKind(SyntaxKind.WarningDirectiveTrivia))
-                    .ToList();  // ToList is better than ToImmutableList in this case
+                    .Where(t => t.IsKind(SyntaxKind.WarningDirectiveTrivia));
 
                 foreach (var trivia in directives)
                 {

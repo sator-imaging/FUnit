@@ -94,7 +94,7 @@ else
 {
     matcher.AddIncludePatterns(fileGlobs);
 }
-var csFiles = matcher.GetResultsInFullPath(currentDirectory).Where(File.Exists).ToList();
+var csFiles = matcher.GetResultsInFullPath(currentDirectory).Where(File.Exists).ToArray();
 
 List<string> validFUnitFiles = [];
 

@@ -53,7 +53,7 @@ partial class FUnit
         /// Gets a read-only dictionary where the key is the test subject and the value is a list of test case descriptions.
         /// </summary>
         public IReadOnlyDictionary<string, IReadOnlyList<string>> TestsBySubject =>
-            this.cache_TestsBySubject ??= this._testCasesBySubject.ToDictionary(k => k.Key, v => v.Value.Select(x => x.Description).ToList() as IReadOnlyList<string>);
+            this.cache_TestsBySubject ??= this._testCasesBySubject.ToDictionary(k => k.Key, v => v.Value.Select(x => x.Description).ToArray() as IReadOnlyList<string>);
         private Dictionary<string, IReadOnlyList<string>>? cache_TestsBySubject;
 
         internal TestSuite(Action<Descriptor> builder)
@@ -278,7 +278,7 @@ partial class FUnit
                     foreach (var (description, error) in this._buildErrors)
                     {
                         errors.Add(
-                            new(description, 1, new List<TestResult.Error>()
+                            new(description, 1, new TestResult.Error[]
                             {
                                 new(error.Message, error.StackTrace, IsFUnitSystemError: true, IsAssertionFailure: false),
                             }));
@@ -297,7 +297,7 @@ partial class FUnit
 
                     foreach (var tc in testCases)
                     {
-                        List<TestResult.Error>? errors = null;
+                        TestResult.Error[]? errors = null;
 
                         var failedCases = failedTestCases.Where(x => x.subject == tc.Subject && x.description == tc.Description);
                         if (failedCases.Any())
@@ -324,7 +324,7 @@ partial class FUnit
 
                                 return new TestResult.Error(msg, e.StackTrace, IsFUnitSystemError: false, IsAssertionFailure: e is FUnitException);
                             })
-                            .ToList();
+                            .ToArray();
                         }
 
                         tests.Add(new(tc.Description, tc.ExecutionCount, errors));
