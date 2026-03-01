@@ -278,7 +278,7 @@ partial class FUnit
                     foreach (var (description, error) in this._buildErrors)
                     {
                         errors.Add(
-                            new(description, 1, new List<TestResult.Error>()
+                            new(description, 1, new TestResult.Error[]
                             {
                                 new(error.Message, error.StackTrace, IsFUnitSystemError: true, IsAssertionFailure: false),
                             }));
@@ -297,7 +297,7 @@ partial class FUnit
 
                     foreach (var tc in testCases)
                     {
-                        List<TestResult.Error>? errors = null;
+                        TestResult.Error[]? errors = null;
 
                         var failedCases = failedTestCases.Where(x => x.subject == tc.Subject && x.description == tc.Description);
                         if (failedCases.Any())

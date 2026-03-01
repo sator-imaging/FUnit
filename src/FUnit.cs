@@ -105,22 +105,22 @@ public static partial class FUnit
         ConsoleLogger.LogInfo("## Test Summary");
         ConsoleLogger.LogInfo($"Options:  {Result.Options}  ");
         ConsoleLogger.LogInfo($"Duration: {Result.TotalExecutionTime.ToString(TimeSpanFormat)}  ");
-        if (skippedTestCases.Count > 0)
+        if (skippedTestCases.Length > 0)
         {
-            ConsoleLogger.LogFailed($"{SR.MarkdownFailed} Total {skippedTestCases.Count} tests canceled");
+            ConsoleLogger.LogFailed($"{SR.MarkdownFailed} Total {skippedTestCases.Length} tests canceled");
 
-            return ~(failedTestCases.Count);  // ok: bash treats -1 as 255 (byte)
+            return ~(failedTestCases.Length);  // ok: bash treats -1 as 255 (byte)
         }
         else
         {
-            if (failedTestCases.Count == 0)
+            if (failedTestCases.Length == 0)
             {
                 ConsoleLogger.LogPassed($"{SR.MarkdownPassed} All Tests Passed: {totalTestCaseCount}");
             }
             else
             {
                 var failedCount = failedTestCases.Count(x => x.test.Errors?.Any(y => y.IsAssertionFailure) ?? false);
-                var erroredCount = failedTestCases.Count - failedCount;
+                var erroredCount = failedTestCases.Length - failedCount;
                 ConsoleLogger.LogPassed($"Passed: {totalTestCaseCount - failedTestCaseCountWithoutSystemErrors} ({totalTestCaseCount})  ");
                 ConsoleLogger.LogFailed($"Failed: {failedCount}  ");
                 if (erroredCount > 0)
@@ -157,7 +157,7 @@ public static partial class FUnit
                 }
             }
 
-            return failedTestCases.Count;
+            return failedTestCases.Length;
         }
     }
 }
