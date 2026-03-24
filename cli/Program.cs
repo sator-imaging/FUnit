@@ -170,7 +170,7 @@ if (validFUnitFiles.Count > 0)
     else
     {
         ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed($"> [!CAUTION]");
+        LogFailed($"> [!CAUTION]");
 
         if (failedTestCaseCount > 0)
         {
@@ -178,12 +178,12 @@ if (validFUnitFiles.Count > 0)
                 ? string.Empty
                 : $" Rerun with '{SR.Flag_StackTrace}' option for more detailed log."
                 ;
-            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed.{guidance}");
+            LogFailed($"> {SR.MarkdownFailed} Total {failedTestCaseCount} test cases were failed.{guidance}");
         }
 
         if (failedTestFiles.Count > 0)
         {
-            ConsoleLogger.LogFailed($"> {SR.MarkdownFailed} {failedTestFiles.Count} of {validFUnitFiles.Count} test files were failed to build: {string.Join(", ", failedTestFiles.Select(Path.GetFileName))}");
+            LogFailed($"> {SR.MarkdownFailed} {failedTestFiles.Count} of {validFUnitFiles.Count} test files were failed to build: {string.Join(", ", failedTestFiles.Select(Path.GetFileName))}");
         }
 
         Environment.Exit(1);
@@ -192,9 +192,9 @@ if (validFUnitFiles.Count > 0)
 else
 {
     ConsoleLogger.LogInfo();
-    ConsoleLogger.LogFailed($"> [!CAUTION]");
+    LogFailed($"> [!CAUTION]");
     var patterns = fileGlobs.Length > 0 ? string.Join(", ", fileGlobs) : "**/*test*.cs";
-    ConsoleLogger.LogFailed($"> No valid {FUnit} test files found matching the criteria: `{patterns}`");
+    LogFailed($"> No valid {FUnit} test files found matching the criteria: `{patterns}`");
 
     Environment.Exit(1);
 }
@@ -229,8 +229,8 @@ int EnsureEnvironment()
     if (process == null)
     {
         ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed("> [!CAUTION]");
-        ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
+        LogFailed("> [!CAUTION]");
+        LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
         return 1;
     }
 
@@ -241,8 +241,8 @@ int EnsureEnvironment()
     if (string.IsNullOrEmpty(output))
     {
         ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed("> [!CAUTION]");
-        ConsoleLogger.LogFailed("> Error: 'dotnet --version' returned empty output.");
+        LogFailed("> [!CAUTION]");
+        LogFailed("> Error: 'dotnet --version' returned empty output.");
         return 1;
     }
 
@@ -250,8 +250,8 @@ int EnsureEnvironment()
     if (versionParts.Length == 0)
     {
         ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed($"> [!CAUTION]");
-        ConsoleLogger.LogFailed($"> Error: Could not parse .NET SDK version from output: '{output}' (no dot found).");
+        LogFailed($"> [!CAUTION]");
+        LogFailed($"> Error: Could not parse .NET SDK version from output: '{output}' (no dot found).");
         return 1;
     }
 
@@ -261,9 +261,9 @@ int EnsureEnvironment()
         if (majorVersion < MinimumRequiredDotnetVersion)
         {
             ConsoleLogger.LogInfo();
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: .NET SDK major version {output} is less than the required {MinimumRequiredDotnetVersion}.");
-            ConsoleLogger.LogFailed($"> Please update your .NET SDK to version {MinimumRequiredDotnetVersion} or higher.");
+            LogFailed($"> [!CAUTION]");
+            LogFailed($"> Error: .NET SDK major version {output} is less than the required {MinimumRequiredDotnetVersion}.");
+            LogFailed($"> Please update your .NET SDK to version {MinimumRequiredDotnetVersion} or higher.");
             return 1;
         }
 
@@ -275,8 +275,8 @@ int EnsureEnvironment()
     else
     {
         ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed($"> [!CAUTION]");
-        ConsoleLogger.LogFailed($"> Error: Could not parse .NET SDK major version from output: '{output}'");
+        LogFailed($"> [!CAUTION]");
+        LogFailed($"> Error: Could not parse .NET SDK major version from output: '{output}'");
 
         return 1;
     }
@@ -329,8 +329,8 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
         if (exitCode != 0)
         {
             ConsoleLogger.LogInfo();
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: 'dotnet restore' command failed with exit code {exitCode}.");
+            LogFailed($"> [!CAUTION]");
+            LogFailed($"> Error: 'dotnet restore' command failed with exit code {exitCode}.");
 
             return (exitCode, false);
         }
@@ -349,8 +349,8 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
         if (exitCode != 0)
         {
             ConsoleLogger.LogInfo();
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: 'dotnet clean' command failed with exit code {exitCode}.");
+            LogFailed($"> [!CAUTION]");
+            LogFailed($"> Error: 'dotnet clean' command failed with exit code {exitCode}.");
 
             return (exitCode, false);
         }
@@ -378,8 +378,8 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
         if (exitCode != 0)
         {
             ConsoleLogger.LogInfo();
-            ConsoleLogger.LogFailed($"> [!CAUTION]");
-            ConsoleLogger.LogFailed($"> Error: 'dotnet build' command failed with exit code {exitCode}.");
+            LogFailed($"> [!CAUTION]");
+            LogFailed($"> Error: 'dotnet build' command failed with exit code {exitCode}.");
 
             return (exitCode, false);
         }
@@ -491,8 +491,8 @@ async ValueTask<int> RunDotnetAsync(
     if (!proc.Start())
     {
         ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed("> [!CAUTION]");
-        ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
+        LogFailed("> [!CAUTION]");
+        LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
 
         return -1;
     }
@@ -541,6 +541,24 @@ async ValueTask<int> RunDotnetAsync(
     }
 
     return proc.ExitCode;
+}
+
+
+static void LogFailed(object message)
+{
+    ConsoleLogger.LogFailed(message);
+    if (Console.IsOutputRedirected)
+    {
+        var msg = message?.ToString();
+        if (msg == null) return;
+
+        // FUnit always!!
+        msg = msg.Replace("\n", $"\n{new string(' ', SR.IndentationAdjustment)}", StringComparison.Ordinal);
+
+        Console.Error.Write(SR.AnsiColorFailed);
+        Console.Error.Write(msg);
+        Console.Error.WriteLine(SR.AnsiColorReset);
+    }
 }
 
 
