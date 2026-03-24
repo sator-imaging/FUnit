@@ -455,6 +455,7 @@ async ValueTask<int> RunDotnetAsync(
     };
 
     var callCounts = new ProcessCallbackCallCounts();
+    var capturedStdout = new List<string>();
 
     proc.ErrorDataReceived += (sender, args) =>
     {
@@ -465,17 +466,27 @@ async ValueTask<int> RunDotnetAsync(
         }
     };
 
-    if (requireStdOutLogging)
+    proc.OutputDataReceived += (sender, args) =>
     {
-        proc.OutputDataReceived += (sender, args) =>
+        if (args.Data != null)
         {
-            if (args.Data != null)
+            Interlocked.Increment(ref callCounts.Stdout);
+            capturedStdout.Add(args.Data);
+
+            var colorized = Colorize(args.Data, force: true);
+            bool hasErrorOrWarning = !string.Equals(args.Data, colorized, StringComparison.Ordinal);
+
+            if (hasErrorOrWarning && (Console.IsOutputRedirected || !requireStdOutLogging))
             {
-                Interlocked.Increment(ref callCounts.Stdout);
-                Console.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
+                Console.Error.WriteLine(colorized);
             }
-        };
-    }
+
+            if (requireStdOutLogging)
+            {
+                Console.WriteLine(ConsoleLogger.EnableMarkdownOutput ? args.Data : colorized);  // DO NOT use ConsoleLogger here!
+            }
+        }
+    };
 
     if (!proc.Start())
     {
@@ -490,6 +501,22 @@ async ValueTask<int> RunDotnetAsync(
     proc.BeginOutputReadLine();
 
     await proc.WaitForExitAsync();
+
+    if (proc.ExitCode != 0 && !requireStdOutLogging)
+    {
+        foreach (var line in capturedStdout)
+        {
+            Console.Error.WriteLine(Colorize(line, force: true));
+        }
+
+        if (ConsoleLogger.EnableMarkdownOutput)
+        {
+            foreach (var line in capturedStdout)
+            {
+                Console.WriteLine(line);
+            }
+        }
+    }
 
     if (ConsoleLogger.EnableMarkdownOutput)
     {
@@ -569,9 +596,9 @@ static string ColorizeInternal(string text)
 }
 
 
-static string Colorize(string message)
+static string Colorize(string message, bool force = false)
 {
-    if (ConsoleLogger.EnableMarkdownOutput ||  // TODO: use <Span> tag instead of ANSI escape
+    if ((!force && ConsoleLogger.EnableMarkdownOutput) ||  // TODO: use <Span> tag instead of ANSI escape
         string.IsNullOrWhiteSpace(message))
     {
         return message;

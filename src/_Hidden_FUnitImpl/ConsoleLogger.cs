@@ -27,7 +27,7 @@ namespace FUnitImpl
             RegexOptions.Compiled | RegexOptions.Multiline);
 #pragma warning restore SYSLIB1045
 
-        private static void Write(object? obj)
+        private static void Write(System.IO.TextWriter writer, bool useMarkdown, object? obj)
         {
             var message = obj?.ToString();
             if (message == null)
@@ -35,7 +35,7 @@ namespace FUnitImpl
                 return;
             }
 
-            if (EnableMarkdownOutput)
+            if (useMarkdown)
             {
                 // As GitHub doesn't allow changing text color, use more eye-catching emojis.
                 message = re_markdownQuoteAwareTagCloser.Replace(message, "&gt;")
@@ -48,21 +48,21 @@ namespace FUnitImpl
             // always!!
             message = message.Replace("\n", $"\n{new string(' ', SR.IndentationAdjustment)}", StringComparison.Ordinal);
 
-            Console.Write(message);
+            writer.Write(message);
         }
 
-        private static void WriteLine(object? obj = null)
+        private static void WriteLine(System.IO.TextWriter writer, bool useMarkdown, object? obj = null)
         {
-            Write(obj);
-            NewLine();
+            Write(writer, useMarkdown, obj);
+            NewLine(writer);
         }
 
-        private static void NewLine()
+        private static void NewLine(System.IO.TextWriter writer)
         {
-            Console.WriteLine();
+            writer.WriteLine();
         }
 
-        private static void Color(string? ansiColor, object obj)
+        private static void Color(System.IO.TextWriter writer, bool useMarkdown, string? ansiColor, object obj)
         {
             var message = obj?.ToString();
 
@@ -70,7 +70,7 @@ namespace FUnitImpl
 
             // fix for markdown
             int numTrailingSpaces = 0;
-            if (message != null && EnableMarkdownOutput)
+            if (message != null && useMarkdown)
             {
                 numTrailingSpaces = message.Length - message.TrimEnd(' ').Length;
                 if (numTrailingSpaces > 0)
@@ -81,7 +81,7 @@ namespace FUnitImpl
                 var match = re_markdownUnorderedList.Match(message);
                 if (match.Success)
                 {
-                    Write(match.Value);
+                    Write(writer, useMarkdown, match.Value);
                     message = message[match.Value.Length..];
                 }
             }
@@ -91,13 +91,13 @@ namespace FUnitImpl
             // write color
             if (writeColor)
             {
-                if (!EnableMarkdownOutput)
+                if (!useMarkdown)
                 {
-                    Console.Write(ansiColor);
+                    writer.Write(ansiColor);
                 }
                 else
                 {
-                    Console.Write(ansiColor switch
+                    writer.Write(ansiColor switch
                     {
                         SR.AnsiColorFailed => SR.MarkdownColorFailed,
                         SR.AnsiColorPassed => SR.MarkdownColorPassed,
@@ -109,19 +109,19 @@ namespace FUnitImpl
             // write remaining message
             if (message != null)
             {
-                Write(message);
+                Write(writer, useMarkdown, message);
             }
 
             // reset color
             if (writeColor)
             {
-                if (!EnableMarkdownOutput)
+                if (!useMarkdown)
                 {
-                    Console.Write(SR.AnsiColorReset);
+                    writer.Write(SR.AnsiColorReset);
                 }
                 else
                 {
-                    Console.Write(SR.MarkdownColorReset);
+                    writer.Write(SR.MarkdownColorReset);
                 }
 
             }
@@ -129,7 +129,7 @@ namespace FUnitImpl
             // trailing spaces
             if (numTrailingSpaces > 0)
             {
-                Write(new string(' ', numTrailingSpaces));
+                Write(writer, useMarkdown, new string(' ', numTrailingSpaces));
             }
         }
 
@@ -148,7 +148,7 @@ namespace FUnitImpl
         {
             lock (sync)
             {
-                Console.WriteLine(message);
+                Console.Out.WriteLine(message);
             }
         }
 
@@ -160,7 +160,7 @@ namespace FUnitImpl
         {
             lock (sync)
             {
-                WriteLine(message);
+                WriteLine(Console.Out, EnableMarkdownOutput, message);
             }
         }
 
@@ -172,8 +172,8 @@ namespace FUnitImpl
         {
             lock (sync)
             {
-                Color(SR.AnsiColorPassed, message);
-                NewLine();
+                Color(Console.Out, EnableMarkdownOutput, SR.AnsiColorPassed, message);
+                NewLine(Console.Out);
             }
         }
 
@@ -185,8 +185,15 @@ namespace FUnitImpl
         {
             lock (sync)
             {
-                Color(SR.AnsiColorFailed, message);
-                NewLine();
+                Color(Console.Out, EnableMarkdownOutput, SR.AnsiColorFailed, message);
+                NewLine(Console.Out);
+
+                // failure should be also visible in standard error stream if stdout is redirected.
+                if (Console.IsOutputRedirected)
+                {
+                    Color(Console.Error, false, SR.AnsiColorFailed, message);
+                    NewLine(Console.Error);
+                }
             }
         }
     }
