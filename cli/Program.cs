@@ -476,7 +476,7 @@ async ValueTask<int> RunDotnetAsync(
                 stdoutBuffer.Add(args.Data);
             }
 
-            if (requireStdOutLogging)
+            if (requireStdOutLogging || Console.IsOutputRedirected)
             {
                 Interlocked.Increment(ref callCounts.Stdout);
                 var colorized = Colorize(args.Data);
@@ -484,13 +484,6 @@ async ValueTask<int> RunDotnetAsync(
                 if (Console.IsOutputRedirected)
                 {
                     Console.Error.WriteLine(colorized);
-                }
-            }
-            else if (Console.IsOutputRedirected)
-            {
-                if (LogRegex.WarningOrError().IsMatch(args.Data))
-                {
-                    Console.Error.WriteLine(Colorize(args.Data));
                 }
             }
         }
@@ -510,7 +503,7 @@ async ValueTask<int> RunDotnetAsync(
 
     await proc.WaitForExitAsync();
 
-    if (proc.ExitCode != 0 && !requireStdOutLogging)
+    if (proc.ExitCode != 0 && !requireStdOutLogging && !Console.IsOutputRedirected)
     {
         lock (stdoutLock)
         {

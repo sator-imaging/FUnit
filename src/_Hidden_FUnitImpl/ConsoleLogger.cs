@@ -49,10 +49,6 @@ namespace FUnitImpl
             message = message.Replace("\n", $"\n{new string(' ', SR.IndentationAdjustment)}", StringComparison.Ordinal);
 
             Console.Write(message);
-            if (Console.IsOutputRedirected)
-            {
-                Console.Error.Write(message);
-            }
         }
 
         private static void WriteLine(object? obj = null)
@@ -64,10 +60,6 @@ namespace FUnitImpl
         private static void NewLine()
         {
             Console.WriteLine();
-            if (Console.IsOutputRedirected)
-            {
-                Console.Error.WriteLine();
-            }
         }
 
         private static void Color(string? ansiColor, object obj)
@@ -99,25 +91,18 @@ namespace FUnitImpl
             // write color
             if (writeColor)
             {
-                var colorTag = string.Empty;
                 if (!EnableMarkdownOutput)
                 {
-                    colorTag = ansiColor ?? string.Empty;
+                    Console.Write(ansiColor);
                 }
                 else
                 {
-                    colorTag = ansiColor switch
+                    Console.Write(ansiColor switch
                     {
                         SR.AnsiColorFailed => SR.MarkdownColorFailed,
                         SR.AnsiColorPassed => SR.MarkdownColorPassed,
                         SR.AnsiColorReset or _ => SR.MarkdownColorReset,
-                    };
-                }
-
-                Console.Write(colorTag);
-                if (Console.IsOutputRedirected)
-                {
-                    Console.Error.Write(colorTag);
+                    });
                 }
             }
 
@@ -130,21 +115,15 @@ namespace FUnitImpl
             // reset color
             if (writeColor)
             {
-                var resetTag = string.Empty;
                 if (!EnableMarkdownOutput)
                 {
-                    resetTag = SR.AnsiColorReset;
+                    Console.Write(SR.AnsiColorReset);
                 }
                 else
                 {
-                    resetTag = SR.MarkdownColorReset;
+                    Console.Write(SR.MarkdownColorReset);
                 }
 
-                Console.Write(resetTag);
-                if (Console.IsOutputRedirected)
-                {
-                    Console.Error.Write(resetTag);
-                }
             }
 
             // trailing spaces
@@ -170,10 +149,6 @@ namespace FUnitImpl
             lock (sync)
             {
                 Console.WriteLine(message);
-                if (Console.IsOutputRedirected)
-                {
-                    Console.Error.WriteLine(message);
-                }
             }
         }
 
