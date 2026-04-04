@@ -1,0 +1,51 @@
+name: 'Generate Class Diagrams'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  diagram:
+    runs-on: ubuntu-latest  # or ubuntu-slim
+
+    # Permissions required for creating PR
+    # Note: Update repo setting to allow GitHub Actions to create PR
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: diagram
+        uses: sator-imaging/dotnet-diagram@v1
+
+
+      - name: Step Summary
+        run: cat "${{ steps.diagram.outputs.readme-path }}" >> $GITHUB_STEP_SUMMARY
+
+
+      - name: Create PR
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
+          BRANCH="auto/diagram-update-$TIMESTAMP"
+
+          git config user.name  "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git checkout -b $BRANCH
+          git add .
+          git commit -m "[bot] ${{ github.workflow }} ($(date +'%Y-%m-%d %H:%M:%S'))" \
+            || exit 0
+          git push origin $BRANCH
+
+          gh pr create \
+            --fill-verbose \
+            --base main \
+            --head $BRANCH
