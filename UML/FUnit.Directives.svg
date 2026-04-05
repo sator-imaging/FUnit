@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="413px" preserveAspectRatio="none" style="width:1331px;height:413px;background:#F9F9F9;" version="1.1" viewBox="0 0 1331 413" width="1331px" zoomAndPan="magnify"><defs/><g><!--MD5=[4950e13153176ab8152ba39dee83d842]
+class SR--><rect fill="#F1F1F1" height="73.6094" id="SR" rx="3.5" ry="3.5" style="stroke: #BBBBBB; stroke-width: 1.5;" width="253" x="162.29" y="245"/><ellipse cx="276.54" cy="261" fill="#ADD1B2" rx="11" ry="11" style="stroke: #BBBBBB; stroke-width: 1.0;"/><path d="M279.5087,266.6406 Q278.9306,266.9375 278.29,267.0781 Q277.6494,267.2344 276.9462,267.2344 Q274.4462,267.2344 273.1181,265.5938 Q271.8056,263.9375 271.8056,260.8125 Q271.8056,257.6875 273.1181,256.0313 Q274.4462,254.375 276.9462,254.375 Q277.6494,254.375 278.29,254.5313 Q278.9462,254.6875 279.5087,254.9844 L279.5087,257.7031 Q278.8837,257.125 278.29,256.8594 Q277.6962,256.5781 277.0712,256.5781 Q275.7275,256.5781 275.04,257.6563 Q274.3525,258.7188 274.3525,260.8125 Q274.3525,262.9063 275.04,263.9844 Q275.7275,265.0469 277.0712,265.0469 Q277.6962,265.0469 278.29,264.7813 Q278.8837,264.5 279.5087,263.9219 L279.5087,266.6406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="16" x="297.04" y="265.1543">SR</text><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="163.29" x2="414.29" y1="277" y2="277"/><ellipse cx="173.29" cy="288" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="227" x="182.29" y="291.2104">«const» DirectivePrefix : string = "funit"</text><ellipse cx="173.29" cy="300.8047" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="204" x="182.29" y="304.0151">«const» DiagnosticCategory : string</text><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="163.29" x2="414.29" y1="310.6094" y2="310.6094"/><!--MD5=[fd3db2e36cad18450d7d88068b67753f]
+class DiagnosticDescriptor--><rect fill="#F1F1F1" height="48" id="DiagnosticDescriptor" rx="3.5" ry="3.5" style="stroke: #BBBBBB; stroke-width: 1.5;" width="163" x="207.29" y="354"/><ellipse cx="222.29" cy="370" fill="#ADD1B2" rx="11" ry="11" style="stroke: #BBBBBB; stroke-width: 1.0;"/><path d="M225.2588,375.6406 Q224.6806,375.9375 224.04,376.0781 Q223.3994,376.2344 222.6963,376.2344 Q220.1963,376.2344 218.8681,374.5938 Q217.5556,372.9375 217.5556,369.8125 Q217.5556,366.6875 218.8681,365.0313 Q220.1963,363.375 222.6963,363.375 Q223.3994,363.375 224.04,363.5313 Q224.6963,363.6875 225.2588,363.9844 L225.2588,366.7031 Q224.6338,366.125 224.04,365.8594 Q223.4463,365.5781 222.8213,365.5781 Q221.4775,365.5781 220.79,366.6563 Q220.1025,367.7188 220.1025,369.8125 Q220.1025,371.9063 220.79,372.9844 Q221.4775,374.0469 222.8213,374.0469 Q223.4463,374.0469 224.04,373.7813 Q224.6338,373.5 225.2588,372.9219 L225.2588,375.6406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="131" x="236.29" y="374.1543">DiagnosticDescriptor</text><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="208.29" x2="369.29" y1="386" y2="386"/><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="208.29" x2="369.29" y1="394" y2="394"/><!--MD5=[6cf110b95aca9ed0b4224b21f468b4d4]
+class FUnitSourceGenerator--><rect fill="#F1F1F1" height="86.4141" id="FUnitSourceGenerator" rx="3.5" ry="3.5" style="stroke: #BBBBBB; stroke-width: 1.5;" width="326" x="734.79" y="143"/><ellipse cx="823.54" cy="159" fill="#ADD1B2" rx="11" ry="11" style="stroke: #BBBBBB; stroke-width: 1.0;"/><path d="M826.5088,164.6406 Q825.9306,164.9375 825.29,165.0781 Q824.6494,165.2344 823.9463,165.2344 Q821.4463,165.2344 820.1181,163.5938 Q818.8056,161.9375 818.8056,158.8125 Q818.8056,155.6875 820.1181,154.0313 Q821.4463,152.375 823.9463,152.375 Q824.6494,152.375 825.29,152.5313 Q825.9463,152.6875 826.5088,152.9844 L826.5088,155.7031 Q825.8838,155.125 825.29,154.8594 Q824.6963,154.5781 824.0713,154.5781 Q822.7275,154.5781 822.04,155.6563 Q821.3525,156.7188 821.3525,158.8125 Q821.3525,160.9063 822.04,161.9844 Q822.7275,163.0469 824.0713,163.0469 Q824.6963,163.0469 825.29,162.7813 Q825.8838,162.5 826.5088,161.9219 L826.5088,164.6406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="140" x="844.04" y="163.1543">FUnitSourceGenerator</text><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="735.79" x2="1059.79" y1="175" y2="175"/><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="735.79" x2="1059.79" y1="183" y2="183"/><ellipse cx="745.79" cy="194" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="134" x="754.79" y="197.2104">FUnitSourceGenerator()</text><ellipse cx="745.79" cy="206.8047" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="300" x="754.79" y="210.0151">Initialize(context:GeneratorInitializationContext) : void</text><ellipse cx="745.79" cy="219.6094" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="287" x="754.79" y="222.8198">Execute(context:GeneratorExecutionContext) : void</text><!--MD5=[ef30079e118f9a7ceda252b793aaf306]
+class ISourceGenerator--><rect fill="#F1F1F1" height="48" id="ISourceGenerator" rx="3.5" ry="3.5" style="stroke: #BBBBBB; stroke-width: 1.5;" width="143" x="217.29" y="162"/><ellipse cx="232.29" cy="178" fill="#ADD1B2" rx="11" ry="11" style="stroke: #BBBBBB; stroke-width: 1.0;"/><path d="M235.2588,183.6406 Q234.6806,183.9375 234.04,184.0781 Q233.3994,184.2344 232.6963,184.2344 Q230.1963,184.2344 228.8681,182.5938 Q227.5556,180.9375 227.5556,177.8125 Q227.5556,174.6875 228.8681,173.0313 Q230.1963,171.375 232.6963,171.375 Q233.3994,171.375 234.04,171.5313 Q234.6963,171.6875 235.2588,171.9844 L235.2588,174.7031 Q234.6338,174.125 234.04,173.8594 Q233.4463,173.5781 232.8213,173.5781 Q231.4775,173.5781 230.79,174.6563 Q230.1025,175.7188 230.1025,177.8125 Q230.1025,179.9063 230.79,180.9844 Q231.4775,182.0469 232.8213,182.0469 Q233.4463,182.0469 234.04,181.7813 Q234.6338,181.5 235.2588,180.9219 L235.2588,183.6406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="111" x="246.29" y="182.1543">ISourceGenerator</text><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="218.29" x2="359.29" y1="194" y2="194"/><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="218.29" x2="359.29" y1="202" y2="202"/><!--MD5=[74f7eefa8b455e3ef096ff84195e3066]
+class IDirectiveOperator--><rect fill="#F1F1F1" height="48" id="IDirectiveOperator" rx="3.5" ry="3.5" style="stroke: #BBBBBB; stroke-width: 1.5;" width="145" x="216.29" y="34"/><ellipse cx="231.29" cy="50" fill="#B4A7E5" rx="11" ry="11" style="stroke: #BBBBBB; stroke-width: 1.0;"/><path d="M227.2119,45.7656 L227.2119,43.6094 L234.6025,43.6094 L234.6025,45.7656 L232.1338,45.7656 L232.1338,53.8438 L234.6025,53.8438 L234.6025,56 L227.2119,56 L227.2119,53.8438 L229.6806,53.8438 L229.6806,45.7656 L227.2119,45.7656 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="113" x="245.29" y="54.1543">IDirectiveOperator</text><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="217.29" x2="360.29" y1="66" y2="66"/><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="217.29" x2="360.29" y1="74" y2="74"/><!--MD5=[d307984b16101f1af270680f0aa60f7a]
+class IncludeOperator--><rect fill="#F1F1F1" height="99.2188" id="IncludeOperator" rx="3.5" ry="3.5" style="stroke: #BBBBBB; stroke-width: 1.5;" width="845" x="475.29" y="8.5"/><ellipse cx="843.04" cy="24.5" fill="#ADD1B2" rx="11" ry="11" style="stroke: #BBBBBB; stroke-width: 1.0;"/><path d="M846.0088,30.1406 Q845.4306,30.4375 844.79,30.5781 Q844.1494,30.7344 843.4463,30.7344 Q840.9463,30.7344 839.6181,29.0938 Q838.3056,27.4375 838.3056,24.3125 Q838.3056,21.1875 839.6181,19.5313 Q840.9463,17.875 843.4463,17.875 Q844.1494,17.875 844.79,18.0313 Q845.4463,18.1875 846.0088,18.4844 L846.0088,21.2031 Q845.3838,20.625 844.79,20.3594 Q844.1963,20.0781 843.5713,20.0781 Q842.2275,20.0781 841.54,21.1563 Q840.8525,22.2188 840.8525,24.3125 Q840.8525,26.4063 841.54,27.4844 Q842.2275,28.5469 843.5713,28.5469 Q844.1963,28.5469 844.79,28.2813 Q845.3838,28 846.0088,27.4219 L846.0088,30.1406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="101" x="863.54" y="28.6543">IncludeOperator</text><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="476.29" x2="1319.29" y1="40.5" y2="40.5"/><ellipse cx="486.29" cy="51.5" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="178" x="495.29" y="54.7104">DirectiveKeyword : string «get»</text><line style="stroke: #BBBBBB; stroke-width: 1.5;" x1="476.29" x2="1319.29" y1="61.3047" y2="61.3047"/><ellipse cx="486.29" cy="72.3047" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="76" x="495.29" y="75.5151">Setup() : void</text><ellipse cx="486.29" cy="85.1094" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="89" x="495.29" y="88.3198">Cleanup() : void</text><ellipse cx="486.29" cy="97.9141" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="819" x="495.29" y="101.1245">Apply(args:string, sourceFilePath:string, location:Location) : (string HintName, string? GeneratedCode, ImmutableList&lt;Diagnostic&gt; Diagnostics)</text><!--MD5=[3cc7a92917984c004e73eff78b7b8b08]
+link SR to DiagnosticDescriptor--><path d="M349.5196,330.9047 C349.5196,330.9047 347.6,340.18 344.55,344.22 " fill="none" id="SR-DiagnosticDescriptor" style="stroke: #191919; stroke-width: 1.0;"/><polygon fill="#191919" points="335.11,353.62,344.3079,350.0988,338.651,350.09,338.6598,344.4331,335.11,353.62" style="stroke: #191919; stroke-width: 1.0;"/><line style="stroke: #191919; stroke-width: 1.0;" x1="338.651" x2="344.32" y1="350.09" y2="344.45"/><polygon fill="#F9F9F9" points="346.83,319.21,344.2766,325.9539,349.5196,330.9047,352.0731,324.1608,346.83,319.21" style="stroke: #191919; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="174" x="151.1943" y="342.9323">MissingFileNameDiagnostic</text><!--MD5=[3cc7a92917984c004e73eff78b7b8b08]
+link SR to DiagnosticDescriptor--><path d="M325.2314,331.1 C325.2314,331.1 324.37,338.96 323.04,342.33 " fill="none" id="SR-DiagnosticDescriptor-1" style="stroke: #191919; stroke-width: 1.0;"/><polygon fill="#191919" points="316.58,353.62,324.5214,347.7947,319.0631,349.2801,317.5776,343.8218,316.58,353.62" style="stroke: #191919; stroke-width: 1.0;"/><line style="stroke: #191919; stroke-width: 1.0;" x1="319.0631" x2="323.04" y1="349.2801" y2="342.34"/><polygon fill="#F9F9F9" points="323.61,319.21,320.4574,325.6954,325.2314,331.1,328.384,324.6145,323.61,319.21" style="stroke: #191919; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="203" x="348.0944" y="342.9323">IncludedFileNotFoundDiagnostic</text><!--MD5=[3cc7a92917984c004e73eff78b7b8b08]
+link SR to DiagnosticDescriptor--><path d="M300.9407,331.1978 C300.9407,331.1978 300.72,337.92 300.41,340.72 " fill="none" id="SR-DiagnosticDescriptor-2" style="stroke: #191919; stroke-width: 1.0;"/><polygon fill="#191919" points="298.05,353.62,303.5978,345.4823,298.9459,348.7009,295.7273,344.0489,298.05,353.62" style="stroke: #191919; stroke-width: 1.0;"/><line style="stroke: #191919; stroke-width: 1.0;" x1="298.9459" x2="300.385" y1="348.7009" y2="340.835"/><polygon fill="#F9F9F9" points="300.4,319.21,296.6744,325.3841,300.9407,331.1978,304.6663,325.0237,300.4,319.21" style="stroke: #191919; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="214" x="377.9788" y="354.1275">UnknownFUnitDirectiveDiagnostic</text><!--MD5=[3cc7a92917984c004e73eff78b7b8b08]
+link SR to DiagnosticDescriptor--><path d="M276.6393,331.1978 C276.6393,331.1978 276.86,337.92 277.18,340.72 " fill="none" id="SR-DiagnosticDescriptor-3" style="stroke: #191919; stroke-width: 1.0;"/><polygon fill="#191919" points="279.53,353.62,281.8527,344.0489,278.6341,348.7009,273.9822,345.4823,279.53,353.62" style="stroke: #191919; stroke-width: 1.0;"/><line style="stroke: #191919; stroke-width: 1.0;" x1="278.6341" x2="277.195" y1="348.7009" y2="340.835"/><polygon fill="#F9F9F9" points="277.18,319.21,272.9137,325.0237,276.6393,331.1978,280.9056,325.3841,277.18,319.21" style="stroke: #191919; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="197" x="3.057" y="353.2869">EmptyFUnitDirectiveDiagnostic</text><!--MD5=[3cc7a92917984c004e73eff78b7b8b08]
+link SR to DiagnosticDescriptor--><path d="M252.3486,331.1 C252.3486,331.1 253.21,338.96 254.54,342.33 " fill="none" id="SR-DiagnosticDescriptor-4" style="stroke: #191919; stroke-width: 1.0;"/><polygon fill="#191919" points="261,353.62,260.0024,343.8218,258.5169,349.2801,253.0586,347.7947,261,353.62" style="stroke: #191919; stroke-width: 1.0;"/><line style="stroke: #191919; stroke-width: 1.0;" x1="258.5169" x2="254.54" y1="349.2801" y2="342.34"/><polygon fill="#F9F9F9" points="253.97,319.21,249.196,324.6145,252.3486,331.1,257.1226,325.6954,253.97,319.21" style="stroke: #191919; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="240" x="-15.0238" y="342.9323">FileExtensionNotSupportedDiagnostic</text><!--MD5=[3cc7a92917984c004e73eff78b7b8b08]
+link SR to DiagnosticDescriptor--><path d="M228.0604,330.9047 C228.0604,330.9047 229.98,340.18 233.03,344.22 " fill="none" id="SR-DiagnosticDescriptor-5" style="stroke: #191919; stroke-width: 1.0;"/><polygon fill="#191919" points="242.47,353.62,238.9202,344.4331,238.929,350.09,233.2721,350.0988,242.47,353.62" style="stroke: #191919; stroke-width: 1.0;"/><line style="stroke: #191919; stroke-width: 1.0;" x1="238.929" x2="233.26" y1="350.09" y2="344.45"/><polygon fill="#F9F9F9" points="230.75,319.21,225.5069,324.1608,228.0604,330.9047,233.3034,325.9539,230.75,319.21" style="stroke: #191919; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="109" x="108.8951" y="342.9323">DebugDiagnostic</text><!--MD5=[cc6e72134b885798d847c84dd61191f1]
+reverse link ISourceGenerator to FUnitSourceGenerator--><path d="M380.52,186 C473.86,186 621.22,186 734.66,186 " fill="none" id="ISourceGenerator&lt;-FUnitSourceGenerator" style="stroke: #191919; stroke-width: 1.0;"/><polygon fill="none" points="380.31,193,360.31,186,380.31,179,380.31,193" style="stroke: #191919; stroke-width: 1.0;"/><!--MD5=[853f9425d35062c57a61439b82c3e0e1]
+reverse link IDirectiveOperator to IncludeOperator--><path d="M381.89,58 C409.15,58 440.93,58 475.08,58 " fill="none" id="IDirectiveOperator&lt;-IncludeOperator" style="stroke: #191919; stroke-width: 1.0;"/><polygon fill="none" points="381.51,65,361.51,58,381.51,51,381.51,65" style="stroke: #191919; stroke-width: 1.0;"/><!--MD5=[7b8ee7c608a538aa614604d4d53f1b52]
+@startuml
+skinparam BackgroundColor F9F9F9
+skinparam shadowing false
+skinparam RoundCorner 7
+skinparam ArrowColor 191919
+skinparam FontColor 191919
+skinparam SequenceLifeLineBorderColor 393939
+skinparam SequenceGroupHeaderFontColor 191919
+skinparam SequenceGroupFontColor 393939
+skinparam SequenceGroupBorderColor 393939
+skinparam SequenceGroupBorderThickness 1
+
+skinparam sequenceDivider {
+    BorderColor 191919
+    BorderThickness 1
+    FontColor 191919
+}
+
+skinparam participant {
+    BackgroundColor E55756
+    BorderColor 191919
+    FontColor F9F9F9
+    BorderThickness 1.5
+}
+
+skinparam database {
+    BackgroundColor A4DBD8
+    BorderColor 191919
+    FontColor 191919
+}
+
+skinparam entity {
+    BackgroundColor EFBABC
+    BorderColor 191919
+    FontColor 191919
+}
+
+skinparam note {
+    BackgroundColor e5e5e5
+    BorderColor 191919
+    FontColor 191919
+    BorderThickness 1.5
+}
+
+skinparam actor {
+    BackgroundColor 191919
+    BorderColor 191919
+    FontColor 191919
+}
+
+skinparam boundary {
+    BackgroundColor EFBABC
+    BorderColor 191919
+    FontColor 191919
+}
+
+skinparam control {
+    BackgroundColor EFBABC
+    BorderColor 191919
+    FontColor 191919
+}
+
+skinparam collections {
+    BackgroundColor E55756
+    BorderColor 191919
+    FontColor 191919
+    BorderThickness 1.5
+}
+
+skinparam queue {
+    BackgroundColor E55756
+    BorderColor 191919
+    FontColor FFF
+    BorderThickness 1.5
+}
+
+skinparam class {
+    BackgroundColor F1F1F1
+    BorderColor BBBBBB
+}
+left to right direction
+class SR {
+    + <<const>> DirectivePrefix : string = "funit"
+    + <<const>> DiagnosticCategory : string
+}
+SR o-> "MissingFileNameDiagnostic" DiagnosticDescriptor
+SR o-> "IncludedFileNotFoundDiagnostic" DiagnosticDescriptor
+SR o-> "UnknownFUnitDirectiveDiagnostic" DiagnosticDescriptor
+SR o-> "EmptyFUnitDirectiveDiagnostic" DiagnosticDescriptor
+SR o-> "FileExtensionNotSupportedDiagnostic" DiagnosticDescriptor
+SR o-> "DebugDiagnostic" DiagnosticDescriptor
+class FUnitSourceGenerator {
+    + FUnitSourceGenerator()
+    + Initialize(context:GeneratorInitializationContext) : void
+    + Execute(context:GeneratorExecutionContext) : void
+}
+ISourceGenerator <|- - FUnitSourceGenerator
+interface IDirectiveOperator {
+}
+class IncludeOperator {
+    + DirectiveKeyword : string <<get>>
+    + Setup() : void
+    + Cleanup() : void
+    + Apply(args:string, sourceFilePath:string, location:Location) : (string HintName, string? GeneratedCode, ImmutableList<Diagnostic> Diagnostics)
+}
+IDirectiveOperator <|- - IncludeOperator
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.18+8
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>
