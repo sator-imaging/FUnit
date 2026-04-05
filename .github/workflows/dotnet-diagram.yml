@@ -2,9 +2,15 @@ name: 'Generate Class Diagrams'
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
   pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
   workflow_dispatch:
 
 jobs:
@@ -25,16 +31,24 @@ jobs:
 
 
       - name: Step Summary
-        run: cat "${{ steps.diagram.outputs.readme-path }}" >> $GITHUB_STEP_SUMMARY
+        run: cat "${{ steps.diagram.outputs.diff-path }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload HTML Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: dotnet-diagram-html
+          path: UML/index.html
+          archive: false
+          if-no-files-found: error
 
 
       - name: Create PR
-        if: github.event_name == 'push'
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-          BRANCH="auto/diagram-update-$TIMESTAMP"
+          BRANCH="bot/dotnet-diagram-$TIMESTAMP"
 
           git config user.name  "github-actions"
           git config user.email "github-actions@github.com"
