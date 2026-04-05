@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+class SR {
+    + <<const>> DirectivePrefix : string = "funit"
+    + <<const>> DiagnosticCategory : string
+}
+SR o-> "MissingFileNameDiagnostic" DiagnosticDescriptor
+SR o-> "IncludedFileNotFoundDiagnostic" DiagnosticDescriptor
+SR o-> "UnknownFUnitDirectiveDiagnostic" DiagnosticDescriptor
+SR o-> "EmptyFUnitDirectiveDiagnostic" DiagnosticDescriptor
+SR o-> "FileExtensionNotSupportedDiagnostic" DiagnosticDescriptor
+SR o-> "DebugDiagnostic" DiagnosticDescriptor
+class FUnitSourceGenerator {
+    + FUnitSourceGenerator()
+    + Initialize(context:GeneratorInitializationContext) : void
+    + Execute(context:GeneratorExecutionContext) : void
+}
+ISourceGenerator <|-- FUnitSourceGenerator
+interface IDirectiveOperator {
+}
+class IncludeOperator {
+    + DirectiveKeyword : string <<get>>
+    + Setup() : void
+    + Cleanup() : void
+    + Apply(args:string, sourceFilePath:string, location:Location) : (string HintName, string? GeneratedCode, ImmutableList<Diagnostic> Diagnostics)
+}
+IDirectiveOperator <|-- IncludeOperator
+@enduml

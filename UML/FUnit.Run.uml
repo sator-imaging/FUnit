@@ -1,0 +1,14 @@
+@startuml
+left to right direction
+class ProcessCallbackCallCounts <<file>> <<sealed>> {
+    + <<volatile>> Error : int
+    + <<volatile>> Stdout : int
+}
+class LogRegex <<static>> <<partial>> {
+    + {static} <<partial>> WarningOrError() : Regex
+}
+class "List`1"<T> {
+}
+class "ValueTask`1"<T> {
+}
+@enduml
