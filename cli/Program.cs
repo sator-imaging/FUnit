@@ -501,17 +501,15 @@ async ValueTask<int> RunDotnetAsync(
 
     await proc.WaitForExitAsync();
 
-    if (proc.ExitCode != 0)
+    if (proc.ExitCode != 0 && Console.IsOutputRedirected)
     {
-        if (Console.IsOutputRedirected)
+        foreach (var line in capturedStdout)
         {
-            foreach (var line in capturedStdout)
-            {
-                Console.Error.WriteLine(Colorize(line));
-            }
+            Console.Error.WriteLine(Colorize(line));
         }
     }
-    else if (ConsoleLogger.EnableMarkdownOutput)
+
+    if (ConsoleLogger.EnableMarkdownOutput)
     {
         if (requireDetailsTag)
         {
