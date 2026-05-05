@@ -455,6 +455,7 @@ async ValueTask<int> RunDotnetAsync(
     };
 
     var callCounts = new ProcessCallbackCallCounts();
+    List<string> capturedStdout = new();
 
     proc.ErrorDataReceived += (sender, args) =>
     {
@@ -465,17 +466,22 @@ async ValueTask<int> RunDotnetAsync(
         }
     };
 
-    if (requireStdOutLogging)
+    proc.OutputDataReceived += (sender, args) =>
     {
-        proc.OutputDataReceived += (sender, args) =>
+        if (args.Data != null)
         {
-            if (args.Data != null)
+            if (Console.IsOutputRedirected)
+            {
+                capturedStdout.Add(args.Data);
+            }
+
+            if (requireStdOutLogging)
             {
                 Interlocked.Increment(ref callCounts.Stdout);
                 Console.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
             }
-        };
-    }
+        }
+    };
 
     if (!proc.Start())
     {
@@ -490,6 +496,14 @@ async ValueTask<int> RunDotnetAsync(
     proc.BeginOutputReadLine();
 
     await proc.WaitForExitAsync();
+
+    if (proc.ExitCode != 0 && Console.IsOutputRedirected)
+    {
+        foreach (var line in capturedStdout)
+        {
+            Console.Error.WriteLine(Colorize(line));
+        }
+    }
 
     if (ConsoleLogger.EnableMarkdownOutput)
     {
