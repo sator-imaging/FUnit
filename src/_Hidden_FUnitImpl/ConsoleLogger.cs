@@ -49,10 +49,6 @@ namespace FUnitImpl
             message = message.Replace("\n", $"\n{new string(' ', SR.IndentationAdjustment)}", StringComparison.Ordinal);
 
             Console.Write(message);
-            if (Console.IsOutputRedirected)
-            {
-                Console.Error.Write(message);
-            }
         }
 
         private static void WriteLine(object? obj = null)
@@ -64,10 +60,6 @@ namespace FUnitImpl
         private static void NewLine()
         {
             Console.WriteLine();
-            if (Console.IsOutputRedirected)
-            {
-                Console.Error.WriteLine();
-            }
         }
 
         private static void Color(string? ansiColor, object obj)
@@ -102,10 +94,6 @@ namespace FUnitImpl
                 if (!EnableMarkdownOutput)
                 {
                     Console.Write(ansiColor);
-                    if (Console.IsOutputRedirected)
-                    {
-                        Console.Error.Write(ansiColor);
-                    }
                 }
                 else
                 {
@@ -115,15 +103,6 @@ namespace FUnitImpl
                         SR.AnsiColorPassed => SR.MarkdownColorPassed,
                         SR.AnsiColorReset or _ => SR.MarkdownColorReset,
                     });
-                    if (Console.IsOutputRedirected)
-                    {
-                        Console.Error.Write(ansiColor switch
-                        {
-                            SR.AnsiColorFailed => SR.MarkdownColorFailed,
-                            SR.AnsiColorPassed => SR.MarkdownColorPassed,
-                            SR.AnsiColorReset or _ => SR.MarkdownColorReset,
-                        });
-                    }
                 }
             }
 
@@ -139,18 +118,10 @@ namespace FUnitImpl
                 if (!EnableMarkdownOutput)
                 {
                     Console.Write(SR.AnsiColorReset);
-                    if (Console.IsOutputRedirected)
-                    {
-                        Console.Error.Write(SR.AnsiColorReset);
-                    }
                 }
                 else
                 {
                     Console.Write(SR.MarkdownColorReset);
-                    if (Console.IsOutputRedirected)
-                    {
-                        Console.Error.Write(SR.MarkdownColorReset);
-                    }
                 }
 
             }
@@ -178,10 +149,6 @@ namespace FUnitImpl
             lock (sync)
             {
                 Console.WriteLine(message);
-                if (Console.IsOutputRedirected)
-                {
-                    Console.Error.WriteLine(message);
-                }
             }
         }
 
