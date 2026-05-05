@@ -109,16 +109,20 @@ namespace FUnitImpl
                 }
                 else
                 {
-                    var color = ansiColor switch
+                    Console.Write(ansiColor switch
                     {
                         SR.AnsiColorFailed => SR.MarkdownColorFailed,
                         SR.AnsiColorPassed => SR.MarkdownColorPassed,
                         SR.AnsiColorReset or _ => SR.MarkdownColorReset,
-                    };
-                    Console.Write(color);
+                    });
                     if (Console.IsOutputRedirected)
                     {
-                        Console.Error.Write(color);
+                        Console.Error.Write(ansiColor switch
+                        {
+                            SR.AnsiColorFailed => SR.MarkdownColorFailed,
+                            SR.AnsiColorPassed => SR.MarkdownColorPassed,
+                            SR.AnsiColorReset or _ => SR.MarkdownColorReset,
+                        });
                     }
                 }
             }
@@ -148,6 +152,7 @@ namespace FUnitImpl
                         Console.Error.Write(SR.MarkdownColorReset);
                     }
                 }
+
             }
 
             // trailing spaces
