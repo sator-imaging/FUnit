@@ -456,7 +456,6 @@ async ValueTask<int> RunDotnetAsync(
 
     var callCounts = new ProcessCallbackCallCounts();
     StringBuilder capturedStdout = new(capacity: 1024);
-    object sync_stdout = new();
 
     proc.ErrorDataReceived += (sender, args) =>
     {
@@ -473,7 +472,7 @@ async ValueTask<int> RunDotnetAsync(
         {
             if (Console.IsOutputRedirected)
             {
-                lock (sync_stdout)
+                lock (capturedStdout)
                 {
                     capturedStdout.Append(args.Data);
                 }
@@ -503,7 +502,7 @@ async ValueTask<int> RunDotnetAsync(
 
     if (proc.ExitCode != 0 && Console.IsOutputRedirected)
     {
-        Console.Error.WriteLine(Colorize(capturedStdout));
+        Console.Error.WriteLine(Colorize(capturedStdout.ToString()));
     }
 
     if (ConsoleLogger.EnableMarkdownOutput)
