@@ -6,6 +6,7 @@ assets
 
 !README.md
 !LICENSE.md
+!DOC_COVERAGE.md
 
 !.gitignore
 !.editorconfig
