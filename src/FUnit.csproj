@@ -30,10 +30,10 @@
 
     <PackageIcon>$(NuGetPublishIconFile)</PackageIcon>
     <PackageReadmeFile>$(NuGetPublishReadmeFile)</PackageReadmeFile>
-    <AssemblyVersion>$(NuGetPublishVersion)</AssemblyVersion>
-    <FileVersion>$(NuGetPublishVersion)</FileVersion>
-    <PackageVersion>$(NuGetPublishVersion)$(NuGetPublishVersionSuffix)</PackageVersion>
-    <Version>$(NuGetPublishVersion)$(NuGetPublishVersionSuffix)</Version>
+    <AssemblyVersion>$([System.String]::Copy('$(NuGetPublishVersion)').Split('-')[0]).0</AssemblyVersion>
+    <FileVersion>$([System.String]::Copy('$(NuGetPublishVersion)').Split('-')[0]).0</FileVersion>
+    <PackageVersion>$(NuGetPublishVersion)</PackageVersion>
+    <Version>$(NuGetPublishVersion)</Version>
 
     <AssemblyName>$(NuGetPublishID)</AssemblyName>
     <PackageId>$(NuGetPublishID)</PackageId>
