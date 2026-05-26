@@ -4,18 +4,22 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  test:
+    uses: ./.github/workflows/test.yml
+
   publish:
+    needs: test
+    if: success()
 
     permissions:
       id-token: write  # enable GitHub OIDC token issuance for this job
       contents: read   # required for private repo
 
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.x.x
 
