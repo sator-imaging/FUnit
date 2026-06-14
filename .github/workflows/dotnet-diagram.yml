@@ -3,14 +3,10 @@ name: 'Generate Class Diagrams'
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - '**/*.cs'
-      - '**/*.csproj'
+    paths: [ '**/*.cs', '**/*.csproj', '**/*.props' ]
   pull_request:
     branches: [ "main" ]
-    paths:
-      - '**/*.cs'
-      - '**/*.csproj'
+    paths: [ '**/*.cs', '**/*.csproj', '**/*.props' ]
   workflow_dispatch:
 
 jobs:
