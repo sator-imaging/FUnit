@@ -41,7 +41,6 @@
     </None>
   </ItemGroup>
   <PropertyGroup>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 
     <PackageIcon>$(NuGetPublishIconFile)</PackageIcon>
