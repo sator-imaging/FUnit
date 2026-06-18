@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.1](https://github.com/sator-imaging/FUnit/releases/tag/v2.0.1) (2026-06-18)
+
+### 📚 Other Changes
+* [bot] Sync `.github` (20260526-001221) by [@github-actions](https://github.com/github-actions)[bot] in [#46](https://github.com/sator-imaging/FUnit/pull/46)
+* chore(deps): Bump the "default" group with 3 updates across multiple ecosystems by [@dependabot](https://github.com/dependabot)[bot] in [#51](https://github.com/sator-imaging/FUnit/pull/51)
+* ci: props by [@sator-imaging](https://github.com/sator-imaging) in [#50](https://github.com/sator-imaging/FUnit/pull/50)
+
+### 🎉 New Contributors
+* [@dependabot](https://github.com/dependabot)[bot] made their first contribution in [#51](https://github.com/sator-imaging/FUnit/pull/51)
+
+**Full Changelog**: https://github.com/sator-imaging/FUnit/compare/v2.0.0...v2.0.1
+
+
 ## [2.0.0](https://github.com/sator-imaging/FUnit/releases/tag/v2.0.0) (2026-05-25)
 
 ### ✨ Breaking Changes
