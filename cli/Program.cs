@@ -455,36 +455,7 @@ async ValueTask<int> RunDotnetAsync(
     };
 
     var callCounts = new ProcessCallbackCallCounts();
-    StringBuilder capturedStdout = new(capacity: 1024);
-
-    proc.ErrorDataReceived += (sender, args) =>
-    {
-        if (args.Data != null)
-        {
-            Interlocked.Increment(ref callCounts.Error);
-            Console.Error.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
-        }
-    };
-
-    proc.OutputDataReceived += (sender, args) =>
-    {
-        if (args.Data != null)
-        {
-            if (Console.IsOutputRedirected)
-            {
-                lock (capturedStdout)
-                {
-                    capturedStdout.Append(args.Data);
-                }
-            }
-
-            if (requireStdOutLogging)
-            {
-                Interlocked.Increment(ref callCounts.Stdout);
-                Console.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
-            }
-        }
-    };
+    StringBuilder capturedStdout = new(capacity: 4096);
 
     if (!proc.Start())
     {
@@ -495,10 +466,39 @@ async ValueTask<int> RunDotnetAsync(
         return -1;
     }
 
-    proc.BeginErrorReadLine();
-    proc.BeginOutputReadLine();
+    var stdoutTask = Task.Run(() =>
+    {
+        string? line;
+        while ((line = proc.StandardOutput.ReadLine()) != null)
+        {
+            if (Console.IsOutputRedirected)
+            {
+                lock (capturedStdout)
+                {
+                    capturedStdout.AppendLine(line);
+                }
+            }
+
+            if (requireStdOutLogging)
+            {
+                Interlocked.Increment(ref callCounts.Stdout);
+                Console.Out.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+            }
+        }
+    });
+
+    var stderrTask = Task.Run(() =>
+    {
+        string? line;
+        while ((line = proc.StandardError.ReadLine()) != null)
+        {
+            Interlocked.Increment(ref callCounts.Error);
+            Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+        }
+    });
 
     await proc.WaitForExitAsync();
+    await Task.WhenAll(stdoutTask, stderrTask);
 
     if (proc.ExitCode != 0 && Console.IsOutputRedirected)
     {
