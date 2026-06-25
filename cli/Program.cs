@@ -455,7 +455,6 @@ async ValueTask<int> RunDotnetAsync(
     };
 
     var callCounts = new ProcessCallbackCallCounts();
-    StringBuilder capturedStdout = new(capacity: 4096);
 
     if (!proc.Start())
     {
@@ -466,39 +465,30 @@ async ValueTask<int> RunDotnetAsync(
         return -1;
     }
 
-    var stdoutTask = Task.Run(() =>
-    {
-        string? line;
-        while ((line = proc.StandardOutput.ReadLine()) != null)
-        {
-            if (Console.IsOutputRedirected)
-            {
-                lock (capturedStdout)
-                {
-                    capturedStdout.AppendLine(line);
-                }
-            }
+    var tasks = new List<Task>();
 
-            if (requireStdOutLogging)
-            {
-                Interlocked.Increment(ref callCounts.Stdout);
-                Console.Out.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
-            }
+    var defaultLogger = new Logger(line => Console.Out.WriteLine(Colorize(line)));
+
+    var stdoutLogger = new Logger(line =>
+    {
+        if (requireStdOutLogging)
+        {
+            Interlocked.Increment(ref callCounts.Stdout);
+            Console.Out.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
         }
     });
 
-    var stderrTask = Task.Run(() =>
+    var stderrLogger = new Logger(line =>
     {
-        string? line;
-        while ((line = proc.StandardError.ReadLine()) != null)
-        {
-            Interlocked.Increment(ref callCounts.Error);
-            Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
-        }
+        Interlocked.Increment(ref callCounts.Error);
+        Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
     });
+
+    var capturedStdout = PollStreamReader(proc.StandardOutput, stdoutLogger ?? defaultLogger, tasks);
+    _ = PollStreamReader(proc.StandardError, stderrLogger, tasks);
 
     await proc.WaitForExitAsync();
-    await Task.WhenAll(stdoutTask, stderrTask);
+    await Task.WhenAll(tasks);
 
     if (proc.ExitCode != 0 && Console.IsOutputRedirected)
     {
@@ -573,6 +563,25 @@ static void RunAllTests()
 #endif
 
 
+static StringBuilder PollStreamReader(StreamReader stream, Logger? logger, List<Task> tasks)
+{
+    var sb = new StringBuilder(capacity: 4096);
+    var task = Task.Run(
+        () =>
+        {
+            string? line;
+            while ((line = stream.ReadLine()) != null)
+            {
+                sb.AppendLine(line);
+                logger?.Debug(line);
+            }
+        });
+    tasks.Add(task);
+
+    return sb;
+}
+
+
 static string ColorizeInternal(string text)
 {
     return LogRegex.WarningOrError().Replace(text, match =>
@@ -617,4 +626,10 @@ internal static partial class LogRegex
 {
     [GeneratedRegex(@"\b(warning(\(s\)|s)?|error(\(s\)|s)?|warn|err)(?!\w)", RegexOptions.IgnoreCase)]
     public static partial Regex WarningOrError();
+}
+
+
+file sealed class Logger(Action<string>? action)
+{
+    public void Debug(string line) => action?.Invoke(line);
 }
