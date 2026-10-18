@@ -221,22 +221,27 @@ int EnsureEnvironment()
         FileName = "dotnet",
         Arguments = "--version",
         RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        StandardErrorEncoding = Encoding.UTF8,
+        StandardOutputEncoding = Encoding.UTF8,
         UseShellExecute = false,
         CreateNoWindow = true
     };
 
-    using Process? process = Process.Start(startInfo);
-    if (process == null)
+    Process? process = Process.Start(startInfo);
+    try
     {
-        ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed("> [!CAUTION]");
-        ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
-        return 1;
-    }
+        if (process == null)
+        {
+            ConsoleLogger.LogInfo();
+            ConsoleLogger.LogFailed("> [!CAUTION]");
+            ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
+            return 1;
+        }
 
-    process.WaitForExit();
+        process.WaitForExit();
 
-    string output = process.StandardOutput.ReadToEnd().Trim();
+        string output = process.StandardOutput.ReadToEnd().Trim();
 
     if (string.IsNullOrEmpty(output))
     {
@@ -282,6 +287,33 @@ int EnsureEnvironment()
     }
 
     return 0;
+    }
+    finally
+    {
+        if (process != null)
+        {
+            try
+            {
+                if (!process.HasExited)
+                {
+                    Thread.Sleep(310);
+                }
+                if (!process.HasExited)
+                {
+                    process.Kill(entireProcessTree: true);
+                    Thread.Sleep(310);
+                    if (!process.HasExited)
+                    {
+                        throw new Exception($"Process {process.Id} did not exit after Kill.");
+                    }
+                }
+            }
+            finally
+            {
+                process.Dispose();
+            }
+        }
+    }
 }
 
 static string BuildEscapedArguments(string[] args)
@@ -441,13 +473,15 @@ async ValueTask<int> RunDotnetAsync(
         }
     }
 
-    using var proc = new Process()
+    var proc = new Process()
     {
         StartInfo = new()
         {
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            StandardErrorEncoding = Encoding.UTF8,
+            StandardOutputEncoding = Encoding.UTF8,
             FileName = "dotnet",
             Arguments = $"{arguments}",
             CreateNoWindow = true,
@@ -456,6 +490,7 @@ async ValueTask<int> RunDotnetAsync(
 
     var callCounts = new ProcessCallbackCallCounts();
     StringBuilder capturedStdout = new(capacity: 1024);
+    var isStarted = false;
 
     proc.ErrorDataReceived += (sender, args) =>
     {
@@ -486,48 +521,78 @@ async ValueTask<int> RunDotnetAsync(
         }
     };
 
-    if (!proc.Start())
+    try
     {
-        ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed("> [!CAUTION]");
-        ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
-
-        return -1;
-    }
-
-    proc.BeginErrorReadLine();
-    proc.BeginOutputReadLine();
-
-    await proc.WaitForExitAsync();
-
-    if (proc.ExitCode != 0 && Console.IsOutputRedirected)
-    {
-        Console.Error.WriteLine(Colorize(capturedStdout.ToString()));
-    }
-
-    if (ConsoleLogger.EnableMarkdownOutput)
-    {
-        if (requireDetailsTag)
+        if (!proc.Start())
         {
-            if (callCounts.Stdout == 0 && callCounts.Error == 0)
-            {
-                ConsoleLogger.LogInfoRaw($"[{FUnit}] 🎉 No errors or warnings!");
-            }
+            ConsoleLogger.LogInfo();
+            ConsoleLogger.LogFailed("> [!CAUTION]");
+            ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
 
-            ConsoleLogger.LogInfoRaw("```");
-            ConsoleLogger.LogInfoRaw();
-            ConsoleLogger.LogInfoRaw("</details>");
+            return -1;
+        }
+        isStarted = true;
 
-            if (callCounts.Stdout > 0 || callCounts.Error > 0)
+        proc.BeginErrorReadLine();
+        proc.BeginOutputReadLine();
+
+        await proc.WaitForExitAsync();
+
+        if (proc.ExitCode != 0 && Console.IsOutputRedirected)
+        {
+            Console.Error.WriteLine(Colorize(capturedStdout.ToString()));
+        }
+
+        if (ConsoleLogger.EnableMarkdownOutput)
+        {
+            if (requireDetailsTag)
             {
+                if (callCounts.Stdout == 0 && callCounts.Error == 0)
+                {
+                    ConsoleLogger.LogInfoRaw($"[{FUnit}] 🎉 No errors or warnings!");
+                }
+
+                ConsoleLogger.LogInfoRaw("```");
                 ConsoleLogger.LogInfoRaw();
-                ConsoleLogger.LogInfoRaw($"> [!WARNING]");
-                ConsoleLogger.LogInfoRaw($"> `{subCommandWithoutFilePath}` has stdout: **{callCounts.Stdout}** error: **{callCounts.Error}**");
+                ConsoleLogger.LogInfoRaw("</details>");
+
+                if (callCounts.Stdout > 0 || callCounts.Error > 0)
+                {
+                    ConsoleLogger.LogInfoRaw();
+                    ConsoleLogger.LogInfoRaw($"> [!WARNING]");
+                    ConsoleLogger.LogInfoRaw($"> `{subCommandWithoutFilePath}` has stdout: **{callCounts.Stdout}** error: **{callCounts.Error}**");
+                }
             }
         }
-    }
 
-    return proc.ExitCode;
+        return proc.ExitCode;
+    }
+    finally
+    {
+        try
+        {
+            if (isStarted)
+            {
+                if (!proc.HasExited)
+                {
+                    await Task.Delay(310);
+                }
+                if (!proc.HasExited)
+                {
+                    proc.Kill(entireProcessTree: true);
+                    await Task.Delay(310);
+                    if (!proc.HasExited)
+                    {
+                        throw new Exception($"Process {proc.Id} did not exit after Kill.");
+                    }
+                }
+            }
+        }
+        finally
+        {
+            proc.Dispose();
+        }
+    }
 }
 
 
