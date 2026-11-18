@@ -615,6 +615,7 @@ file sealed class ProcessCallbackCallCounts
 
 internal static partial class LogRegex
 {
-    [GeneratedRegex(@"\b(warning(\(s\)|s)?|error(\(s\)|s)?|warn|err)(?!\w)", RegexOptions.IgnoreCase)]
+    // Use non-capturing groups unless captured match values are required.
+    [GeneratedRegex(@"\b(warning(?:\(s\)|s)?|error(?:\(s\)|s)?|warn|err)(?!\w)", RegexOptions.IgnoreCase)]
     public static partial Regex WarningOrError();
 }
