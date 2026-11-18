@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
 
 #pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 #pragma warning disable CA1822 // Mark members as static
@@ -21,6 +22,25 @@ Must.Throw<ArgumentException>("'--concurrency' takes 1 positive integer paramete
 Must.Throw<ArgumentException>("'--iterations' takes 1 positive integer parameter", () => CommandLineOptions.Parse(["--iterations"]));
 Must.Throw<ArgumentException>("'--configuration' takes 1 string parameter", () => CommandLineOptions.Parse(["--configuration"]));
 Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Parameter 'ConcurrencyLevel')", () => CommandLineOptions.Parse(["--concurrency", "0"]));
+
+// markdown logger regex
+{
+    const BindingFlags privateStatic = BindingFlags.NonPublic | BindingFlags.Static;
+
+    var unorderedListRegex = (Regex)typeof(ConsoleLogger).GetField(
+        "re_markdownUnorderedList",
+        privateStatic)?.GetValue(null)!;
+    var quoteAwareTagCloserRegex = (Regex)typeof(ConsoleLogger).GetField(
+        "re_markdownQuoteAwareTagCloser",
+        privateStatic)?.GetValue(null)!;
+
+    Must.BeEqual(1, unorderedListRegex.GetGroupNumbers().Length);
+    Must.BeEqual(1, quoteAwareTagCloserRegex.GetGroupNumbers().Length);
+    Must.BeTrue(unorderedListRegex.IsMatch("- item"));
+    Must.BeTrue(unorderedListRegex.IsMatch("> [!NOTE]\n"));
+    Must.BeEqual("a&gt;b", quoteAwareTagCloserRegex.Replace("a>b", "&gt;"));
+    Must.BeEqual("> quoted", quoteAwareTagCloserRegex.Replace("> quoted", "&gt;"));
+}
 Must.Throw<ArgumentOutOfRangeException>("Argument must be greater than 0: 0 (Parameter 'Iterations')", () => CommandLineOptions.Parse(["--iterations", "0"]));
 
 
