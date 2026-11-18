@@ -18,8 +18,9 @@ namespace FUnitImpl
         public static bool EnableMarkdownOutput { get; set; }
 
 #pragma warning disable SYSLIB1045 // Use GeneratedRegexAttribute to generate the regular expression implementation at compile time.
+        // Non-capturing groups keep the match as a whole while avoiding unnecessary capture state.
         private static readonly Regex re_markdownUnorderedList = new(
-            @"(^(>[ ]+)?[ ]*([\*\-+]?([ ]+\[[ x]\])?)?[ ]+)|(^(>[ ]+(\[\![^\]]+\]([^\n]*\n)?)?))",
+            @"(?:^(?:>[ ]+)?[ ]*(?:[\*\-+]?(?:[ ]+\[[ x]\])?)?[ ]+)|(?:^(?:>[ ]+(?:\[\![^\]]+\](?:[^\n]*\n)?)?))",
             RegexOptions.Compiled);
 
         private static readonly Regex re_markdownQuoteAwareTagCloser = new(
