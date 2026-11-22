@@ -572,8 +572,7 @@ ValueTask<int> RunDotnetAsync(
         }
     }
 
-    int stdoutCount = 0;
-    int stderrCount = 0;
+    var callCounts = new ProcessCallbackCallCounts();
     int exitCode = ExecuteProcessAndCapture(
         "dotnet",
         arguments,
@@ -582,13 +581,13 @@ ValueTask<int> RunDotnetAsync(
         stdoutCallback: requireStdOutLogging
             ? line =>
             {
-                stdoutCount++;
+                Interlocked.Increment(ref callCounts.Stdout);
                 Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
             }
             : null,
         stderrCallback: line =>
         {
-            stderrCount++;
+            Interlocked.Increment(ref callCounts.Error);
             Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
         });
 
@@ -610,7 +609,7 @@ ValueTask<int> RunDotnetAsync(
     {
         if (requireDetailsTag)
         {
-            if (stdoutCount == 0 && stderrCount == 0)
+            if (callCounts.Stdout == 0 && callCounts.Error == 0)
             {
                 ConsoleLogger.LogInfoRaw($"[{FUnit}] 🎉 No errors or warnings!");
             }
@@ -619,11 +618,11 @@ ValueTask<int> RunDotnetAsync(
             ConsoleLogger.LogInfoRaw();
             ConsoleLogger.LogInfoRaw("</details>");
 
-            if (stdoutCount > 0 || stderrCount > 0)
+            if (callCounts.Stdout > 0 || callCounts.Error > 0)
             {
                 ConsoleLogger.LogInfoRaw();
                 ConsoleLogger.LogInfoRaw($"> [!WARNING]");
-                ConsoleLogger.LogInfoRaw($"> `{subCommandWithoutFilePath}` has stdout: **{stdoutCount}** error: **{stderrCount}**");
+                ConsoleLogger.LogInfoRaw($"> `{subCommandWithoutFilePath}` has stdout: **{callCounts.Stdout}** error: **{callCounts.Error}**");
             }
         }
     }
@@ -709,6 +708,11 @@ static string Colorize(string message)
         }
     }
 
+file sealed class ProcessCallbackCallCounts
+{
+    public volatile int Error;
+    public volatile int Stdout;
+}
 
 internal static partial class LogRegex
 {
