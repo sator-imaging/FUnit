@@ -103,31 +103,16 @@ namespace FUnit.Cli
             try
             {
                 process.Start();
-
-                Task<string>? stdoutTask = null;
-                Task<string>? stderrTask = null;
-                if (stdoutCallback == null && stderrCallback == null)
-                {
-                    stdoutTask = process.StandardOutput.ReadToEndAsync();
-                    stderrTask = process.StandardError.ReadToEndAsync();
-                }
-                else
-                {
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
-                }
-
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
                 await process.WaitForExitAsync();
-                var stdout = stdoutTask == null ? stdoutBuilder.ToString() : await stdoutTask;
-                var stderr = stderrTask == null ? stderrBuilder.ToString() : await stderrTask;
+                var stdout = stdoutBuilder.ToString();
+                var stderr = stderrBuilder.ToString();
                 exitCode = process.ExitCode;
                 return (exitCode, stdout, stderr);
             }
-            catch (System.ComponentModel.Win32Exception)
-            {
-                exitCode = -1;
-            }
-            catch (InvalidOperationException)
+            // Ignore exception: The process might have already exited or not been started yet.
+            catch (Exception)
             {
                 exitCode = -1;
             }
@@ -155,7 +140,7 @@ namespace FUnit.Cli
                     }
                 }
                 // Ignore exception: The process might have already exited or not been started yet when accessing its properties.
-                catch (InvalidOperationException)
+                catch (Exception)
                 {
                 }
             }
