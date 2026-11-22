@@ -54,7 +54,9 @@ namespace FUnit.Cli
         // reference: https://github.com/sator-imaging/FGenerator/blob/main/cli/Utils.cs#L17
         static async Task<(int exitCode, string stdout, string stderr)> ExecuteProcessAndCaptureAsync(
             string exe,
-            string arguments)
+            string arguments,
+            Action<string>? stdoutCallback = null,
+            Action<string>? stderrCallback = null)
         {
             var procInfo = new ProcessStartInfo
             {
@@ -81,8 +83,18 @@ namespace FUnit.Cli
             {
                 process.Start();
 
-                var stdoutTask = process.StandardOutput.ReadToEndAsync();
-                var stderrTask = process.StandardError.ReadToEndAsync();
+                Task<string> stdoutTask;
+                Task<string> stderrTask;
+                if (stdoutCallback == null && stderrCallback == null)
+                {
+                    stdoutTask = process.StandardOutput.ReadToEndAsync();
+                    stderrTask = process.StandardError.ReadToEndAsync();
+                }
+                else
+                {
+                    stdoutTask = ReadLinesAsync(process.StandardOutput, stdoutCallback);
+                    stderrTask = ReadLinesAsync(process.StandardError, stderrCallback);
+                }
 
                 await process.WaitForExitAsync();
                 var stdout = await stdoutTask;
@@ -128,6 +140,17 @@ namespace FUnit.Cli
             }
 
             return (exitCode, string.Empty, string.Empty);
+        }
+
+        static async Task<string> ReadLinesAsync(StreamReader reader, Action<string>? callback)
+        {
+            var builder = new StringBuilder();
+            while (await reader.ReadLineAsync() is { } line)
+            {
+                builder.AppendLine(line);
+                callback?.Invoke(line);
+            }
+            return builder.ToString();
         }
 
         static async Task<int> MainCore(string[] args)
@@ -546,22 +569,21 @@ async ValueTask<int> RunDotnetAsync(
     }
 
     var callCounts = new ProcessCallbackCallCounts();
-    var (exitCode, stdout, stderr) = await ExecuteProcessAndCaptureAsync("dotnet", arguments);
-
-    foreach (var line in stdout.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
-    {
-        if (requireStdOutLogging)
+    var (exitCode, stdout, stderr) = await ExecuteProcessAndCaptureAsync(
+        "dotnet",
+        arguments,
+        stdoutCallback: requireStdOutLogging
+        ? line =>
         {
             Interlocked.Increment(ref callCounts.Stdout);
             Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
         }
-    }
-
-    foreach (var line in stderr.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
-    {
+        : null,
+        stderrCallback: line =>
+        {
         Interlocked.Increment(ref callCounts.Error);
         Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
-    }
+        });
 
     if (exitCode == -1)
     {
