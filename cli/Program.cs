@@ -52,17 +52,10 @@ namespace FUnit.Cli
         }
 
         // reference: https://github.com/sator-imaging/FGenerator/blob/main/cli/Utils.cs#L17
-        static int ExecuteProcessAndCapture(
+        static async Task<(int exitCode, string stdout, string stderr)> ExecuteProcessAndCaptureAsync(
             string exe,
-            string arguments,
-            out string stdout,
-            out string stderr,
-            Action<string>? stdoutCallback = null,
-            Action<string>? stderrCallback = null)
+            string arguments)
         {
-            var stdoutBuilder = new StringBuilder();
-            var stderrBuilder = new StringBuilder();
-
             var procInfo = new ProcessStartInfo
             {
                 FileName = exe,
@@ -75,7 +68,6 @@ namespace FUnit.Cli
                 StandardOutputEncoding = Encoding.UTF8,
             };
 
-            // Keep process output streaming while also retaining it for callers that capture it.
             procInfo.EnvironmentVariables["DOTNET_CLI_FORCE_UTF8_ENCODING"] = "true";
             procInfo.Environment["DOTNET_CLI_FORCE_UTF8_ENCODING"] = "true";
 
@@ -84,36 +76,19 @@ namespace FUnit.Cli
                 StartInfo = procInfo,
             };
 
-            process.OutputDataReceived += (_, args) =>
-            {
-                if (args.Data == null)
-                {
-                    return;
-                }
-
-                stdoutBuilder.AppendLine(args.Data);
-                stdoutCallback?.Invoke(args.Data);
-            };
-
-            process.ErrorDataReceived += (_, args) =>
-            {
-                if (args.Data == null)
-                {
-                    return;
-                }
-
-                stderrBuilder.AppendLine(args.Data);
-                stderrCallback?.Invoke(args.Data);
-            };
-
             int exitCode = -1;
             try
             {
                 process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-                process.WaitForExit();
+
+                var stdoutTask = process.StandardOutput.ReadToEndAsync();
+                var stderrTask = process.StandardError.ReadToEndAsync();
+
+                await process.WaitForExitAsync();
+                var stdout = await stdoutTask;
+                var stderr = await stderrTask;
                 exitCode = process.ExitCode;
+                return (exitCode, stdout, stderr);
             }
             catch (System.ComponentModel.Win32Exception)
             {
@@ -129,11 +104,11 @@ namespace FUnit.Cli
                 {
                     if (!process.HasExited)
                     {
-                        Thread.Sleep(310);
+                        await Task.Delay(310);
                         if (!process.HasExited)
                         {
                             process.Kill(entireProcessTree: true);
-                            Thread.Sleep(310);
+                            await Task.Delay(310);
                             if (!process.HasExited)
                             {
                                 throw new Exception($"Process failed to exit: {exe} {arguments}");
@@ -152,9 +127,7 @@ namespace FUnit.Cli
                 }
             }
 
-            stdout = stdoutBuilder.ToString();
-            stderr = stderrBuilder.ToString();
-            return exitCode;
+            return (exitCode, string.Empty, string.Empty);
         }
 
         static async Task<int> MainCore(string[] args)
@@ -218,7 +191,7 @@ const string FUnit = nameof(FUnit);
 const int MinimumRequiredDotnetVersion = 10;
 byte[] utf8Bom = [0xef, 0xbb, 0xbf];
 
-if (EnsureEnvironment() != 0)
+if (await EnsureEnvironment() != 0)
 {
     Environment.Exit(1);
 }
@@ -350,14 +323,14 @@ return 0;
 
 
 
-int EnsureEnvironment()
+async Task<int> EnsureEnvironment()
 {
     if (!ConsoleLogger.EnableMarkdownOutput)
     {
         ConsoleLogger.LogInfo("Checking .NET SDK version...");
     }
 
-    int exitCode = ExecuteProcessAndCapture("dotnet", "--version", out var output, out var stderr);
+    var (exitCode, output, stderr) = await ExecuteProcessAndCaptureAsync("dotnet", "--version");
     output = output.Trim();
     if (exitCode != 0)
     {
@@ -529,7 +502,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     }
 }
 
-ValueTask<int> RunDotnetAsync(
+async ValueTask<int> RunDotnetAsync(
     string subCommand,
     string arguments,
     bool requireStdOutLogging,
@@ -573,23 +546,22 @@ ValueTask<int> RunDotnetAsync(
     }
 
     var callCounts = new ProcessCallbackCallCounts();
-    int exitCode = ExecuteProcessAndCapture(
-        "dotnet",
-        arguments,
-        out var stdout,
-        out var stderr,
-        stdoutCallback: requireStdOutLogging
-            ? line =>
-            {
-                Interlocked.Increment(ref callCounts.Stdout);
-                Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
-            }
-            : null,
-        stderrCallback: line =>
+    var (exitCode, stdout, stderr) = await ExecuteProcessAndCaptureAsync("dotnet", arguments);
+
+    foreach (var line in stdout.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+    {
+        if (requireStdOutLogging)
         {
-            Interlocked.Increment(ref callCounts.Error);
-            Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
-        });
+            Interlocked.Increment(ref callCounts.Stdout);
+            Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+        }
+    }
+
+    foreach (var line in stderr.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+    {
+        Interlocked.Increment(ref callCounts.Error);
+        Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+    }
 
     if (exitCode == -1)
     {
@@ -597,7 +569,7 @@ ValueTask<int> RunDotnetAsync(
         ConsoleLogger.LogFailed("> [!CAUTION]");
         ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
 
-        return new(-1);
+        return -1;
     }
 
     if (exitCode != 0 && Console.IsOutputRedirected)
@@ -627,7 +599,7 @@ ValueTask<int> RunDotnetAsync(
         }
     }
 
-    return new(exitCode);
+    return exitCode;
 }
 
 
