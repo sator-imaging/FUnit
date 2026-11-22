@@ -16,7 +16,28 @@ using System.Threading.Tasks;
 const string AnsiColorRed = "\u001b[97;41m";
 const string AnsiColorYellow = "\u001b[97;43m";
 const string AnsiColorReset = "\u001b[0m";
+const string Utf8EnvironmentVariable = "DOTNET_CLI_FORCE_UTF8_ENCODING";
+Encoding originalOutputEncoding = Console.OutputEncoding;
+string? originalUtf8Environment = Environment.GetEnvironmentVariable(Utf8EnvironmentVariable);
+const string FUnit = nameof(FUnit);
+const int MinimumRequiredDotnetVersion = 10;
+byte[] utf8Bom = [0xef, 0xbb, 0xbf];
+CommandLineOptions options = null!;
+string[] fileGlobs = [];
+string[] executionArgs = [];
 
+Environment.SetEnvironmentVariable(Utf8EnvironmentVariable, "true");
+try
+{
+    Console.OutputEncoding = Encoding.UTF8;
+}
+catch
+{
+    // Ignore exception: Setting Console.OutputEncoding can throw if the console is unavailable or redirected.
+}
+
+try
+{
 
 // --help
 if (args.Contains(SR.Flag_Help) || args.Contains(SR.Flag_HelpShort))
@@ -58,9 +79,9 @@ if (args.Contains(SR.Flag_Lint))
         addNoWarn: false);
 }
 
-var options = CommandLineOptions.Parse(args, throwOnUnknown: false);
-var fileGlobs = options.UnknownOptions;
-var executionArgs = args.Except(fileGlobs).ToArray();
+options = CommandLineOptions.Parse(args, throwOnUnknown: false);
+fileGlobs = options.UnknownOptions;
+executionArgs = args.Except(fileGlobs).ToArray();
 
 // Verify that the arguments to be passed to the test executable are valid.
 CommandLineOptions.Parse(executionArgs, throwOnUnknown: true);
@@ -72,10 +93,6 @@ if (args.Contains(SR.Flag_TEST))
     return 0;
 }
 #endif
-
-const string FUnit = nameof(FUnit);
-const int MinimumRequiredDotnetVersion = 10;
-byte[] utf8Bom = [0xef, 0xbb, 0xbf];
 
 if (EnsureEnvironment() != 0)
 {
@@ -205,9 +222,19 @@ else
 
 return 0;
 
-
-
-
+}
+finally
+{
+    Environment.SetEnvironmentVariable(Utf8EnvironmentVariable, originalUtf8Environment);
+    try
+    {
+        Console.OutputEncoding = originalOutputEncoding;
+    }
+    catch
+    {
+        // Ignore exception: Restoring Console.OutputEncoding can throw if the console is unavailable or redirected.
+    }
+}
 
 int EnsureEnvironment()
 {
@@ -227,6 +254,7 @@ int EnsureEnvironment()
         UseShellExecute = false,
         CreateNoWindow = true
     };
+    SetupUtf8Environment(startInfo);
 
     Process? process = Process.Start(startInfo);
     try
@@ -487,6 +515,7 @@ async ValueTask<int> RunDotnetAsync(
             CreateNoWindow = true,
         },
     };
+    SetupUtf8Environment(proc.StartInfo);
 
     var callCounts = new ProcessCallbackCallCounts();
     StringBuilder capturedStdout = new(capacity: 1024);
@@ -670,6 +699,12 @@ static string Colorize(string message)
     return message;
 }
 
+static void SetupUtf8Environment(ProcessStartInfo procInfo)
+{
+    // No effect prior to net11.0
+    procInfo.EnvironmentVariables[Utf8EnvironmentVariable] = "true";
+    procInfo.Environment[Utf8EnvironmentVariable] = "true";
+}
 
 file sealed class ProcessCallbackCallCounts
 {
