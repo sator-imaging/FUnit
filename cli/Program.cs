@@ -13,11 +13,115 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-const string AnsiColorRed = "\u001b[97;41m";
-const string AnsiColorYellow = "\u001b[97;43m";
-const string AnsiColorReset = "\u001b[0m";
+namespace FUnit.Cli
+{
+    static class Program
+    {
+        const string AnsiColorRed = "\u001b[97;41m";
+        const string AnsiColorYellow = "\u001b[97;43m";
+        const string AnsiColorReset = "\u001b[0m";
 
+        static async Task<int> Main(string[] args)
+        {
+            var originalOutputEncoding = Console.OutputEncoding;
 
+            try
+            {
+                try
+                {
+                    Console.OutputEncoding = Encoding.UTF8;
+                }
+                // Ignore exception: Setting Console.OutputEncoding can throw an exception if the console is not available or redirected in some environments. Wrap this in a try-catch block to prevent the CLI tool from crashing in those environments.
+                catch
+                {
+                }
+
+                return await MainCore(args);
+            }
+            finally
+            {
+                try
+                {
+                    Console.OutputEncoding = originalOutputEncoding;
+                }
+                // Ignore exception: Setting Console.OutputEncoding can throw an exception if the console is not available or redirected in some environments. Wrap this in a try-catch block to prevent the CLI tool from crashing in those environments.
+                catch
+                {
+                }
+            }
+        }
+
+        // reference: https://github.com/sator-imaging/FGenerator/blob/main/cli/Utils.cs#L17
+        static int ExecuteProcessAndCapture(string exe, string arguments, out string stdout, out string stderr)
+        {
+            var procInfo = new ProcessStartInfo
+            {
+                FileName = exe,
+                Arguments = arguments,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                StandardErrorEncoding = Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8,
+            };
+
+            procInfo.EnvironmentVariables["DOTNET_CLI_FORCE_UTF8_ENCODING"] = "true";
+            procInfo.Environment["DOTNET_CLI_FORCE_UTF8_ENCODING"] = "true";
+
+            using var process = new Process
+            {
+                StartInfo = procInfo,
+            };
+
+            int exitCode = -1;
+            try
+            {
+                process.Start();
+
+                // NOTE: this utility is for CLI tools. ok to use GetAwaiter()
+                var stdoutTask = process.StandardOutput.ReadToEndAsync();
+                var stderrTask = process.StandardError.ReadToEndAsync();
+
+                process.WaitForExit();
+                stdout = stdoutTask.GetAwaiter().GetResult();
+                stderr = stderrTask.GetAwaiter().GetResult();
+                exitCode = process.ExitCode;
+            }
+            finally
+            {
+                try
+                {
+                    if (!process.HasExited)
+                    {
+                        Thread.Sleep(310);
+                        if (!process.HasExited)
+                        {
+                            process.Kill(entireProcessTree: true);
+                            Thread.Sleep(310);
+                            if (!process.HasExited)
+                            {
+                                throw new Exception($"Process failed to exit: {exe} {arguments}");
+                            }
+                        }
+                    }
+
+                    if (exitCode == -1 && process.HasExited)
+                    {
+                        exitCode = process.ExitCode;
+                    }
+                }
+                // Ignore exception: The process might have already exited or not been started yet when accessing its properties.
+                catch (InvalidOperationException)
+                {
+                }
+            }
+
+            return exitCode;
+        }
+
+        static async Task<int> MainCore(string[] args)
+        {
 // --help
 if (args.Contains(SR.Flag_Help) || args.Contains(SR.Flag_HelpShort))
 {
@@ -216,27 +320,17 @@ int EnsureEnvironment()
         ConsoleLogger.LogInfo("Checking .NET SDK version...");
     }
 
-    ProcessStartInfo startInfo = new()
-    {
-        FileName = "dotnet",
-        Arguments = "--version",
-        RedirectStandardOutput = true,
-        UseShellExecute = false,
-        CreateNoWindow = true
-    };
-
-    using Process? process = Process.Start(startInfo);
-    if (process == null)
+    int exitCode = ExecuteProcessAndCapture("dotnet", "--version", out var output, out var stderr);
+    output = output.Trim();
+    if (exitCode != 0)
     {
         ConsoleLogger.LogInfo();
         ConsoleLogger.LogFailed("> [!CAUTION]");
-        ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
+        ConsoleLogger.LogFailed(string.IsNullOrWhiteSpace(stderr)
+            ? "> Error: 'dotnet --version' failed to execute."
+            : $"> Error: {stderr.Trim()}");
         return 1;
     }
-
-    process.WaitForExit();
-
-    string output = process.StandardOutput.ReadToEnd().Trim();
 
     if (string.IsNullOrEmpty(output))
     {
@@ -605,6 +699,8 @@ static string Colorize(string message)
     return message;
 }
 
+        }
+    }
 
 file sealed class ProcessCallbackCallCounts
 {
@@ -618,4 +714,5 @@ internal static partial class LogRegex
     // Use non-capturing groups unless captured match values are required.
     [GeneratedRegex(@"\b(?:warning(?:\(s\)|s)?|error(?:\(s\)|s)?|warn|err)(?!\w)", RegexOptions.IgnoreCase)]
     public static partial Regex WarningOrError();
+}
 }
