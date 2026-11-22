@@ -52,10 +52,16 @@ namespace FUnit.Cli
         }
 
         // reference: https://github.com/sator-imaging/FGenerator/blob/main/cli/Utils.cs#L17
-        static int ExecuteProcessAndCapture(string exe, string arguments, out string stdout, out string stderr)
+        static int ExecuteProcessAndCapture(
+            string exe,
+            string arguments,
+            out string stdout,
+            out string stderr,
+            Action<string>? stdoutCallback = null,
+            Action<string>? stderrCallback = null)
         {
-            stdout = string.Empty;
-            stderr = string.Empty;
+            var stdoutBuilder = new StringBuilder();
+            var stderrBuilder = new StringBuilder();
 
             var procInfo = new ProcessStartInfo
             {
@@ -69,6 +75,7 @@ namespace FUnit.Cli
                 StandardOutputEncoding = Encoding.UTF8,
             };
 
+            // Keep process output streaming while also retaining it for callers that capture it.
             procInfo.EnvironmentVariables["DOTNET_CLI_FORCE_UTF8_ENCODING"] = "true";
             procInfo.Environment["DOTNET_CLI_FORCE_UTF8_ENCODING"] = "true";
 
@@ -77,19 +84,44 @@ namespace FUnit.Cli
                 StartInfo = procInfo,
             };
 
+            process.OutputDataReceived += (_, args) =>
+            {
+                if (args.Data == null)
+                {
+                    return;
+                }
+
+                stdoutBuilder.AppendLine(args.Data);
+                stdoutCallback?.Invoke(args.Data);
+            };
+
+            process.ErrorDataReceived += (_, args) =>
+            {
+                if (args.Data == null)
+                {
+                    return;
+                }
+
+                stderrBuilder.AppendLine(args.Data);
+                stderrCallback?.Invoke(args.Data);
+            };
+
             int exitCode = -1;
             try
             {
                 process.Start();
-
-                // NOTE: this utility is for CLI tools. ok to use GetAwaiter()
-                var stdoutTask = process.StandardOutput.ReadToEndAsync();
-                var stderrTask = process.StandardError.ReadToEndAsync();
-
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
                 process.WaitForExit();
-                stdout = stdoutTask.GetAwaiter().GetResult();
-                stderr = stderrTask.GetAwaiter().GetResult();
                 exitCode = process.ExitCode;
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                exitCode = -1;
+            }
+            catch (InvalidOperationException)
+            {
+                exitCode = -1;
             }
             finally
             {
@@ -120,6 +152,8 @@ namespace FUnit.Cli
                 }
             }
 
+            stdout = stdoutBuilder.ToString();
+            stderr = stderrBuilder.ToString();
             return exitCode;
         }
 
@@ -538,23 +572,33 @@ ValueTask<int> RunDotnetAsync(
         }
     }
 
-    int exitCode = ExecuteProcessAndCapture("dotnet", arguments, out var stdout, out var stderr);
-
     int stdoutCount = 0;
-    foreach (var line in stdout.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
-    {
-        if (requireStdOutLogging)
-        {
-            stdoutCount++;
-            Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
-        }
-    }
-
     int stderrCount = 0;
-    foreach (var line in stderr.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+    int exitCode = ExecuteProcessAndCapture(
+        "dotnet",
+        arguments,
+        out var stdout,
+        out var stderr,
+        stdoutCallback: requireStdOutLogging
+            ? line =>
+            {
+                stdoutCount++;
+                Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+            }
+            : null,
+        stderrCallback: line =>
+        {
+            stderrCount++;
+            Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+        });
+
+    if (exitCode == -1)
     {
-        stderrCount++;
-        Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+        ConsoleLogger.LogInfo();
+        ConsoleLogger.LogFailed("> [!CAUTION]");
+        ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
+
+        return new(-1);
     }
 
     if (exitCode != 0 && Console.IsOutputRedirected)
