@@ -54,6 +54,9 @@ namespace FUnit.Cli
         // reference: https://github.com/sator-imaging/FGenerator/blob/main/cli/Utils.cs#L17
         static int ExecuteProcessAndCapture(string exe, string arguments, out string stdout, out string stderr)
         {
+            stdout = string.Empty;
+            stderr = string.Empty;
+
             var procInfo = new ProcessStartInfo
             {
                 FileName = exe,
@@ -492,7 +495,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     }
 }
 
-async ValueTask<int> RunDotnetAsync(
+ValueTask<int> RunDotnetAsync(
     string subCommand,
     string arguments,
     bool requireStdOutLogging,
@@ -535,75 +538,35 @@ async ValueTask<int> RunDotnetAsync(
         }
     }
 
-    using var proc = new Process()
-    {
-        StartInfo = new()
-        {
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            FileName = "dotnet",
-            Arguments = $"{arguments}",
-            CreateNoWindow = true,
-        },
-    };
+    int exitCode = ExecuteProcessAndCapture("dotnet", arguments, out var stdout, out var stderr);
 
-    var callCounts = new ProcessCallbackCallCounts();
-    StringBuilder capturedStdout = new(capacity: 1024);
-
-    proc.ErrorDataReceived += (sender, args) =>
+    int stdoutCount = 0;
+    foreach (var line in stdout.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
     {
-        if (args.Data != null)
+        if (requireStdOutLogging)
         {
-            Interlocked.Increment(ref callCounts.Error);
-            Console.Error.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
+            stdoutCount++;
+            Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
         }
-    };
-
-    proc.OutputDataReceived += (sender, args) =>
-    {
-        if (args.Data != null)
-        {
-            if (Console.IsOutputRedirected)
-            {
-                lock (capturedStdout)
-                {
-                    capturedStdout.Append(args.Data);
-                }
-            }
-
-            if (requireStdOutLogging)
-            {
-                Interlocked.Increment(ref callCounts.Stdout);
-                Console.WriteLine(Colorize(args.Data));  // DO NOT use ConsoleLogger here!
-            }
-        }
-    };
-
-    if (!proc.Start())
-    {
-        ConsoleLogger.LogInfo();
-        ConsoleLogger.LogFailed("> [!CAUTION]");
-        ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
-
-        return -1;
     }
 
-    proc.BeginErrorReadLine();
-    proc.BeginOutputReadLine();
-
-    await proc.WaitForExitAsync();
-
-    if (proc.ExitCode != 0 && Console.IsOutputRedirected)
+    int stderrCount = 0;
+    foreach (var line in stderr.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
     {
-        Console.Error.WriteLine(Colorize(capturedStdout.ToString()));
+        stderrCount++;
+        Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+    }
+
+    if (exitCode != 0 && Console.IsOutputRedirected)
+    {
+        Console.Error.WriteLine(Colorize(stdout));
     }
 
     if (ConsoleLogger.EnableMarkdownOutput)
     {
         if (requireDetailsTag)
         {
-            if (callCounts.Stdout == 0 && callCounts.Error == 0)
+            if (stdoutCount == 0 && stderrCount == 0)
             {
                 ConsoleLogger.LogInfoRaw($"[{FUnit}] 🎉 No errors or warnings!");
             }
@@ -612,16 +575,16 @@ async ValueTask<int> RunDotnetAsync(
             ConsoleLogger.LogInfoRaw();
             ConsoleLogger.LogInfoRaw("</details>");
 
-            if (callCounts.Stdout > 0 || callCounts.Error > 0)
+            if (stdoutCount > 0 || stderrCount > 0)
             {
                 ConsoleLogger.LogInfoRaw();
                 ConsoleLogger.LogInfoRaw($"> [!WARNING]");
-                ConsoleLogger.LogInfoRaw($"> `{subCommandWithoutFilePath}` has stdout: **{callCounts.Stdout}** error: **{callCounts.Error}**");
+                ConsoleLogger.LogInfoRaw($"> `{subCommandWithoutFilePath}` has stdout: **{stdoutCount}** error: **{stderrCount}**");
             }
         }
     }
 
-    return proc.ExitCode;
+    return new(exitCode);
 }
 
 
@@ -701,12 +664,6 @@ static string Colorize(string message)
 
         }
     }
-
-file sealed class ProcessCallbackCallCounts
-{
-    public volatile int Error;
-    public volatile int Stdout;
-}
 
 
 internal static partial class LogRegex
