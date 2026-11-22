@@ -147,7 +147,7 @@ namespace FUnit.Cli
             var builder = new StringBuilder();
             while (await reader.ReadLineAsync() is { } line)
             {
-                builder.AppendLine(line);
+                builder.Append(line);
                 callback?.Invoke(line);
             }
             return builder.ToString();
@@ -355,13 +355,11 @@ async Task<int> EnsureEnvironment()
 
     var (exitCode, output, stderr) = await ExecuteProcessAndCaptureAsync("dotnet", "--version");
     output = output.Trim();
-    if (exitCode != 0)
+    if (exitCode == -1)
     {
         ConsoleLogger.LogInfo();
         ConsoleLogger.LogFailed("> [!CAUTION]");
-        ConsoleLogger.LogFailed(string.IsNullOrWhiteSpace(stderr)
-            ? "> Error: 'dotnet --version' failed to execute."
-            : $"> Error: {stderr.Trim()}");
+        ConsoleLogger.LogFailed("> Error: 'dotnet' command could not be started. Please ensure .NET SDK is installed and 'dotnet' command is accessible in your system's PATH.");
         return 1;
     }
 
@@ -573,16 +571,16 @@ async ValueTask<int> RunDotnetAsync(
         "dotnet",
         arguments,
         stdoutCallback: requireStdOutLogging
-        ? line =>
-        {
-            Interlocked.Increment(ref callCounts.Stdout);
-            Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
-        }
-        : null,
+            ? line =>
+            {
+                Interlocked.Increment(ref callCounts.Stdout);
+                Console.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+            }
+            : null,
         stderrCallback: line =>
         {
-        Interlocked.Increment(ref callCounts.Error);
-        Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
+            Interlocked.Increment(ref callCounts.Error);
+            Console.Error.WriteLine(Colorize(line));  // DO NOT use ConsoleLogger here!
         });
 
     if (exitCode == -1)
