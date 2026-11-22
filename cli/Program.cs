@@ -78,13 +78,34 @@ namespace FUnit.Cli
                 StartInfo = procInfo,
             };
 
+            var stdoutBuilder = new StringBuilder();
+            var stderrBuilder = new StringBuilder();
+
+            process.OutputDataReceived += (_, args) =>
+            {
+                if (args.Data != null)
+                {
+                    stdoutBuilder.Append(args.Data);
+                    stdoutCallback?.Invoke(args.Data);
+                }
+            };
+
+            process.ErrorDataReceived += (_, args) =>
+            {
+                if (args.Data != null)
+                {
+                    stderrBuilder.Append(args.Data);
+                    stderrCallback?.Invoke(args.Data);
+                }
+            };
+
             int exitCode = -1;
             try
             {
                 process.Start();
 
-                Task<string> stdoutTask;
-                Task<string> stderrTask;
+                Task<string>? stdoutTask = null;
+                Task<string>? stderrTask = null;
                 if (stdoutCallback == null && stderrCallback == null)
                 {
                     stdoutTask = process.StandardOutput.ReadToEndAsync();
@@ -92,13 +113,13 @@ namespace FUnit.Cli
                 }
                 else
                 {
-                    stdoutTask = ReadLinesAsync(process.StandardOutput, stdoutCallback);
-                    stderrTask = ReadLinesAsync(process.StandardError, stderrCallback);
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
                 }
 
                 await process.WaitForExitAsync();
-                var stdout = await stdoutTask;
-                var stderr = await stderrTask;
+                var stdout = stdoutTask == null ? stdoutBuilder.ToString() : await stdoutTask;
+                var stderr = stderrTask == null ? stderrBuilder.ToString() : await stderrTask;
                 exitCode = process.ExitCode;
                 return (exitCode, stdout, stderr);
             }
@@ -140,17 +161,6 @@ namespace FUnit.Cli
             }
 
             return (exitCode, string.Empty, string.Empty);
-        }
-
-        static async Task<string> ReadLinesAsync(StreamReader reader, Action<string>? callback)
-        {
-            var builder = new StringBuilder();
-            while (await reader.ReadLineAsync() is { } line)
-            {
-                builder.Append(line);
-                callback?.Invoke(line);
-            }
-            return builder.ToString();
         }
 
         static async Task<int> MainCore(string[] args)
