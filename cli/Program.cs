@@ -112,7 +112,11 @@ namespace FUnit.Cli
                 return (exitCode, stdout, stderr);
             }
             // Ignore exception: The process might have already exited or not been started yet.
-            catch (Exception)
+            catch (System.ComponentModel.Win32Exception)
+            {
+                exitCode = -1;
+            }
+            catch (InvalidOperationException)
             {
                 exitCode = -1;
             }
@@ -140,7 +144,7 @@ namespace FUnit.Cli
                     }
                 }
                 // Ignore exception: The process might have already exited or not been started yet when accessing its properties.
-                catch (Exception)
+                catch (InvalidOperationException)
                 {
                 }
             }
