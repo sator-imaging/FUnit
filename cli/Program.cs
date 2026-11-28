@@ -388,7 +388,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     // run
     {
         var exitCode = await RunDotnetAsync(
-            $"run {subCommandOptions} --no-build {debugInfoFlags}",
+            $"run {subCommandOptions} --no-build -p:PublishAot=false {debugInfoFlags}",
             arguments: escapedArguments,
             requireStdOutLogging: true,
             requireDetailsTag: false,
