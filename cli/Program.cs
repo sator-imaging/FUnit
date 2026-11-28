@@ -369,7 +369,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     // build
     {
         var exitCode = await RunDotnetAsync(
-            $"build {subCommandOptions} --no-restore {debugInfoFlags}",
+            $"build {subCommandOptions} --no-restore -p:PublishAot=false {debugInfoFlags}",
             arguments: "",
             requireStdOutLogging: true,
             requireDetailsTag: true,
@@ -388,7 +388,7 @@ async ValueTask<(int exitCode, bool isTestRan)> ExecuteTestAsync(string filePath
     // run
     {
         var exitCode = await RunDotnetAsync(
-            $"run {subCommandOptions} --no-build -p:PublishAot=false {debugInfoFlags}",
+            $"run {subCommandOptions} --no-build {debugInfoFlags}",
             arguments: escapedArguments,
             requireStdOutLogging: true,
             requireDetailsTag: false,
